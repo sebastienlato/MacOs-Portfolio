@@ -17,7 +17,7 @@ const ImageWindowContent = () => {
         <h2>{name}</h2>
       </div>
 
-      <div className="p-5 bg-white">
+      <div className="p-5 bg-white dark:bg-neutral-900">
         {imageUrl ? (
           <div className="w-full">
             <img

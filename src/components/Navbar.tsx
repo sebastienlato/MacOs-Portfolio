@@ -17,9 +17,15 @@ const appleMenuItems: AppleMenuItem[] = [
   { id: "restart", label: "Restart…", action: "restart" },
 ];
 
+const navIconActions = {
+  spotlight: "toggleSpotlight",
+  theme: "toggleTheme",
+} as const;
+
 const Navbar = () => {
   const { openWindow } = useWindowStore();
-  const { toggleSpotlight } = useSystemStore();
+  const { toggleSpotlight, toggleTheme } = useSystemStore();
+  const iconHandlers = { toggleSpotlight, toggleTheme };
   const [menuOpen, setMenuOpen] = useState(false);
   const [now, setNow] = useState(dayjs());
   const menuRef = useRef<HTMLDivElement>(null);
@@ -58,7 +64,7 @@ const Navbar = () => {
             aria-haspopup="menu"
             aria-expanded={menuOpen}
           >
-            <img src="/images/logo.svg" alt="logo" />
+            <img src="/images/logo.svg" alt="logo" className="dark:invert" />
           </button>
 
           {menuOpen && (
@@ -96,9 +102,13 @@ const Navbar = () => {
           {navIcons.map(({ id, img, action }) => (
             <li
               key={id}
-              onClick={action === "spotlight" ? toggleSpotlight : undefined}
+              onClick={action ? iconHandlers[navIconActions[action]] : undefined}
             >
-              <img src={img} className="icon-hover" alt={`icon-${id}`} />
+              <img
+                src={img}
+                className="icon-hover dark:invert"
+                alt={`icon-${id}`}
+              />
             </li>
           ))}
         </ul>

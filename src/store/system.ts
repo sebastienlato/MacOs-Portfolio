@@ -1,16 +1,19 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { wallpapers } from "#constants/index";
-import type { Wallpaper } from "#types";
+import type { Theme, Wallpaper } from "#types";
 
 const DEFAULT_WALLPAPER = wallpapers[0];
 
 interface SystemStore {
   wallpaper: Wallpaper;
+  theme: Theme;
   spotlightOpen: boolean;
   setWallpaper: (wallpaper: Wallpaper) => void;
   setCustomWallpaper: (dataUrl: string) => void;
   resetWallpaper: () => void;
+  setTheme: (theme: Theme) => void;
+  toggleTheme: () => void;
   setSpotlightOpen: (open: boolean) => void;
   toggleSpotlight: () => void;
 }
@@ -19,6 +22,7 @@ const useSystemStore = create<SystemStore>()(
   persist(
     (set) => ({
       wallpaper: DEFAULT_WALLPAPER,
+      theme: "light",
       spotlightOpen: false,
 
       setWallpaper: (wallpaper) => set({ wallpaper }),
@@ -35,6 +39,11 @@ const useSystemStore = create<SystemStore>()(
 
       resetWallpaper: () => set({ wallpaper: DEFAULT_WALLPAPER }),
 
+      setTheme: (theme) => set({ theme }),
+
+      toggleTheme: () =>
+        set((state) => ({ theme: state.theme === "light" ? "dark" : "light" })),
+
       setSpotlightOpen: (open) => set({ spotlightOpen: open }),
 
       toggleSpotlight: () =>
@@ -42,8 +51,11 @@ const useSystemStore = create<SystemStore>()(
     }),
     {
       name: "portfolio-system",
-      // Only the wallpaper survives reloads; UI state like Spotlight does not
-      partialize: (state) => ({ wallpaper: state.wallpaper }),
+      // Wallpaper and theme survive reloads; UI state like Spotlight does not
+      partialize: (state) => ({
+        wallpaper: state.wallpaper,
+        theme: state.theme,
+      }),
     }
   )
 );

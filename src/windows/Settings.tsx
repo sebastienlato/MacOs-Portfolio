@@ -1,5 +1,5 @@
 import { useRef, type ChangeEvent } from "react";
-import { ImagePlus, RotateCcw } from "lucide-react";
+import { ImagePlus, Moon, RotateCcw, Sun } from "lucide-react";
 import clsx from "clsx";
 
 import WindowWrapper from "#hoc/WindowWrapper";
@@ -11,8 +11,14 @@ import type { Wallpaper } from "#types";
 const MAX_UPLOAD_BYTES = 4 * 1024 * 1024; // localStorage-friendly cap
 
 const Settings = () => {
-  const { wallpaper, setWallpaper, setCustomWallpaper, resetWallpaper } =
-    useSystemStore();
+  const {
+    wallpaper,
+    theme,
+    setWallpaper,
+    setCustomWallpaper,
+    resetWallpaper,
+    setTheme,
+  } = useSystemStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleUpload = (e: ChangeEvent<HTMLInputElement>) => {
@@ -46,6 +52,30 @@ const Settings = () => {
       </div>
 
       <div className="settings-content">
+        <div className="section-title">
+          <h3>Appearance</h3>
+        </div>
+        <p className="hint">How the menu bar, windows, and dock look.</p>
+
+        <div className="appearance">
+          <button
+            type="button"
+            className={clsx(theme === "light" && "selected")}
+            onClick={() => setTheme("light")}
+          >
+            <Sun size={16} />
+            Light
+          </button>
+          <button
+            type="button"
+            className={clsx(theme === "dark" && "selected")}
+            onClick={() => setTheme("dark")}
+          >
+            <Moon size={16} />
+            Dark
+          </button>
+        </div>
+
         <div className="section-title">
           <h3>Wallpaper</h3>
           <button type="button" onClick={resetWallpaper}>
