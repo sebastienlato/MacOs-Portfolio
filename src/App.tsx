@@ -1,5 +1,6 @@
 import gsap from "gsap";
 import { Draggable } from "gsap/Draggable";
+import clsx from "clsx";
 
 import { Navbar, Welcome, Dock, Home, BootScreen, Spotlight } from "#components";
 import {
@@ -20,12 +21,16 @@ gsap.registerPlugin(Draggable);
 
 const App = () => {
   const wallpaper = useSystemStore((state) => state.wallpaper);
+  const theme = useSystemStore((state) => state.theme);
 
   const backgroundImage =
     wallpaper.type === "gradient" ? wallpaper.value : `url(${wallpaper.value})`;
 
   return (
-    <main style={{ backgroundImage }} className="desktop">
+    <main
+      style={{ backgroundImage }}
+      className={clsx("desktop", theme === "dark" && "dark")}
+    >
       <Navbar />
       <Welcome />
       <Dock />

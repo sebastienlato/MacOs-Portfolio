@@ -42,6 +42,8 @@ export interface WindowState {
   data: FinderItem | null;
 }
 
+export type Theme = "light" | "dark";
+
 export interface Wallpaper {
   id: string;
   name: string;
