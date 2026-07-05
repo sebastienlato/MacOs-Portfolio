@@ -39,7 +39,8 @@ body {
   nav {
     @apply flex justify-between items-center bg-white/50 backdrop-blur-3xl p-2 px-5 select-none relative z-[9999] dark:bg-black/40 dark:text-gray-100;
 
-    div {
+    /* Direct children only, so popover internals (Control Center) aren't forced into a row */
+    > div {
       @apply flex items-center max-sm:w-full max-sm:justify-center gap-5;
 
       &:last-child {
@@ -92,6 +93,86 @@ body {
 
   .running-dot {
     @apply absolute -bottom-1 left-1/2 -translate-x-1/2 size-1 rounded-full bg-gray-700/90 dark:bg-gray-200/90;
+  }
+
+  nav .wifi-status {
+    @apply flex items-center;
+  }
+
+  #control-center {
+    @apply relative flex items-center;
+
+    > button {
+      @apply flex items-center cursor-pointer rounded p-1 hover:bg-black/10 transition-colors dark:hover:bg-white/15;
+    }
+
+    .cc-panel {
+      @apply absolute top-9 right-0 w-72 rounded-2xl bg-white/70 backdrop-blur-2xl shadow-2xl border border-gray-300/50 p-3 space-y-3 z-[10000] dark:bg-neutral-800/80 dark:border-neutral-600/50 dark:text-gray-100;
+    }
+
+    .tiles {
+      @apply grid grid-cols-2 gap-2;
+    }
+
+    .tile {
+      @apply flex items-center gap-2.5 rounded-xl bg-white/60 shadow-sm p-2.5 text-left cursor-pointer transition-colors hover:bg-white/90 dark:bg-white/10 dark:hover:bg-white/20;
+
+      .tile-icon {
+        @apply flex-center size-8 rounded-full bg-gray-300/70 text-gray-700 shrink-0 transition-colors dark:bg-neutral-600 dark:text-gray-100;
+
+        &.on {
+          @apply bg-blue-500 text-white;
+        }
+      }
+
+      h4 {
+        @apply text-xs font-semibold leading-tight;
+      }
+
+      p {
+        @apply text-[11px] text-gray-500 leading-tight dark:text-gray-400;
+      }
+    }
+
+    .slider-group {
+      @apply rounded-xl bg-white/60 shadow-sm p-3 dark:bg-white/10;
+
+      h4 {
+        @apply text-xs font-semibold mb-2;
+      }
+
+      .slider-row {
+        @apply flex items-center gap-2 text-gray-600 dark:text-gray-300;
+
+        input[type="range"] {
+          @apply flex-1 h-1.5 appearance-none rounded-full bg-gray-300 cursor-pointer dark:bg-neutral-600;
+
+          &::-webkit-slider-thumb {
+            @apply appearance-none size-4 rounded-full bg-white shadow;
+          }
+        }
+      }
+    }
+
+    .cc-footer {
+      @apply w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-gray-600 cursor-pointer transition-colors hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10;
+    }
+  }
+
+  #desktop-menu {
+    @apply fixed min-w-52 rounded-lg bg-white/85 backdrop-blur-2xl shadow-2xl border border-gray-200 p-1 z-[15000] select-none dark:bg-neutral-800/90 dark:border-neutral-600;
+
+    li {
+      @apply text-sm text-gray-800 px-3 py-1.5 rounded-md cursor-pointer hover:bg-blue-500 hover:text-white transition-colors dark:text-gray-100;
+    }
+
+    .divider {
+      @apply h-px bg-gray-300 my-1 mx-2 p-0 hover:bg-gray-300 cursor-default dark:bg-neutral-600 dark:hover:bg-neutral-600;
+    }
+  }
+
+  .brightness-overlay {
+    @apply fixed inset-0 bg-black pointer-events-none z-[9998] transition-opacity duration-200;
   }
 
   .maximized {
