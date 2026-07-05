@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import dayjs from "dayjs";
+import { Wifi, WifiOff } from "lucide-react";
 import { navIcons, navLinks } from "#constants/index";
 import useWindowStore from "#store/window";
 import useSystemStore from "#store/system";
+import ControlCenter from "#components/ControlCenter";
 import type { WindowKey } from "#types";
 
 type AppleMenuItem =
@@ -24,7 +26,7 @@ const navIconActions = {
 
 const Navbar = () => {
   const { openWindow } = useWindowStore();
-  const { toggleSpotlight, toggleTheme } = useSystemStore();
+  const { toggleSpotlight, toggleTheme, wifiEnabled } = useSystemStore();
   const iconHandlers = { toggleSpotlight, toggleTheme };
   const [menuOpen, setMenuOpen] = useState(false);
   const [now, setNow] = useState(dayjs());
@@ -99,19 +101,29 @@ const Navbar = () => {
 
       <div>
         <ul>
-          {navIcons.map(({ id, img, action }) => (
-            <li
-              key={id}
-              onClick={action ? iconHandlers[navIconActions[action]] : undefined}
-            >
-              <img
-                src={img}
-                className="icon-hover dark:invert"
-                alt={`icon-${id}`}
-              />
-            </li>
-          ))}
+          {navIcons.map(({ id, img, action }) =>
+            action === "wifi" ? (
+              <li key={id} className="wifi-status" aria-label="Wi-Fi status">
+                {wifiEnabled ? <Wifi size={17} /> : <WifiOff size={17} />}
+              </li>
+            ) : (
+              <li
+                key={id}
+                onClick={
+                  action ? iconHandlers[navIconActions[action]] : undefined
+                }
+              >
+                <img
+                  src={img}
+                  className="icon-hover dark:invert"
+                  alt={`icon-${id}`}
+                />
+              </li>
+            )
+          )}
         </ul>
+
+        <ControlCenter />
 
         <time>{now.format("ddd MMM D h:mm A")}</time>
       </div>
