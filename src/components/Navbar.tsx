@@ -21,13 +21,12 @@ const appleMenuItems: AppleMenuItem[] = [
 
 const navIconActions = {
   spotlight: "toggleSpotlight",
-  theme: "toggleTheme",
 } as const;
 
 const Navbar = () => {
   const { openWindow } = useWindowStore();
-  const { toggleSpotlight, toggleTheme, wifiEnabled } = useSystemStore();
-  const iconHandlers = { toggleSpotlight, toggleTheme };
+  const { toggleSpotlight, wifiEnabled } = useSystemStore();
+  const iconHandlers = { toggleSpotlight };
   const [menuOpen, setMenuOpen] = useState(false);
   const [now, setNow] = useState(dayjs());
   const menuRef = useRef<HTMLDivElement>(null);
