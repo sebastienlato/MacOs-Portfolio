@@ -92,7 +92,12 @@ body {
   }
 
   .maximized {
-    @apply !fixed !top-10 !left-0 !w-screen !max-w-none !h-[calc(100dvh-2.5rem)] !rounded-none;
+    @apply !fixed !top-10 !left-0 !w-screen !max-w-none !h-[calc(100dvh-2.5rem)] !max-h-none !rounded-none flex flex-col;
+
+    /* Stretch the content area (the child before the resize handle) to fill */
+    > :nth-last-child(2) {
+      @apply flex-1 min-h-0 overflow-auto;
+    }
 
     .resize-handle {
       @apply hidden;
@@ -389,7 +394,8 @@ body {
   }
 
   #photos {
-    @apply max-w-3xl absolute top-96 left-1/2 -translate-y-1/2 bg-white shadow-2xl drop-shadow-2xl rounded-xl overflow-hidden;
+    /* No percent-translate here: GSAP preserves yPercent, which breaks maximize */
+    @apply max-w-3xl absolute top-28 left-1/4 bg-white shadow-2xl drop-shadow-2xl rounded-xl overflow-hidden;
 
     .sidebar {
       @apply w-3/12 flex-none bg-gray-50 border-r border-gray-200 flex flex-col p-5;
@@ -449,12 +455,17 @@ body {
   }
 
   #resume {
-    @apply w-fit h-fit absolute top-16 left-7/12 bg-white shadow-2xl drop-shadow-2xl rounded-xl overflow-hidden;
+    @apply w-fit absolute top-16 left-7/12 bg-white shadow-2xl drop-shadow-2xl rounded-xl overflow-hidden flex flex-col max-h-[calc(100dvh-8rem)];
 
     #window-header {
       h2 {
         @apply font-bold text-sm text-center flex-1;
       }
+    }
+
+    /* The PDF scrolls inside the window instead of growing past the screen */
+    > :nth-last-child(2) {
+      @apply min-h-0 overflow-y-auto;
     }
   }
 
@@ -503,10 +514,15 @@ body {
   }
 
   #txtfile {
-    @apply w-md absolute top-36 right-32 bg-white shadow-2xl drop-shadow-2xl rounded-xl overflow-hidden;
+    @apply w-md absolute top-36 right-32 bg-white shadow-2xl drop-shadow-2xl rounded-xl overflow-hidden flex flex-col max-h-[calc(100dvh-12rem)];
 
     h2 {
       @apply font-bold text-sm text-center w-full;
+    }
+
+    /* Long notes scroll inside the window instead of growing past the screen */
+    > :nth-last-child(2) {
+      @apply min-h-0 overflow-y-auto;
     }
   }
 
