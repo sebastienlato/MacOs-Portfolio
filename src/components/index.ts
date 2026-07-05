@@ -4,5 +4,6 @@ import Dock from "#components/Dock";
 import WindowControls from "#components/WindowControls";
 import Home from "#components/Home";
 import BootScreen from "#components/BootScreen";
+import Spotlight from "#components/Spotlight";
 
-export { Navbar, Welcome, Dock, WindowControls, Home, BootScreen };
+export { Navbar, Welcome, Dock, WindowControls, Home, BootScreen, Spotlight };

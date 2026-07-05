@@ -117,6 +117,54 @@ body {
     }
   }
 
+  #spotlight {
+    @apply fixed inset-0 z-[20000];
+
+    .panel {
+      @apply mx-auto mt-[18vh] w-xl max-w-[90vw] rounded-2xl bg-white/85 backdrop-blur-2xl shadow-2xl border border-gray-300/60 overflow-hidden;
+    }
+
+    .search-row {
+      @apply flex items-center gap-3 px-4 py-3 text-gray-500;
+
+      input {
+        @apply flex-1 bg-transparent outline-none text-xl text-gray-900 placeholder:text-gray-400;
+      }
+
+      kbd {
+        @apply text-xs text-gray-400 border border-gray-300 rounded px-1.5 py-0.5;
+      }
+    }
+
+    .results {
+      @apply border-t border-gray-200 py-1.5 max-h-96 overflow-y-auto;
+
+      li {
+        @apply flex items-center gap-3 mx-1.5 px-2.5 py-2 rounded-lg cursor-pointer text-sm text-gray-800;
+
+        img {
+          @apply size-6 object-contain;
+        }
+
+        p {
+          @apply truncate;
+        }
+
+        .category {
+          @apply ml-auto text-xs opacity-60 shrink-0;
+        }
+
+        &.selected {
+          @apply bg-blue-500 text-white;
+        }
+      }
+    }
+
+    .empty {
+      @apply border-t border-gray-200 px-4 py-6 text-center text-sm text-gray-400;
+    }
+  }
+
   .boot-screen {
     @apply fixed inset-0 z-[99999] col-center gap-16 bg-black;
 
