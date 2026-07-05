@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import dayjs from "dayjs";
 import { navIcons, navLinks } from "#constants/index";
 import useWindowStore from "#store/window";
+import useSystemStore from "#store/system";
 import type { WindowKey } from "#types";
 
 type AppleMenuItem =
@@ -18,6 +19,7 @@ const appleMenuItems: AppleMenuItem[] = [
 
 const Navbar = () => {
   const { openWindow } = useWindowStore();
+  const { toggleSpotlight } = useSystemStore();
   const [menuOpen, setMenuOpen] = useState(false);
   const [now, setNow] = useState(dayjs());
   const menuRef = useRef<HTMLDivElement>(null);
@@ -91,8 +93,11 @@ const Navbar = () => {
 
       <div>
         <ul>
-          {navIcons.map(({ id, img }) => (
-            <li key={id}>
+          {navIcons.map(({ id, img, action }) => (
+            <li
+              key={id}
+              onClick={action === "spotlight" ? toggleSpotlight : undefined}
+            >
               <img src={img} className="icon-hover" alt={`icon-${id}`} />
             </li>
           ))}

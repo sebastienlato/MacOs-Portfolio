@@ -1,7 +1,7 @@
 import gsap from "gsap";
 import { Draggable } from "gsap/Draggable";
 
-import { Navbar, Welcome, Dock, Home, BootScreen } from "#components";
+import { Navbar, Welcome, Dock, Home, BootScreen, Spotlight } from "#components";
 import {
   Finder,
   Resume,
@@ -43,6 +43,7 @@ const App = () => {
 
       <Home />
 
+      <Spotlight />
       <BootScreen />
     </main>
   );

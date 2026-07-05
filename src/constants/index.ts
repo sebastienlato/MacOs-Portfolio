@@ -18,6 +18,7 @@ interface NavLink {
 interface NavIcon {
   id: number;
   img: string;
+  action?: "spotlight";
 }
 
 interface PhotosLink {
@@ -62,6 +63,7 @@ const navIcons: NavIcon[] = [
   {
     id: 2,
     img: "/icons/search.svg",
+    action: "spotlight",
   },
   {
     id: 3,

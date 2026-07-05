@@ -7,15 +7,19 @@ const DEFAULT_WALLPAPER = wallpapers[0];
 
 interface SystemStore {
   wallpaper: Wallpaper;
+  spotlightOpen: boolean;
   setWallpaper: (wallpaper: Wallpaper) => void;
   setCustomWallpaper: (dataUrl: string) => void;
   resetWallpaper: () => void;
+  setSpotlightOpen: (open: boolean) => void;
+  toggleSpotlight: () => void;
 }
 
 const useSystemStore = create<SystemStore>()(
   persist(
     (set) => ({
       wallpaper: DEFAULT_WALLPAPER,
+      spotlightOpen: false,
 
       setWallpaper: (wallpaper) => set({ wallpaper }),
 
@@ -30,8 +34,17 @@ const useSystemStore = create<SystemStore>()(
         }),
 
       resetWallpaper: () => set({ wallpaper: DEFAULT_WALLPAPER }),
+
+      setSpotlightOpen: (open) => set({ spotlightOpen: open }),
+
+      toggleSpotlight: () =>
+        set((state) => ({ spotlightOpen: !state.spotlightOpen })),
     }),
-    { name: "portfolio-system" }
+    {
+      name: "portfolio-system",
+      // Only the wallpaper survives reloads; UI state like Spotlight does not
+      partialize: (state) => ({ wallpaper: state.wallpaper }),
+    }
   )
 );
 
