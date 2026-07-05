@@ -2,7 +2,6 @@ import { useEffect, useRef } from "react";
 import {
   Image as ImageIcon,
   Moon,
-  SlidersHorizontal,
   Sun,
   Volume1,
   Volume2,
@@ -60,7 +59,11 @@ const ControlCenter = () => {
         aria-expanded={controlCenterOpen}
         aria-label="Control Center"
       >
-        <SlidersHorizontal size={15} />
+        <img
+          src="/icons/mode.svg"
+          alt=""
+          className="w-4 dark:invert"
+        />
       </button>
 
       {controlCenterOpen && (
