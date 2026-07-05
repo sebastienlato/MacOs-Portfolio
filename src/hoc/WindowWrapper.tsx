@@ -1,4 +1,5 @@
 import useWindowStore from "#store/window";
+import useLayoutStore from "#store/layout";
 import clsx from "clsx";
 import { useLayoutEffect, useRef, type ComponentType } from "react";
 import { useGSAP } from "@gsap/react";
@@ -8,6 +9,9 @@ import type { WindowKey } from "#types";
 
 const MIN_WIDTH = 360;
 const MIN_HEIGHT = 220;
+const MENU_BAR_HEIGHT = 40;
+/** How much of a window must stay reachable when restoring a saved position. */
+const EDGE_MARGIN = 100;
 
 const WindowWrapper = <P extends object>(
   Component: ComponentType<P>,
@@ -18,6 +22,36 @@ const WindowWrapper = <P extends object>(
     const { isOpen, isMinimized, isMaximized, zIndex } = windows[windowKey];
     const ref = useRef<HTMLElement>(null);
 
+    const saveLayout = (layout: Partial<{ x: number; y: number; w: number; h: number }>) =>
+      useLayoutStore.getState().saveLayout(windowKey, layout);
+
+    /**
+     * Applies the persisted size, then returns the persisted x/y clamped so
+     * the window stays reachable if the viewport shrank since last visit.
+     */
+    const restoreLayout = (el: HTMLElement) => {
+      const layout = useLayoutStore.getState().layouts[windowKey];
+      if (!layout) return { x: 0, y: 0 };
+
+      if (layout.w && layout.h) {
+        el.classList.add("user-resized");
+        el.style.width = `${layout.w}px`;
+        el.style.height = `${layout.h}px`;
+      }
+
+      // The element's untranslated origin: current rect minus current offsets
+      const rect = el.getBoundingClientRect();
+      const baseLeft = rect.left - Number(gsap.getProperty(el, "x"));
+      const baseTop = rect.top - Number(gsap.getProperty(el, "y"));
+
+      let { x, y } = layout;
+      x = Math.min(x, window.innerWidth - baseLeft - EDGE_MARGIN);
+      x = Math.max(x, EDGE_MARGIN - baseLeft - rect.width);
+      y = Math.max(y, MENU_BAR_HEIGHT - baseTop);
+      y = Math.min(y, window.innerHeight - baseTop - EDGE_MARGIN);
+      return { x, y };
+    };
+
     useGSAP(() => {
       const el = ref.current;
       if (!el || !isOpen) return;
@@ -25,10 +59,12 @@ const WindowWrapper = <P extends object>(
       // Clear the inline "none" so CSS controls display (block, or flex once resized)
       el.style.removeProperty("display");
 
+      const { x, y } = restoreLayout(el);
+
       gsap.fromTo(
         el,
-        { scale: 0.8, opacity: 0, y: 40 },
-        { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }
+        { scale: 0.8, opacity: 0, x, y: y + 40 },
+        { scale: 1, opacity: 1, y, duration: 0.4, ease: "power3.out" }
       );
     }, [isOpen]);
 
@@ -38,6 +74,10 @@ const WindowWrapper = <P extends object>(
       if (!el || !isOpen) return;
 
       if (isMinimized) {
+        saveLayout({
+          x: Number(gsap.getProperty(el, "x")),
+          y: Number(gsap.getProperty(el, "y")),
+        });
         gsap.to(el, {
           scale: 0.4,
           opacity: 0,
@@ -53,7 +93,7 @@ const WindowWrapper = <P extends object>(
         gsap.to(el, {
           scale: 1,
           opacity: 1,
-          y: 0,
+          y: useLayoutStore.getState().layouts[windowKey]?.y ?? 0,
           duration: 0.35,
           ease: "power2.out",
         });
@@ -78,6 +118,9 @@ const WindowWrapper = <P extends object>(
         trigger: header ?? el,
         onPress: () => focusWindow(windowKey),
       });
+      instance.addEventListener("dragend", () =>
+        saveLayout({ x: instance.x, y: instance.y })
+      );
 
       return () => instance.kill();
     }, [isMaximized]);
@@ -111,6 +154,7 @@ const WindowWrapper = <P extends object>(
       const onUp = () => {
         window.removeEventListener("pointermove", onMove);
         window.removeEventListener("pointerup", onUp);
+        saveLayout({ w: el.offsetWidth, h: el.offsetHeight });
       };
 
       window.addEventListener("pointermove", onMove);
