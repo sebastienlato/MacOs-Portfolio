@@ -9,6 +9,10 @@ interface SystemStore {
   wallpaper: Wallpaper;
   theme: Theme;
   spotlightOpen: boolean;
+  controlCenterOpen: boolean;
+  wifiEnabled: boolean;
+  brightness: number;
+  volume: number;
   setWallpaper: (wallpaper: Wallpaper) => void;
   setCustomWallpaper: (dataUrl: string) => void;
   resetWallpaper: () => void;
@@ -16,6 +20,11 @@ interface SystemStore {
   toggleTheme: () => void;
   setSpotlightOpen: (open: boolean) => void;
   toggleSpotlight: () => void;
+  setControlCenterOpen: (open: boolean) => void;
+  toggleControlCenter: () => void;
+  toggleWifi: () => void;
+  setBrightness: (value: number) => void;
+  setVolume: (value: number) => void;
 }
 
 const useSystemStore = create<SystemStore>()(
@@ -24,6 +33,10 @@ const useSystemStore = create<SystemStore>()(
       wallpaper: DEFAULT_WALLPAPER,
       theme: "light",
       spotlightOpen: false,
+      controlCenterOpen: false,
+      wifiEnabled: true,
+      brightness: 100,
+      volume: 65,
 
       setWallpaper: (wallpaper) => set({ wallpaper }),
 
@@ -48,13 +61,27 @@ const useSystemStore = create<SystemStore>()(
 
       toggleSpotlight: () =>
         set((state) => ({ spotlightOpen: !state.spotlightOpen })),
+
+      setControlCenterOpen: (open) => set({ controlCenterOpen: open }),
+
+      toggleControlCenter: () =>
+        set((state) => ({ controlCenterOpen: !state.controlCenterOpen })),
+
+      toggleWifi: () => set((state) => ({ wifiEnabled: !state.wifiEnabled })),
+
+      setBrightness: (value) => set({ brightness: value }),
+
+      setVolume: (value) => set({ volume: value }),
     }),
     {
       name: "portfolio-system",
-      // Wallpaper and theme survive reloads; UI state like Spotlight does not
+      // Preferences survive reloads; transient UI state (popovers) does not
       partialize: (state) => ({
         wallpaper: state.wallpaper,
         theme: state.theme,
+        wifiEnabled: state.wifiEnabled,
+        brightness: state.brightness,
+        volume: state.volume,
       }),
     }
   )
