@@ -65,8 +65,9 @@ const WindowWrapper = <P extends object>(
       if (!el) return;
 
       if (isMaximized) {
-        // Fullscreen windows are pinned below the menu bar, not draggable
-        gsap.set(el, { x: 0, y: 0 });
+        // Fullscreen windows are pinned below the menu bar, not draggable.
+        // Zero the percent offsets too: GSAP tracks them separately from x/y
+        gsap.set(el, { x: 0, y: 0, xPercent: 0, yPercent: 0 });
         return;
       }
 
