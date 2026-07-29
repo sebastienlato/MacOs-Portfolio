@@ -17,7 +17,7 @@ export const runMenuAction = (action: MenuAction) => {
     openWindow,
     closeWindow,
     minimizeWindow,
-    toggleMaximizeWindow,
+    toggleZoom,
   } = useWindowStore.getState();
 
   switch (action) {
@@ -29,7 +29,7 @@ export const runMenuAction = (action: MenuAction) => {
       if (activeWindow) minimizeWindow(activeWindow);
       return;
     case "zoom":
-      if (activeWindow) toggleMaximizeWindow(activeWindow);
+      if (activeWindow) toggleZoom(activeWindow);
       return;
 
     case "about":

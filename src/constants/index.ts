@@ -579,7 +579,7 @@ const INITIAL_Z_INDEX = 1000;
 const WINDOW_DEFAULTS: WindowState = {
   isOpen: false,
   isMinimized: false,
-  isMaximized: false,
+  tile: null,
   hasOpened: false,
   zIndex: INITIAL_Z_INDEX,
   data: null,
