@@ -64,6 +64,12 @@ body {
       rgb(255 255 255 / 0.7) 100%
     );
     --glass-inner-glow: inset 0 1px 0 0 rgb(255 255 255 / 0.5);
+
+    --glass-chrome-alpha: 0.72;
+    /* The one place more blur is right: chrome should wash the colour of what
+       is behind it, not let you read a window through a sidebar. */
+    --glass-chrome-blur: 26px;
+    --glass-hairline: rgb(0 0 0 / 0.12);
   }
 
   .dark {
@@ -83,6 +89,9 @@ body {
       rgb(255 255 255 / 0.32) 100%
     );
     --glass-inner-glow: inset 0 1px 0 0 rgb(255 255 255 / 0.16);
+
+    --glass-chrome-alpha: 0.62;
+    --glass-hairline: rgb(255 255 255 / 0.12);
   }
 }
 
@@ -154,6 +163,22 @@ body {
 @utility glass-tight {
   --glass-edge: 3px;
   --glass-edge-blur: 5px;
+}
+
+/*
+ * Window chrome — title bars and sidebars. Same material, but deliberately
+ * without the lens and specular rings: those read as the edge of a floating
+ * pane, and chrome is part of a window, not a pane of its own. A ring here
+ * would draw a bright seam across the middle of every window.
+ *
+ * Denser than a popover because chrome sits directly against opaque content,
+ * and too much transparency makes the seam between them obvious.
+ */
+@utility glass-chrome {
+  background-color: rgb(var(--glass-tint) / var(--glass-chrome-alpha));
+  backdrop-filter: blur(var(--glass-chrome-blur)) var(--glass-backdrop);
+  -webkit-backdrop-filter: blur(var(--glass-chrome-blur))
+    var(--glass-backdrop);
 }
 
 /* Opaque surfaces (window bodies) still want the softer, larger 26-era shadow */
@@ -466,7 +491,7 @@ body {
   }
 
   #settings {
-    @apply w-xl absolute top-32 left-1/3 bg-white window-shadow rounded-[var(--radius-window)] overflow-hidden dark:bg-neutral-900;
+    @apply w-xl absolute top-32 left-1/3 window-shadow rounded-[var(--radius-window)] overflow-hidden;
 
     h2 {
       @apply font-bold text-sm text-center w-full;
@@ -530,7 +555,7 @@ body {
   }
 
   #about {
-    @apply w-sm absolute top-40 left-[38%] bg-white window-shadow rounded-[var(--radius-window)] overflow-hidden;
+    @apply w-sm absolute top-40 left-[38%] window-shadow rounded-[var(--radius-window)] overflow-hidden;
 
     h2 {
       @apply font-bold text-sm text-center w-full;
@@ -624,11 +649,13 @@ body {
 
   #window-header {
     /* Top corners stay concentric with the window's own radius */
-    @apply flex items-center justify-between px-4 py-3 rounded-t-[var(--radius-window)] bg-gray-50 border-b border-gray-200 select-none text-sm text-gray-400 dark:bg-neutral-800 dark:border-neutral-700;
+    @apply glass-chrome flex items-center justify-between px-4 py-3 rounded-t-[var(--radius-window)] select-none text-sm text-gray-500 dark:text-gray-400;
+
+    border-bottom: 1px solid var(--glass-hairline);
   }
 
   #safari {
-    @apply w-4xl absolute top-40 left-2/12 bg-white window-shadow rounded-[var(--radius-window)] overflow-hidden dark:bg-neutral-900;
+    @apply w-4xl absolute top-40 left-2/12 window-shadow rounded-[var(--radius-window)] overflow-hidden;
 
     .search {
       @apply flex items-center gap-3 w-2/3 bg-white border border-gray-300 rounded-lg px-3 py-2 dark:bg-neutral-800 dark:border-neutral-600 dark:text-gray-100;
@@ -677,7 +704,8 @@ body {
     @apply w-xl absolute top-32 left-1/12 window-shadow rounded-[var(--radius-window)] overflow-hidden;
 
     #window-header {
-      @apply bg-[#38393b] border-gray-700;
+      @apply bg-[#38393b]/75 backdrop-blur-xl;
+      border-bottom-color: rgb(255 255 255 / 0.1);
 
       h2 {
         @apply font-bold text-sm text-center w-full text-gray-300;
@@ -714,7 +742,7 @@ body {
   }
 
   #contact {
-    @apply max-w-2xl absolute top-60 left-5/12 bg-white window-shadow rounded-[var(--radius-window)] overflow-hidden dark:bg-neutral-900 dark:text-gray-100;
+    @apply max-w-2xl absolute top-60 left-5/12 window-shadow rounded-[var(--radius-window)] overflow-hidden dark:text-gray-100;
 
     h2 {
       @apply font-bold text-sm text-center w-full;
@@ -743,10 +771,11 @@ body {
 
   #photos {
     /* No percent-translate here: GSAP preserves yPercent, which breaks maximize */
-    @apply max-w-3xl absolute top-28 left-1/4 bg-white window-shadow rounded-[var(--radius-window)] overflow-hidden dark:bg-neutral-900;
+    @apply max-w-3xl absolute top-28 left-1/4 window-shadow rounded-[var(--radius-window)] overflow-hidden;
 
     .sidebar {
-      @apply w-3/12 flex-none bg-gray-50 border-r border-gray-200 flex flex-col p-5 dark:bg-neutral-800/70 dark:border-neutral-700 dark:text-gray-200;
+      @apply glass-chrome w-3/12 flex-none flex flex-col p-5 dark:text-gray-200;
+      border-right: 1px solid var(--glass-hairline);
 
       h2 {
         @apply text-xs font-medium text-gray-400 mb-1;
@@ -772,7 +801,7 @@ body {
     }
 
     .gallery {
-      @apply p-5;
+      @apply flex-1 p-5 bg-white dark:bg-neutral-900;
 
       ul {
         @apply grid grid-cols-5 grid-rows-5 gap-2.5;
@@ -803,7 +832,7 @@ body {
   }
 
   #resume {
-    @apply w-fit absolute top-16 left-7/12 bg-white window-shadow rounded-[var(--radius-window)] overflow-hidden flex flex-col max-h-[calc(100dvh-8rem)];
+    @apply w-fit absolute top-16 left-7/12 window-shadow rounded-[var(--radius-window)] overflow-hidden flex flex-col max-h-[calc(100dvh-8rem)];
 
     #window-header {
       h2 {
@@ -816,6 +845,11 @@ body {
       @apply min-h-0 overflow-y-auto;
     }
 
+    /* The shell is transparent now, so the page itself is the opaque surface */
+    .react-pdf__Document {
+      @apply bg-white;
+    }
+
     /* Holds the page's natural 612x792pt while the pdf.js chunk downloads */
     .resume-loading {
       @apply flex-center w-[612px] h-[792px] bg-gray-100 text-sm text-gray-400 dark:bg-neutral-800 dark:text-gray-500;
@@ -826,7 +860,8 @@ body {
     @apply absolute w-3xl left-40 top-20 window-shadow overflow-hidden rounded-[var(--radius-window)];
 
     .sidebar {
-      @apply w-48 bg-gray-50 border-r border-gray-200 flex flex-col p-5 space-y-3 dark:bg-neutral-800/70 dark:border-neutral-700;
+      @apply glass-chrome w-48 flex flex-col p-5 space-y-3;
+      border-right: 1px solid var(--glass-hairline);
 
       h3 {
         @apply text-xs font-medium text-gray-400 mb-1;
@@ -867,7 +902,7 @@ body {
   }
 
   #txtfile {
-    @apply w-md absolute top-36 right-32 bg-white window-shadow rounded-[var(--radius-window)] overflow-hidden flex flex-col max-h-[calc(100dvh-12rem)] dark:bg-neutral-900;
+    @apply w-md absolute top-36 right-32 window-shadow rounded-[var(--radius-window)] overflow-hidden flex flex-col max-h-[calc(100dvh-12rem)];
 
     h2 {
       @apply font-bold text-sm text-center w-full;
@@ -880,7 +915,7 @@ body {
   }
 
   #imgfile {
-    @apply w-xl absolute top-40 left-2/12 bg-white window-shadow rounded-[var(--radius-window)] overflow-hidden dark:bg-neutral-900;
+    @apply w-xl absolute top-40 left-2/12 window-shadow rounded-[var(--radius-window)] overflow-hidden;
 
     h2 {
       @apply font-bold text-sm text-center w-full;

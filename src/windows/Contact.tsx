@@ -10,7 +10,9 @@ const Contact = () => {
         <h2>Contact Me</h2>
       </div>
 
-      <div className="p-5 space-y-5">
+      {/* The window shell is transparent so its chrome can be glass; the
+          content area is what supplies the opaque surface */}
+      <div className="p-5 space-y-5 bg-white dark:bg-neutral-900">
         <img
           src="/images/avatar.webp"
           alt="Sebastien"
