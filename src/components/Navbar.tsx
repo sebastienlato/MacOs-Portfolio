@@ -65,7 +65,7 @@ const Navbar = () => {
             aria-haspopup="menu"
             aria-expanded={menuOpen}
           >
-            <img src="/images/logo.svg" alt="logo" className="dark:invert" />
+            <img src="/images/logo.svg" alt="logo" className="invert" />
           </button>
 
           {menuOpen && (
@@ -114,7 +114,7 @@ const Navbar = () => {
               >
                 <img
                   src={img}
-                  className="icon-hover dark:invert"
+                  className="icon-hover invert"
                   alt={`icon-${id}`}
                 />
               </li>

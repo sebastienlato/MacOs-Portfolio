@@ -17,6 +17,75 @@ body {
   --font-georama: "Georama", sans-serif;
   --font-roboto: "Roboto Mono", monospace;
   --breakpoint-3xl: 1920px;
+
+  /* macOS 26 rounds windows far more than the 12px this used to use, and keeps
+     the header's top corners concentric with them. */
+  --radius-window: 20px;
+  --radius-panel: 18px;
+}
+
+/*
+ * Liquid Glass. The distinction that matters: this is *clear*, not frosted.
+ * Pre-26 vibrancy hid the backdrop behind heavy blur and a thick tint; Liquid
+ * Glass keeps it legible through the surface and sells the material with
+ * refraction at the rim instead.
+ *
+ * So blur stays low and tint stays light, and readability comes from
+ * `--glass-backdrop` — a brightness/saturation pass that pushes whatever is
+ * behind toward one end of the range (up in light, down in dark) so label text
+ * has something consistent to sit on. Covering the wallpaper up with opacity
+ * would be the easy fix and the wrong look.
+ */
+@layer base {
+  :root {
+    --glass-blur: 5px;
+    --glass-backdrop: saturate(1.8) brightness(1.6);
+    --glass-tint: 255 255 255;
+    --glass-alpha: 0.16;
+    --glass-alpha-thick: 0.44;
+    --glass-border: rgb(255 255 255 / 0.5);
+    --glass-shadow: 0 16px 40px -12px rgb(0 0 0 / 0.35);
+    /* Rim lighting: bright top edge, softer bottom bounce, faint sides */
+    --glass-rim: inset 0 1px 1px -0.5px rgb(255 255 255 / 0.9),
+      inset 0 -1px 1px -0.5px rgb(255 255 255 / 0.4),
+      inset 1px 0 1px -1px rgb(255 255 255 / 0.5),
+      inset -1px 0 1px -1px rgb(255 255 255 / 0.5);
+  }
+
+  .dark {
+    --glass-backdrop: saturate(1.6) brightness(0.5);
+    --glass-tint: 8 8 12;
+    --glass-alpha: 0.16;
+    --glass-alpha-thick: 0.34;
+    --glass-border: rgb(255 255 255 / 0.22);
+    --glass-shadow: 0 16px 40px -12px rgb(0 0 0 / 0.6);
+    --glass-rim: inset 0 1px 1px -0.5px rgb(255 255 255 / 0.45),
+      inset 0 -1px 1px -0.5px rgb(255 255 255 / 0.14),
+      inset 1px 0 1px -1px rgb(255 255 255 / 0.2),
+      inset -1px 0 1px -1px rgb(255 255 255 / 0.2);
+  }
+}
+
+@utility glass {
+  background-color: rgb(var(--glass-tint) / var(--glass-fill, var(--glass-alpha)));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-rim), var(--glass-shadow);
+  backdrop-filter: blur(var(--glass-blur)) var(--glass-backdrop);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) var(--glass-backdrop);
+}
+
+/*
+ * Popovers carry more text than the dock, so they take a slightly denser tint
+ * and a touch more blur — still see-through, just enough to hold small labels.
+ */
+@utility glass-thick {
+  --glass-fill: var(--glass-alpha-thick);
+  --glass-blur: 9px;
+}
+
+/* Opaque surfaces (window bodies) still want the softer, larger 26-era shadow */
+@utility window-shadow {
+  box-shadow: 0 24px 64px -16px rgb(0 0 0 / 0.45), 0 2px 8px rgb(0 0 0 / 0.16);
 }
 
 @utility flex-center {
@@ -37,7 +106,18 @@ body {
   }
 
   nav {
-    @apply flex justify-between items-center bg-white/50 backdrop-blur-3xl p-2 px-5 select-none relative z-[9999] dark:bg-black/40 dark:text-gray-100;
+    @apply flex justify-between items-center p-2 px-5 select-none relative z-[9999] text-white;
+
+    /* macOS 26 dropped the menu bar fill entirely. A solid bar can't come back
+       for legibility, because every wallpaper here is dark at the top and the
+       old bg-white/50 washed them out — so this is just a scrim, thin enough
+       that the wallpaper still reads through it. */
+    background: linear-gradient(
+      to bottom,
+      rgb(0 0 0 / 0.32),
+      rgb(0 0 0 / 0.04)
+    );
+    text-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
 
     /* Direct children only, so popover internals (Control Center) aren't forced into a row */
     > div {
@@ -57,7 +137,13 @@ body {
     }
 
     time {
-      @apply text-sm font-medium text-black dark:text-gray-100;
+      @apply text-sm font-medium;
+    }
+
+    /* Popovers are children of <nav>, so they must opt out of its scrim text */
+    .dropdown,
+    .cc-panel {
+      text-shadow: none;
     }
   }
 }
@@ -75,18 +161,19 @@ body {
     @apply relative;
 
     > button {
-      @apply flex items-center cursor-pointer rounded px-1.5 py-0.5 hover:bg-black/10 transition-colors dark:hover:bg-white/15;
+      /* The bar is transparent now, so the hover chip lifts rather than darkens */
+      @apply flex items-center cursor-pointer rounded-md px-1.5 py-0.5 hover:bg-white/20 transition-colors;
     }
 
     .dropdown {
-      @apply absolute top-8 left-0 !flex flex-col items-stretch gap-0 min-w-52 bg-white/80 backdrop-blur-2xl rounded-lg shadow-2xl border border-gray-200 p-1 z-[10000] dark:bg-neutral-800/90 dark:border-neutral-600;
+      @apply glass glass-thick absolute top-8 left-0 !flex flex-col items-stretch gap-0 min-w-52 rounded-[var(--radius-panel)] p-1.5 z-[10000] text-gray-900 dark:text-gray-100;
 
       li {
-        @apply text-sm text-gray-800 px-3 py-1.5 rounded-md cursor-pointer hover:bg-blue-500 hover:text-white transition-colors dark:text-gray-100;
+        @apply text-sm px-3 py-1.5 rounded-lg cursor-pointer hover:bg-blue-500 hover:text-white transition-colors;
       }
 
       .divider {
-        @apply h-px bg-gray-300 my-1 p-0 mx-3 hover:bg-gray-300 cursor-default dark:bg-neutral-600 dark:hover:bg-neutral-600;
+        @apply h-px my-1 p-0 mx-3 cursor-default bg-black/10 hover:bg-black/10 dark:bg-white/15 dark:hover:bg-white/15;
       }
     }
   }
@@ -103,22 +190,23 @@ body {
     @apply relative flex items-center;
 
     > button {
-      @apply flex items-center cursor-pointer rounded p-1 hover:bg-black/10 transition-colors dark:hover:bg-white/15;
+      @apply flex items-center cursor-pointer rounded-md p-1 hover:bg-white/20 transition-colors;
     }
 
     .cc-panel {
-      @apply absolute top-9 right-0 w-72 rounded-2xl bg-white/70 backdrop-blur-2xl shadow-2xl border border-gray-300/50 p-3 space-y-3 z-[10000] dark:bg-neutral-800/80 dark:border-neutral-600/50 dark:text-gray-100;
+      @apply glass glass-thick absolute top-9 right-0 w-72 rounded-[var(--radius-panel)] p-3 space-y-3 z-[10000] text-gray-900 dark:text-gray-100;
     }
 
     .tiles {
       @apply grid grid-cols-2 gap-2;
     }
 
+    /* Inner surfaces sit on glass, so they tint rather than paint over it */
     .tile {
-      @apply flex items-center gap-2.5 rounded-xl bg-white/60 shadow-sm p-2.5 text-left cursor-pointer transition-colors hover:bg-white/90 dark:bg-white/10 dark:hover:bg-white/20;
+      @apply flex items-center gap-2.5 rounded-2xl bg-white/40 p-2.5 text-left cursor-pointer transition-colors hover:bg-white/60 dark:bg-white/10 dark:hover:bg-white/[0.18];
 
       .tile-icon {
-        @apply flex-center size-8 rounded-full bg-gray-300/70 text-gray-700 shrink-0 transition-colors dark:bg-neutral-600 dark:text-gray-100;
+        @apply flex-center size-8 rounded-full bg-black/10 text-gray-700 shrink-0 transition-colors dark:bg-white/15 dark:text-gray-100;
 
         &.on {
           @apply bg-blue-500 text-white;
@@ -130,44 +218,63 @@ body {
       }
 
       p {
-        @apply text-[11px] text-gray-500 leading-tight dark:text-gray-400;
+        @apply text-[11px] text-gray-700 leading-tight dark:text-gray-300;
       }
     }
 
     .slider-group {
-      @apply rounded-xl bg-white/60 shadow-sm p-3 dark:bg-white/10;
+      @apply rounded-2xl bg-white/40 p-3 dark:bg-white/10;
 
       h4 {
         @apply text-xs font-semibold mb-2;
       }
 
+      /*
+       * macOS Control Center sliders are a tall rounded track that fills from
+       * the left with the glyph riding inside it — not a thin rail with a knob.
+       * The fill is a hard-stop gradient driven by --value (set from React) and
+       * the native thumb is hidden, since there is no visible knob to draw.
+       */
       .slider-row {
-        @apply flex items-center gap-2 text-gray-600 dark:text-gray-300;
+        @apply relative flex items-center;
+
+        svg {
+          @apply absolute left-2.5 z-10 pointer-events-none text-gray-600 mix-blend-luminosity dark:text-gray-200;
+        }
 
         input[type="range"] {
-          @apply flex-1 h-1.5 appearance-none rounded-full bg-gray-300 cursor-pointer dark:bg-neutral-600;
+          @apply w-full h-8 appearance-none rounded-full cursor-pointer bg-black/10 dark:bg-black/30;
+          background-image: linear-gradient(
+            to right,
+            rgb(255 255 255 / 0.95) 0 var(--value),
+            transparent var(--value) 100%
+          );
 
           &::-webkit-slider-thumb {
-            @apply appearance-none size-4 rounded-full bg-white shadow;
+            @apply appearance-none w-1 h-8 opacity-0;
+          }
+
+          &::-moz-range-thumb {
+            @apply w-1 h-8 border-0 opacity-0;
           }
         }
       }
     }
 
     .cc-footer {
-      @apply w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-gray-600 cursor-pointer transition-colors hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10;
+      @apply w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-gray-800 cursor-pointer transition-colors hover:bg-black/10 dark:text-gray-200 dark:hover:bg-white/10;
     }
   }
 
   #desktop-menu {
-    @apply fixed min-w-52 rounded-lg bg-white/85 backdrop-blur-2xl shadow-2xl border border-gray-200 p-1 z-[15000] select-none dark:bg-neutral-800/90 dark:border-neutral-600;
+    @apply glass glass-thick fixed min-w-52 rounded-[var(--radius-panel)] p-1.5 z-[15000] select-none text-gray-900 dark:text-gray-100;
 
     li {
-      @apply text-sm text-gray-800 px-3 py-1.5 rounded-md cursor-pointer hover:bg-blue-500 hover:text-white transition-colors dark:text-gray-100;
+      @apply text-sm px-3 py-1.5 rounded-lg cursor-pointer hover:bg-blue-500 hover:text-white transition-colors;
     }
 
     .divider {
-      @apply h-px bg-gray-300 my-1 mx-2 p-0 hover:bg-gray-300 cursor-default dark:bg-neutral-600 dark:hover:bg-neutral-600;
+      @apply h-px my-1 mx-2 p-0 cursor-default bg-black/10 hover:bg-black/10 dark:bg-white/15 dark:hover:bg-white/15;
     }
   }
 
@@ -202,10 +309,13 @@ body {
   }
 
   #spotlight {
-    @apply fixed inset-0 z-[20000];
+    /* Clear glass shows whatever is behind it, and the hero type is huge and
+       high-contrast. Dimming the desktop keeps the panel see-through while
+       giving the result list something calm to sit on. */
+    @apply fixed inset-0 z-[20000] bg-black/25;
 
     .panel {
-      @apply mx-auto mt-[18vh] w-xl max-w-[90vw] rounded-2xl bg-white/85 backdrop-blur-2xl shadow-2xl border border-gray-300/60 overflow-hidden dark:bg-neutral-800/85 dark:border-neutral-600/60;
+      @apply glass glass-thick mx-auto mt-[18vh] w-xl max-w-[90vw] rounded-[22px] overflow-hidden text-gray-900 dark:text-gray-100;
     }
 
     .search-row {
@@ -216,12 +326,12 @@ body {
       }
 
       kbd {
-        @apply text-xs text-gray-400 border border-gray-300 rounded px-1.5 py-0.5 dark:border-neutral-600;
+        @apply text-xs text-gray-500 border rounded px-1.5 py-0.5 border-black/15 dark:border-white/20 dark:text-gray-400;
       }
     }
 
     .results {
-      @apply border-t border-gray-200 py-1.5 max-h-96 overflow-y-auto dark:border-neutral-700;
+      @apply border-t py-1.5 max-h-96 overflow-y-auto border-black/10 dark:border-white/10;
 
       li {
         @apply flex items-center gap-3 mx-1.5 px-2.5 py-2 rounded-lg cursor-pointer text-sm text-gray-800 dark:text-gray-200;
@@ -245,7 +355,7 @@ body {
     }
 
     .empty {
-      @apply border-t border-gray-200 px-4 py-6 text-center text-sm text-gray-400 dark:border-neutral-700;
+      @apply border-t px-4 py-6 text-center text-sm text-gray-500 border-black/10 dark:border-white/10 dark:text-gray-400;
     }
   }
 
@@ -266,7 +376,7 @@ body {
   }
 
   #settings {
-    @apply w-xl absolute top-32 left-1/3 bg-white shadow-2xl drop-shadow-2xl rounded-xl overflow-hidden dark:bg-neutral-900;
+    @apply w-xl absolute top-32 left-1/3 bg-white window-shadow rounded-[var(--radius-window)] overflow-hidden dark:bg-neutral-900;
 
     h2 {
       @apply font-bold text-sm text-center w-full;
@@ -330,7 +440,7 @@ body {
   }
 
   #about {
-    @apply w-sm absolute top-40 left-[38%] bg-white shadow-2xl drop-shadow-2xl rounded-xl overflow-hidden;
+    @apply w-sm absolute top-40 left-[38%] bg-white window-shadow rounded-[var(--radius-window)] overflow-hidden;
 
     h2 {
       @apply font-bold text-sm text-center w-full;
@@ -388,8 +498,9 @@ body {
   #dock {
     @apply absolute bottom-5 left-1/2 -translate-x-1/2 z-50 select-none max-sm:hidden;
 
+    /* Tahoe's dock is a floating glass slab, rounded far more than before */
     .dock-container {
-      @apply bg-white/20 backdrop-blur-md justify-between rounded-2xl p-1.5 flex items-end gap-1.5;
+      @apply glass justify-between rounded-[26px] p-2 flex items-end gap-1.5;
     }
 
     .tooltip {
@@ -422,11 +533,12 @@ body {
   }
 
   #window-header {
-    @apply flex items-center justify-between px-4 py-3 rounded-t-lg bg-gray-50 border-b border-gray-200 select-none text-sm text-gray-400 dark:bg-neutral-800 dark:border-neutral-700;
+    /* Top corners stay concentric with the window's own radius */
+    @apply flex items-center justify-between px-4 py-3 rounded-t-[var(--radius-window)] bg-gray-50 border-b border-gray-200 select-none text-sm text-gray-400 dark:bg-neutral-800 dark:border-neutral-700;
   }
 
   #safari {
-    @apply w-4xl absolute top-40 left-2/12 bg-white shadow-2xl drop-shadow-2xl rounded-xl overflow-hidden dark:bg-neutral-900;
+    @apply w-4xl absolute top-40 left-2/12 bg-white window-shadow rounded-[var(--radius-window)] overflow-hidden dark:bg-neutral-900;
 
     .search {
       @apply flex items-center gap-3 w-2/3 bg-white border border-gray-300 rounded-lg px-3 py-2 dark:bg-neutral-800 dark:border-neutral-600 dark:text-gray-100;
@@ -472,7 +584,7 @@ body {
   }
 
   #terminal {
-    @apply w-xl absolute top-32 left-1/12 shadow-2xl drop-shadow-2xl rounded-xl overflow-hidden;
+    @apply w-xl absolute top-32 left-1/12 window-shadow rounded-[var(--radius-window)] overflow-hidden;
 
     #window-header {
       @apply bg-[#38393b] border-gray-700;
@@ -512,7 +624,7 @@ body {
   }
 
   #contact {
-    @apply max-w-2xl absolute top-60 left-5/12 bg-white shadow-2xl drop-shadow-2xl rounded-xl overflow-hidden dark:bg-neutral-900 dark:text-gray-100;
+    @apply max-w-2xl absolute top-60 left-5/12 bg-white window-shadow rounded-[var(--radius-window)] overflow-hidden dark:bg-neutral-900 dark:text-gray-100;
 
     h2 {
       @apply font-bold text-sm text-center w-full;
@@ -541,7 +653,7 @@ body {
 
   #photos {
     /* No percent-translate here: GSAP preserves yPercent, which breaks maximize */
-    @apply max-w-3xl absolute top-28 left-1/4 bg-white shadow-2xl drop-shadow-2xl rounded-xl overflow-hidden dark:bg-neutral-900;
+    @apply max-w-3xl absolute top-28 left-1/4 bg-white window-shadow rounded-[var(--radius-window)] overflow-hidden dark:bg-neutral-900;
 
     .sidebar {
       @apply w-3/12 flex-none bg-gray-50 border-r border-gray-200 flex flex-col p-5 dark:bg-neutral-800/70 dark:border-neutral-700 dark:text-gray-200;
@@ -601,7 +713,7 @@ body {
   }
 
   #resume {
-    @apply w-fit absolute top-16 left-7/12 bg-white shadow-2xl drop-shadow-2xl rounded-xl overflow-hidden flex flex-col max-h-[calc(100dvh-8rem)];
+    @apply w-fit absolute top-16 left-7/12 bg-white window-shadow rounded-[var(--radius-window)] overflow-hidden flex flex-col max-h-[calc(100dvh-8rem)];
 
     #window-header {
       h2 {
@@ -621,7 +733,7 @@ body {
   }
 
   #finder {
-    @apply absolute w-3xl left-40 top-20 shadow-2xl drop-shadow-2xl overflow-hidden rounded-xl;
+    @apply absolute w-3xl left-40 top-20 window-shadow overflow-hidden rounded-[var(--radius-window)];
 
     .sidebar {
       @apply w-48 bg-gray-50 border-r border-gray-200 flex flex-col p-5 space-y-3 dark:bg-neutral-800/70 dark:border-neutral-700;
@@ -665,7 +777,7 @@ body {
   }
 
   #txtfile {
-    @apply w-md absolute top-36 right-32 bg-white shadow-2xl drop-shadow-2xl rounded-xl overflow-hidden flex flex-col max-h-[calc(100dvh-12rem)] dark:bg-neutral-900;
+    @apply w-md absolute top-36 right-32 bg-white window-shadow rounded-[var(--radius-window)] overflow-hidden flex flex-col max-h-[calc(100dvh-12rem)] dark:bg-neutral-900;
 
     h2 {
       @apply font-bold text-sm text-center w-full;
@@ -678,7 +790,7 @@ body {
   }
 
   #imgfile {
-    @apply w-xl absolute top-40 left-2/12 bg-white shadow-2xl drop-shadow-2xl rounded-xl overflow-hidden dark:bg-neutral-900;
+    @apply w-xl absolute top-40 left-2/12 bg-white window-shadow rounded-[var(--radius-window)] overflow-hidden dark:bg-neutral-900;
 
     h2 {
       @apply font-bold text-sm text-center w-full;
