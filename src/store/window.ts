@@ -3,9 +3,35 @@ import { immer } from "zustand/middleware/immer";
 import { INITIAL_Z_INDEX, WINDOW_CONFIG } from "#constants/index";
 import type { FinderItem, WindowKey, WindowState } from "#types";
 
+/**
+ * The frontmost window a visitor can actually interact with. Closing or
+ * minimizing the active window hands focus to whatever is next down the stack,
+ * the way macOS does, rather than leaving the menu bar pointing at nothing.
+ */
+const topMostWindow = (
+  windows: Record<WindowKey, WindowState>
+): WindowKey | null => {
+  let top: WindowKey | null = null;
+  let topZ = -Infinity;
+
+  for (const [key, win] of Object.entries(windows) as [
+    WindowKey,
+    WindowState,
+  ][]) {
+    if (win.isOpen && !win.isMinimized && win.zIndex > topZ) {
+      top = key;
+      topZ = win.zIndex;
+    }
+  }
+
+  return top;
+};
+
 interface WindowStore {
   windows: Record<WindowKey, WindowState>;
   nextZIndex: number;
+  /** null when nothing is open — the menu bar falls back to Finder. */
+  activeWindow: WindowKey | null;
   openWindow: (windowKey: WindowKey, data?: FinderItem | null) => void;
   closeWindow: (windowKey: WindowKey) => void;
   minimizeWindow: (windowKey: WindowKey) => void;
@@ -17,6 +43,7 @@ const useWindowStore = create<WindowStore>()(
   immer((set) => ({
     windows: WINDOW_CONFIG,
     nextZIndex: INITIAL_Z_INDEX + 1,
+    activeWindow: null,
 
     openWindow: (windowKey, data = null) =>
       set((state) => {
@@ -28,6 +55,7 @@ const useWindowStore = create<WindowStore>()(
         win.zIndex = state.nextZIndex;
         win.data = data ?? win.data;
         state.nextZIndex++;
+        state.activeWindow = windowKey;
       }),
 
     closeWindow: (windowKey) =>
@@ -39,6 +67,7 @@ const useWindowStore = create<WindowStore>()(
         win.isMaximized = false;
         win.zIndex = INITIAL_Z_INDEX;
         win.data = null;
+        state.activeWindow = topMostWindow(state.windows);
       }),
 
     minimizeWindow: (windowKey) =>
@@ -46,6 +75,7 @@ const useWindowStore = create<WindowStore>()(
         const win = state.windows[windowKey];
         if (!win) return;
         win.isMinimized = true;
+        state.activeWindow = topMostWindow(state.windows);
       }),
 
     toggleMaximizeWindow: (windowKey) =>
@@ -54,6 +84,7 @@ const useWindowStore = create<WindowStore>()(
         if (!win) return;
         win.isMaximized = !win.isMaximized;
         win.zIndex = state.nextZIndex++;
+        state.activeWindow = windowKey;
       }),
 
     focusWindow: (windowKey) =>
@@ -61,6 +92,7 @@ const useWindowStore = create<WindowStore>()(
         const win = state.windows[windowKey];
         if (!win) return;
         win.zIndex = state.nextZIndex++;
+        state.activeWindow = windowKey;
       }),
   }))
 );

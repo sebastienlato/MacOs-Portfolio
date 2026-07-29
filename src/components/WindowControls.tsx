@@ -6,10 +6,30 @@ const WindowControls = ({ target }: { target: WindowKey }) => {
     useWindowStore();
 
   return (
+    /*
+     * Buttons rather than divs: these are a window's primary controls, and as
+     * divs they were unreachable by keyboard and unnamed to screen readers.
+     * The ×/−/+ glyphs are drawn in CSS and only appear on hover, as in macOS.
+     */
     <div id="window-controls">
-      <div className="close" onClick={() => closeWindow(target)} />
-      <div className="minimize" onClick={() => minimizeWindow(target)} />
-      <div className="maximize" onClick={() => toggleMaximizeWindow(target)} />
+      <button
+        type="button"
+        className="close"
+        aria-label="Close window"
+        onClick={() => closeWindow(target)}
+      />
+      <button
+        type="button"
+        className="minimize"
+        aria-label="Minimize window"
+        onClick={() => minimizeWindow(target)}
+      />
+      <button
+        type="button"
+        className="maximize"
+        aria-label="Zoom window"
+        onClick={() => toggleMaximizeWindow(target)}
+      />
     </div>
   );
 };

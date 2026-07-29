@@ -181,9 +181,17 @@ body {
     var(--glass-backdrop);
 }
 
-/* Opaque surfaces (window bodies) still want the softer, larger 26-era shadow */
+/*
+ * Opaque surfaces (window bodies) still want the softer, larger 26-era shadow.
+ * Only the frontmost window casts it at full strength — an unfocused window
+ * sits visibly lower, which is most of what separates the two states.
+ */
 @utility window-shadow {
-  box-shadow: 0 24px 64px -16px rgb(0 0 0 / 0.45), 0 2px 8px rgb(0 0 0 / 0.16);
+  box-shadow: 0 8px 24px -10px rgb(0 0 0 / 0.35), 0 1px 4px rgb(0 0 0 / 0.12);
+
+  &.is-focused {
+    box-shadow: 0 24px 64px -16px rgb(0 0 0 / 0.45), 0 2px 8px rgb(0 0 0 / 0.16);
+  }
 }
 
 @utility flex-center {
@@ -229,6 +237,16 @@ body {
 
       p {
         @apply text-sm cursor-pointer hover:underline transition-all;
+      }
+    }
+
+    /* The app menus are a <ul> inside <nav>, so they have to opt out of the
+       row layout above — otherwise every dropdown lays out horizontally */
+    #app-menus {
+      @apply gap-0;
+
+      .dropdown {
+        @apply !flex flex-col items-stretch gap-0;
       }
     }
 
@@ -288,6 +306,59 @@ body {
       .divider {
         @apply h-px my-1 p-0 mx-3 cursor-default bg-black/10 hover:bg-black/10 dark:bg-white/15 dark:hover:bg-white/15;
       }
+    }
+  }
+
+  /* The per-app menu bar. Titles are buttons; the first carries the app name. */
+  #app-menus {
+    .menu {
+      @apply relative;
+    }
+
+    > .menu > button {
+      @apply text-sm cursor-pointer rounded-md px-2.5 py-0.5 transition-colors hover:bg-white/20;
+
+      &.app-name {
+        @apply font-bold;
+      }
+
+      /* An open menu keeps its title highlighted, as macOS does */
+      &.open {
+        @apply bg-white/25;
+      }
+    }
+
+    .dropdown {
+      @apply glass glass-thick absolute top-7 left-0 min-w-56 rounded-[var(--radius-panel)] p-1.5 z-[10000] text-gray-900 dark:text-gray-100;
+
+      li {
+        @apply flex items-center gap-8 text-sm px-3 py-1.5 rounded-lg cursor-pointer transition-colors;
+
+        &:not(.disabled):not(.divider):hover {
+          @apply bg-blue-500 text-white;
+        }
+
+        /* macOS greys out what doesn't apply rather than hiding it */
+        &.disabled {
+          @apply opacity-40 cursor-default;
+        }
+
+        .shortcut {
+          @apply ml-auto text-xs opacity-60 shrink-0;
+        }
+      }
+
+      .divider {
+        @apply h-px my-1 mx-3 p-0 cursor-default bg-black/10 dark:bg-white/15;
+      }
+    }
+  }
+
+  main.menu-bar-on-light > nav #app-menus > .menu > button {
+    @apply hover:bg-black/10;
+
+    &.open {
+      @apply bg-black/15;
     }
   }
 
@@ -631,19 +702,52 @@ body {
     }
   }
 
+  /*
+   * Traffic lights. macOS greys them on any window that isn't frontmost and
+   * re-colours the whole group the moment you hover it, so an inactive window
+   * still shows you where its controls are.
+   */
   #window-controls {
     @apply flex gap-2;
 
+    button {
+      @apply size-3.5 rounded-full cursor-pointer flex-center transition-colors;
+      /* Grey by default; colour arrives from :focused or :hover below */
+      @apply bg-black/20 dark:bg-white/25;
+
+      /* Glyphs live in the button and only surface on hover of the group */
+      &::before {
+        @apply text-[9px] font-bold leading-none opacity-0 transition-opacity;
+        color: rgb(0 0 0 / 0.55);
+      }
+    }
+
+    .close::before {
+      content: "×";
+    }
+    .minimize::before {
+      content: "−";
+    }
+    .maximize::before {
+      content: "+";
+    }
+
+    &:hover button::before {
+      @apply opacity-100;
+    }
+  }
+
+  /* Only the frontmost window gets coloured lights */
+  .is-focused #window-controls,
+  #window-controls:hover {
     .close {
-      @apply size-3.5 rounded-full bg-[#ff6157] cursor-pointer;
+      @apply bg-[#ff6157];
     }
-
     .minimize {
-      @apply size-3.5 rounded-full bg-[#ffc030];
+      @apply bg-[#ffc030];
     }
-
     .maximize {
-      @apply size-3.5 rounded-full bg-[#2acb42];
+      @apply bg-[#2acb42];
     }
   }
 
@@ -652,6 +756,15 @@ body {
     @apply glass-chrome flex items-center justify-between px-4 py-3 rounded-t-[var(--radius-window)] select-none text-sm text-gray-500 dark:text-gray-400;
 
     border-bottom: 1px solid var(--glass-hairline);
+
+    /* An unfocused title dims rather than disappears, as macOS does */
+    h2 {
+      @apply text-gray-400 transition-colors dark:text-gray-500;
+    }
+  }
+
+  .is-focused #window-header h2 {
+    @apply text-gray-700 dark:text-gray-200;
   }
 
   #safari {

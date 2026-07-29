@@ -13,6 +13,7 @@ import {
   BootScreen,
   Spotlight,
   DesktopMenu,
+  KeyboardShortcuts,
 } from "#components";
 import {
   Finder,
@@ -86,6 +87,7 @@ const App = () => {
 
       <DesktopMenu />
       <Spotlight />
+      <KeyboardShortcuts />
 
       <div
         className="brightness-overlay"

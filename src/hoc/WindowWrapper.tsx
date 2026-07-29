@@ -20,9 +20,10 @@ const WindowWrapper = <P extends object>(
   windowKey: WindowKey
 ) => {
   const Wrapped = (props: P) => {
-    const { focusWindow, windows } = useWindowStore();
+    const { focusWindow, windows, activeWindow } = useWindowStore();
     const { isOpen, isMinimized, isMaximized, hasOpened, zIndex } =
       windows[windowKey];
+    const isFocused = activeWindow === windowKey;
     const ref = useRef<HTMLElement>(null);
 
     const saveLayout = (layout: Partial<{ x: number; y: number; w: number; h: number }>) =>
@@ -196,7 +197,11 @@ const WindowWrapper = <P extends object>(
         ref={ref}
         style={{ zIndex }}
         onMouseDown={() => focusWindow(windowKey)}
-        className={clsx("absolute", isMaximized && "maximized")}
+        className={clsx(
+          "absolute",
+          isMaximized && "maximized",
+          isFocused && "is-focused"
+        )}
       >
         <Component {...props} />
         <div
