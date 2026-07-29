@@ -711,7 +711,13 @@ body {
   }
 
   #dock {
-    @apply absolute bottom-5 left-1/2 -translate-x-1/2 z-50 select-none max-sm:hidden;
+    /*
+     * Above the windows (z-1000+), because the dock floats over them in macOS
+     * and magnified icons rise well past its own slab — at z-50 the enlarged
+     * icon was sliced off by whatever window sat above it. Still below the
+     * menu bar and the brightness overlay, both of which cover the dock too.
+     */
+    @apply absolute bottom-5 left-1/2 -translate-x-1/2 z-[9500] select-none max-sm:hidden;
 
     /* Tahoe's dock is a floating glass slab, rounded far more than before */
     .dock-container {
@@ -740,28 +746,55 @@ body {
     @apply flex gap-2;
 
     button {
-      @apply size-3.5 rounded-full cursor-pointer flex-center transition-colors;
+      @apply relative size-3.5 rounded-full cursor-pointer transition-colors;
       /* Grey by default; colour arrives from :focused or :hover below */
       @apply bg-black/20 dark:bg-white/25;
+    }
 
-      /* Glyphs live in the button and only surface on hover of the group */
+    /*
+     * The ×, − and + are drawn as strokes rather than typed as characters.
+     * Typed, they inherit the font's glyph metrics: − and × sit on the maths
+     * axis, which is above the optical centre, so the minus in particular rode
+     * visibly high inside its circle — and it would land differently again on
+     * a machine resolving system-ui to something other than SF.
+     *
+     * Two bars per button, rotated, gives exact centring and a weight we set.
+     */
+    button::before,
+    button::after {
+      content: "";
+      @apply absolute left-1/2 top-1/2 rounded-full opacity-0 transition-opacity;
+      width: var(--glyph-length, 7px);
+      height: 1.6px;
+      margin-left: calc(var(--glyph-length, 7px) / -2);
+      margin-top: -0.8px;
+      background: rgb(0 0 0 / 0.65);
+    }
+
+    /* Diagonals need to be shorter to stay inside the circle */
+    .close {
+      --glyph-length: 6.5px;
+
       &::before {
-        @apply text-[9px] font-bold leading-none opacity-0 transition-opacity;
-        color: rgb(0 0 0 / 0.55);
+        transform: rotate(45deg);
+      }
+      &::after {
+        transform: rotate(-45deg);
       }
     }
 
-    .close::before {
-      content: "×";
-    }
-    .minimize::before {
-      content: "−";
-    }
-    .maximize::before {
-      content: "+";
+    /* A single bar — the second stroke is the one that has to go */
+    .minimize::after {
+      @apply hidden;
     }
 
-    &:hover button::before {
+    .maximize::after {
+      transform: rotate(90deg);
+    }
+
+    /* Glyphs surface on hover of the whole group, as macOS does */
+    &:hover button::before,
+    &:hover button::after {
       @apply opacity-100;
     }
   }
