@@ -34,10 +34,17 @@ export interface FinderItem {
   children?: FinderItem[];
 }
 
+/**
+ * Where a tiled window sits. "fill" is what the green button does on its own —
+ * macOS calls that Zoom — and the halves are what its hover menu offers.
+ */
+export type WindowTile = "fill" | "left" | "right";
+
 export interface WindowState {
   isOpen: boolean;
   isMinimized: boolean;
-  isMaximized: boolean;
+  /** null while the window floats freely; otherwise where it is tiled. */
+  tile: WindowTile | null;
   /**
    * Latches on the first open. Windows stay unmounted until then so their
    * images aren't fetched on page load; once mounted they stay mounted, which

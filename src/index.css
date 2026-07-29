@@ -495,10 +495,16 @@ body {
    * (True full screen is the other macOS behaviour: its own Space, with the
    * menu bar and dock hidden until you push the pointer at the edge.)
    */
-  .maximized {
-    @apply !fixed !top-10 !left-0 !w-screen !max-w-none !max-h-none flex flex-col;
+  /*
+   * Geometry is forced throughout. Each window's own #id rule carries its
+   * natural size (#finder is w-3xl, #terminal w-xl), which outranks a class,
+   * and a window the visitor has resized additionally has inline width/height
+   * that outranks everything short of !important.
+   */
+  .tiled {
+    @apply !fixed !top-10 !max-w-none !max-h-none flex flex-col;
 
-    height: calc(100dvh - 2.5rem - var(--dock-inset));
+    height: calc(100dvh - 2.5rem - var(--dock-inset)) !important;
 
     /* Stretch the content area (the child before the resize handle) to fill */
     > :nth-last-child(2) {
@@ -508,6 +514,22 @@ body {
     .resize-handle {
       @apply hidden;
     }
+  }
+
+  /* Halves leave a hairline down the middle so two tiled windows read as two */
+  .tile-fill {
+    left: 0 !important;
+    width: 100vw !important;
+  }
+
+  .tile-left {
+    left: 0 !important;
+    width: calc(50vw - 1px) !important;
+  }
+
+  .tile-right {
+    left: calc(50vw + 1px) !important;
+    width: calc(50vw - 1px) !important;
   }
 
   .resize-handle {
@@ -797,6 +819,32 @@ body {
     &:hover button::after {
       @apply opacity-100;
     }
+
+    .zoom {
+      @apply relative flex;
+    }
+
+    /*
+     * Tiling options, revealed by resting on the green button. Sits inside the
+     * window, so it needs to clear the title bar without escaping the window's
+     * own overflow-hidden.
+     */
+    /* Anchored from the green button rather than centred on it: the controls
+       sit close to the window's left edge, and a centred menu was clipped by
+       the window's own overflow-hidden. */
+    .tile-menu {
+      @apply glass glass-thick absolute left-0 top-6 z-[10001] flex gap-1.5 p-1.5 rounded-xl;
+
+      button {
+        /* Reset the traffic-light sizing these inherit from the group */
+        @apply size-auto rounded-lg bg-transparent px-2.5 py-1.5 text-[11px] whitespace-nowrap text-gray-800 transition-colors hover:bg-blue-500 hover:text-white dark:text-gray-100;
+
+        &::before,
+        &::after {
+          content: none;
+        }
+      }
+    }
   }
 
   /* Only the frontmost window gets coloured lights */
@@ -814,8 +862,13 @@ body {
   }
 
   #window-header {
-    /* Top corners stay concentric with the window's own radius */
-    @apply glass-chrome flex items-center justify-between px-4 py-3 rounded-t-[var(--radius-window)] select-none text-sm text-gray-500 dark:text-gray-400;
+    /*
+     * Top corners stay concentric with the window's own radius. It also has to
+     * sit above the content area: glass-chrome's backdrop-filter opens a
+     * stacking context, so without this the tiling popover was painted behind
+     * whatever the window renders below the title bar.
+     */
+    @apply glass-chrome relative z-20 flex items-center justify-between px-4 py-3 rounded-t-[var(--radius-window)] select-none text-sm text-gray-500 dark:text-gray-400;
 
     border-bottom: 1px solid var(--glass-hairline);
 
@@ -892,9 +945,15 @@ body {
       @apply bg-[#38393b]/75 backdrop-blur-xl;
       border-bottom-color: rgb(255 255 255 / 0.1);
 
+      /* Dims when unfocused like every other title; this rule carries two ids
+         so it has to restate the focused colour rather than inherit it */
       h2 {
-        @apply font-bold text-sm text-center w-full text-gray-300;
+        @apply font-bold text-sm text-center w-full text-gray-500;
       }
+    }
+
+    &.is-focused #window-header h2 {
+      @apply text-gray-300;
     }
 
     .terminal-screen {

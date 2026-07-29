@@ -21,7 +21,7 @@ const WindowWrapper = <P extends object>(
 ) => {
   const Wrapped = (props: P) => {
     const { focusWindow, windows, activeWindow } = useWindowStore();
-    const { isOpen, isMinimized, isMaximized, hasOpened, zIndex } =
+    const { isOpen, isMinimized, tile, hasOpened, zIndex } =
       windows[windowKey];
     const isFocused = activeWindow === windowKey;
     const ref = useRef<HTMLElement>(null);
@@ -128,9 +128,9 @@ const WindowWrapper = <P extends object>(
       const el = ref.current;
       if (!el) return;
 
-      if (isMaximized) {
-        // Fullscreen windows are pinned below the menu bar, not draggable.
-        // Zero the percent offsets too: GSAP tracks them separately from x/y
+      if (tile) {
+        // Tiled windows are pinned by CSS and not draggable. Zero the percent
+        // offsets too: GSAP tracks those separately from x/y
         gsap.set(el, { x: 0, y: 0, xPercent: 0, yPercent: 0 });
         return;
       }
@@ -149,7 +149,7 @@ const WindowWrapper = <P extends object>(
       return () => instance.kill();
       // hasOpened is a dependency because the element does not exist until the
       // first open — without it the Draggable would never be created.
-    }, [isMaximized, hasOpened]);
+    }, [tile, hasOpened]);
 
     // Only handles closed windows; opening and minimizing animate via GSAP above
     useLayoutEffect(() => {
@@ -160,7 +160,7 @@ const WindowWrapper = <P extends object>(
 
     const handleResizeStart = (e: React.PointerEvent<HTMLDivElement>) => {
       const el = ref.current;
-      if (!el || isMaximized) return;
+      if (!el || tile) return;
 
       e.preventDefault();
       e.stopPropagation();
@@ -199,7 +199,7 @@ const WindowWrapper = <P extends object>(
         onMouseDown={() => focusWindow(windowKey)}
         className={clsx(
           "absolute",
-          isMaximized && "maximized",
+          tile && `tiled tile-${tile}`,
           isFocused && "is-focused"
         )}
       >

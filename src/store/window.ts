@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { INITIAL_Z_INDEX, WINDOW_CONFIG } from "#constants/index";
-import type { FinderItem, WindowKey, WindowState } from "#types";
+import type { FinderItem, WindowKey, WindowState, WindowTile } from "#types";
 
 /**
  * The frontmost window a visitor can actually interact with. Closing or
@@ -35,7 +35,10 @@ interface WindowStore {
   openWindow: (windowKey: WindowKey, data?: FinderItem | null) => void;
   closeWindow: (windowKey: WindowKey) => void;
   minimizeWindow: (windowKey: WindowKey) => void;
-  toggleMaximizeWindow: (windowKey: WindowKey) => void;
+  /** Tiles to a region, or restores to free-floating with null. */
+  tileWindow: (windowKey: WindowKey, tile: WindowTile | null) => void;
+  /** The green button on its own: fill the screen, or come back from it. */
+  toggleZoom: (windowKey: WindowKey) => void;
   focusWindow: (windowKey: WindowKey) => void;
 }
 
@@ -64,7 +67,7 @@ const useWindowStore = create<WindowStore>()(
         if (!win) return;
         win.isOpen = false;
         win.isMinimized = false;
-        win.isMaximized = false;
+        win.tile = null;
         win.zIndex = INITIAL_Z_INDEX;
         win.data = null;
         state.activeWindow = topMostWindow(state.windows);
@@ -78,11 +81,22 @@ const useWindowStore = create<WindowStore>()(
         state.activeWindow = topMostWindow(state.windows);
       }),
 
-    toggleMaximizeWindow: (windowKey) =>
+    tileWindow: (windowKey, tile) =>
       set((state) => {
         const win = state.windows[windowKey];
         if (!win) return;
-        win.isMaximized = !win.isMaximized;
+        win.tile = tile;
+        win.zIndex = state.nextZIndex++;
+        state.activeWindow = windowKey;
+      }),
+
+    toggleZoom: (windowKey) =>
+      set((state) => {
+        const win = state.windows[windowKey];
+        if (!win) return;
+        // Zoom toggles against fill only: from a half-tile it fills rather
+        // than restoring, which is what the green button does in macOS.
+        win.tile = win.tile === "fill" ? null : "fill";
         win.zIndex = state.nextZIndex++;
         state.activeWindow = windowKey;
       }),
