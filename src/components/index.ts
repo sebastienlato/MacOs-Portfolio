@@ -7,6 +7,7 @@ import BootScreen from "#components/BootScreen";
 import Spotlight from "#components/Spotlight";
 import ControlCenter from "#components/ControlCenter";
 import DesktopMenu from "#components/DesktopMenu";
+import KeyboardShortcuts from "#components/KeyboardShortcuts";
 
 export {
   Navbar,
@@ -18,4 +19,5 @@ export {
   Spotlight,
   ControlCenter,
   DesktopMenu,
+  KeyboardShortcuts,
 };

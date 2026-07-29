@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import dayjs from "dayjs";
 import { Wifi, WifiOff } from "lucide-react";
-import { navIcons, navLinks } from "#constants/index";
+import { navIcons } from "#constants/index";
 import useWindowStore from "#store/window";
 import useSystemStore from "#store/system";
 import ControlCenter from "#components/ControlCenter";
+import AppMenus from "#components/AppMenus";
 import type { WindowKey } from "#types";
 
 type AppleMenuItem =
@@ -87,15 +88,7 @@ const Navbar = () => {
           )}
         </div>
 
-        <p className="font-bold">Sebastien's Portfolio</p>
-
-        <ul>
-          {navLinks.map(({ id, name, type }) => (
-            <li key={id} onClick={() => openWindow(type)}>
-              <p>{name}</p>
-            </li>
-          ))}
-        </ul>
+        <AppMenus />
       </div>
 
       <div>

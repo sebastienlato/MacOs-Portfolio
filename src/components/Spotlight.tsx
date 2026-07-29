@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { Search } from "lucide-react";
 import clsx from "clsx";
 import gsap from "gsap";
@@ -8,7 +8,7 @@ import { blogPosts, locations, socials } from "#constants/index";
 import useSystemStore from "#store/system";
 import useWindowStore from "#store/window";
 import useLocationStore from "#store/location";
-import type { FinderItem, WindowKey, WindowState } from "#types";
+import type { FinderItem, WindowKey } from "#types";
 
 interface SpotlightItem {
   id: string;
@@ -32,48 +32,10 @@ const APPS: { title: string; key: WindowKey; icon: string; extra?: string }[] =
     { title: "About This Mac", key: "about", icon: "/macbook.png", extra: "specs info" },
   ];
 
-const isEditable = (target: EventTarget | null) =>
-  target instanceof HTMLElement &&
-  (target.tagName === "INPUT" ||
-    target.tagName === "TEXTAREA" ||
-    target.isContentEditable);
-
-const closeTopMostWindow = () => {
-  const { windows, closeWindow } = useWindowStore.getState();
-  const open = (Object.entries(windows) as [WindowKey, WindowState][])
-    .filter(([, win]) => win.isOpen && !win.isMinimized)
-    .sort(([, a], [, b]) => b.zIndex - a.zIndex);
-  if (open.length > 0) closeWindow(open[0][0]);
-};
-
 const Spotlight = () => {
   const { spotlightOpen, setSpotlightOpen } = useSystemStore();
 
-  // Global shortcuts: ⌘K / Ctrl+K / ⌘Space toggle, Esc closes (window as fallback)
-  useEffect(() => {
-    const onKeyDown = (e: globalThis.KeyboardEvent) => {
-      const cmd = e.metaKey || e.ctrlKey;
-      const { spotlightOpen: open, toggleSpotlight, setSpotlightOpen: setOpen } =
-        useSystemStore.getState();
-
-      if (cmd && (e.key.toLowerCase() === "k" || e.code === "Space")) {
-        e.preventDefault();
-        toggleSpotlight();
-        return;
-      }
-
-      if (e.key === "Escape") {
-        if (open) {
-          setOpen(false);
-        } else if (!isEditable(e.target)) {
-          closeTopMostWindow();
-        }
-      }
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  // ⌘K / ⌘Space and Escape now live in KeyboardShortcuts, alongside the rest
 
   if (!spotlightOpen) return null;
 
