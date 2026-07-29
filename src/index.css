@@ -665,8 +665,18 @@ body {
       }
     }
 
+    /*
+     * The surface has to span the whole window, not the reading column. This
+     * was max-w-3xl inside a w-4xl window, which was invisible while the window
+     * shell was still opaque and became two see-through strips once it wasn't.
+     * The width limit belongs on the content instead.
+     */
     .blog {
-      @apply bg-white p-10 max-w-3xl mx-auto dark:bg-neutral-900;
+      @apply bg-white p-10 dark:bg-neutral-900;
+
+      > * {
+        @apply max-w-3xl mx-auto;
+      }
 
       h2 {
         @apply text-xl font-bold text-pink-600 mb-10;
