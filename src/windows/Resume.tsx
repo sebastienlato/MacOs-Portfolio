@@ -1,12 +1,11 @@
+import { Suspense, lazy } from "react";
 import WindowWrapper from "#hoc/WindowWrapper";
 import { WindowControls } from "#components";
 import { Download } from "lucide-react";
-import { Document, Page, pdfjs } from "react-pdf";
 
-import "react-pdf/dist/Page/AnnotationLayer.css";
-import "react-pdf/dist/Page/TextLayer.css";
-
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// pdf.js is a large dependency and most visitors never open the resume, so the
+// viewer is split into its own chunk and fetched on first open.
+const ResumeDocument = lazy(() => import("#windows/ResumeDocument"));
 
 const Resume = () => {
   return (
@@ -24,9 +23,11 @@ const Resume = () => {
           <Download className="icon" />
         </a>
       </div>
-      <Document file="files/resume.pdf">
-        <Page pageNumber={1} renderTextLayer renderAnnotationLayer />
-      </Document>
+
+      {/* Fallback matches the PDF's natural page size, so nothing reflows */}
+      <Suspense fallback={<div className="resume-loading">Loading resume…</div>}>
+        <ResumeDocument />
+      </Suspense>
     </>
   );
 };

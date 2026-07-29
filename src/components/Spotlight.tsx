@@ -28,7 +28,7 @@ const APPS: { title: string; key: WindowKey; icon: string; extra?: string }[] =
     { title: "Contact", key: "contact", icon: "/images/contact.png", extra: "email socials" },
     { title: "Terminal", key: "terminal", icon: "/images/terminal.png", extra: "shell zsh commands" },
     { title: "Resume", key: "resume", icon: "/images/pdf.png", extra: "cv pdf" },
-    { title: "System Settings", key: "settings", icon: "/images/wallpaper.png", extra: "wallpaper preferences" },
+    { title: "System Settings", key: "settings", icon: "/images/wallpaper.webp", extra: "wallpaper preferences" },
     { title: "About This Mac", key: "about", icon: "/macbook.png", extra: "specs info" },
   ];
 
@@ -125,7 +125,7 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
       id: "app-trash",
       title: "Trash",
       category: "Application",
-      icon: "/images/trash.png",
+      icon: "/images/trash.webp",
       haystack: "trash bin archive",
       action: () => {
         setActiveLocation(locations.trash);

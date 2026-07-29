@@ -77,7 +77,7 @@ const wallpapers: Wallpaper[] = [
     id: "sequoia",
     name: "Sequoia",
     type: "image",
-    value: "/images/wallpaper.png",
+    value: "/images/wallpaper.webp",
   },
   {
     id: "sonoma",
@@ -145,7 +145,7 @@ const dockApps: DockApp[] = [
   {
     id: "trash",
     name: "Trash",
-    icon: "trash.png",
+    icon: "trash.webp",
     canOpen: true,
   },
 ];
@@ -155,21 +155,21 @@ const blogPosts: BlogPost[] = [
     id: 1,
     date: "Nov 24, 2025",
     title: "How I Structure All My Xcode Projects",
-    image: "/images/blog1.png",
+    image: "/images/blog1.webp",
     link: "https://dev.to/sebastienlato/how-i-structure-all-my-xcode-projects-19ic",
   },
   {
     id: 2,
     date: "Nov 24, 2025",
     title: "How to Build a Clean Collapsible Header in SwiftUI",
-    image: "/images/blog2.png",
+    image: "/images/blog2.webp",
     link: "https://dev.to/sebastienlato/how-to-build-a-clean-collapsible-header-in-swiftui-7hn",
   },
   {
     id: 3,
     date: "Nov 24, 2025",
     title: "How to Build a Floating Bottom Sheet in SwiftUI (Drag, Snap, Blur)",
-    image: "/images/blog3.png",
+    image: "/images/blog3.webp",
     link: "https://dev.to/sebastienlato/how-to-build-a-floating-bottom-sheet-in-swiftui-drag-snap-blur-lfp",
   },
 ];
@@ -263,19 +263,19 @@ const photosLinks: PhotosLink[] = [
 const gallery: GalleryImage[] = [
   {
     id: 1,
-    img: "/images/gal1.png",
+    img: "/images/gal1.webp",
   },
   {
     id: 2,
-    img: "/images/gal2.png",
+    img: "/images/gal2.webp",
   },
   {
     id: 3,
-    img: "/images/gal3.png",
+    img: "/images/gal3.webp",
   },
   {
     id: 4,
-    img: "/images/gal4.png",
+    img: "/images/gal4.webp",
   },
 ];
 
@@ -345,7 +345,7 @@ const WORK_LOCATION: FinderItem = {
           kind: "file",
           fileType: "img",
           position: "top-52 right-80",
-          imageUrl: "/images/project-1.png",
+          imageUrl: "/images/project-1.webp",
         },
         {
           id: 5,
@@ -399,7 +399,7 @@ const WORK_LOCATION: FinderItem = {
           kind: "file",
           fileType: "img",
           position: "top-52 left-80",
-          imageUrl: "/images/project-2.png",
+          imageUrl: "/images/project-2.webp",
         },
         {
           id: 5,
@@ -453,7 +453,7 @@ const WORK_LOCATION: FinderItem = {
           kind: "file",
           fileType: "img",
           position: "top-52 right-80",
-          imageUrl: "/images/project-3.png",
+          imageUrl: "/images/project-3.webp",
         },
         {
           id: 5,
@@ -483,7 +483,7 @@ const ABOUT_LOCATION: FinderItem = {
       kind: "file",
       fileType: "img",
       position: "top-10 left-5",
-      imageUrl: "/images/sebastien.png",
+      imageUrl: "/images/sebastien.webp",
     },
     {
       id: 2,
@@ -492,7 +492,7 @@ const ABOUT_LOCATION: FinderItem = {
       kind: "file",
       fileType: "img",
       position: "top-28 right-72",
-      imageUrl: "/images/sebastien-2.png",
+      imageUrl: "/images/sebastien-2.webp",
     },
     {
       id: 3,
@@ -501,7 +501,7 @@ const ABOUT_LOCATION: FinderItem = {
       kind: "file",
       fileType: "img",
       position: "top-52 left-80",
-      imageUrl: "/images/sebastien-3.png",
+      imageUrl: "/images/sebastien-3.webp",
     },
     {
       id: 4,
@@ -511,7 +511,7 @@ const ABOUT_LOCATION: FinderItem = {
       fileType: "txt",
       position: "top-60 left-5",
       subtitle: "Meet the Developer Behind the Code",
-      image: "/images/sebastien.png",
+      image: "/images/sebastien.webp",
       description: [
         "Hey! I’m Sebastien 👋, a mobile and web developer who enjoys building sleek, interactive apps and websites that actually work well.",
         "I specialize in Swift, SwiftUI, JavaScript, React, and Next.js—and I love making things feel smooth, fast, and just a little bit delightful.",
@@ -553,7 +553,7 @@ const TRASH_LOCATION: FinderItem = {
       kind: "file",
       fileType: "img",
       position: "top-10 left-10",
-      imageUrl: "/images/trash-1.png",
+      imageUrl: "/images/trash-1.webp",
     },
     {
       id: 2,
@@ -562,7 +562,7 @@ const TRASH_LOCATION: FinderItem = {
       kind: "file",
       fileType: "img",
       position: "top-40 left-80",
-      imageUrl: "/images/trash-2.png",
+      imageUrl: "/images/trash-2.webp",
     },
   ],
 };
@@ -580,6 +580,7 @@ const WINDOW_DEFAULTS: WindowState = {
   isOpen: false,
   isMinimized: false,
   isMaximized: false,
+  hasOpened: false,
   zIndex: INITIAL_Z_INDEX,
   data: null,
 };

@@ -19,7 +19,8 @@ const WindowWrapper = <P extends object>(
 ) => {
   const Wrapped = (props: P) => {
     const { focusWindow, windows } = useWindowStore();
-    const { isOpen, isMinimized, isMaximized, zIndex } = windows[windowKey];
+    const { isOpen, isMinimized, isMaximized, hasOpened, zIndex } =
+      windows[windowKey];
     const ref = useRef<HTMLElement>(null);
 
     const saveLayout = (layout: Partial<{ x: number; y: number; w: number; h: number }>) =>
@@ -123,7 +124,9 @@ const WindowWrapper = <P extends object>(
       );
 
       return () => instance.kill();
-    }, [isMaximized]);
+      // hasOpened is a dependency because the element does not exist until the
+      // first open — without it the Draggable would never be created.
+    }, [isMaximized, hasOpened]);
 
     // Only handles closed windows; opening and minimizing animate via GSAP above
     useLayoutEffect(() => {
@@ -160,6 +163,10 @@ const WindowWrapper = <P extends object>(
       window.addEventListener("pointermove", onMove);
       window.addEventListener("pointerup", onUp);
     };
+
+    // Nothing to show until the window has been opened at least once. Every
+    // hook above still runs, so this stays a valid conditional return.
+    if (!hasOpened) return null;
 
     return (
       <section
