@@ -2,7 +2,7 @@
 
 Interactive portfolio website that recreates the feel of the macOS desktop. Visitors can boot the "machine", open apps from the dock, drag and resize windows, type commands in a working terminal, and explore projects, skills, blog posts, and contact info – all within a playful, desktop-style UI.
 
-![macOS Portfolio screenshot](public/screeshots/screenshot.png)
+![macOS Portfolio screenshot](docs/screenshot.webp)
 
 ## Features
 
@@ -57,7 +57,7 @@ Most of the portfolio data lives in `src/constants/index.ts`:
 
 Shared types (window keys, Finder items, wallpapers, …) are in `src/types.ts`.
 
-Update the image files under `public/images` and `public/files` (or add new assets) to match your own projects. The screenshot above lives at `public/screeshots/screenshot.png`.
+Update the image files under `public/images` and `public/files` (or add new assets) to match your own projects. The screenshot above lives at `docs/screenshot.webp` (kept out of `public/` so it is not deployed).
 
 ## Project Structure
 
@@ -70,7 +70,7 @@ src/
   constants/      # Portfolio content configuration
   types.ts        # Shared TypeScript types
 public/
-  files, icons, images, screeshots, macbook.png
+  files, icons, images, macbook.png
 ```
 
 Feel free to fork, remix, and deploy – just update the constants, assets, and copy to make the desktop experience your own.

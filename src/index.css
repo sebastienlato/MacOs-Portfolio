@@ -611,6 +611,11 @@ body {
     > :nth-last-child(2) {
       @apply min-h-0 overflow-y-auto;
     }
+
+    /* Holds the page's natural 612x792pt while the pdf.js chunk downloads */
+    .resume-loading {
+      @apply flex-center w-[612px] h-[792px] bg-gray-100 text-sm text-gray-400 dark:bg-neutral-800 dark:text-gray-500;
+    }
   }
 
   #finder {

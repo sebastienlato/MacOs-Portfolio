@@ -24,6 +24,7 @@ const useWindowStore = create<WindowStore>()(
         if (!win) return;
         win.isOpen = true;
         win.isMinimized = false;
+        win.hasOpened = true;
         win.zIndex = state.nextZIndex;
         win.data = data ?? win.data;
         state.nextZIndex++;

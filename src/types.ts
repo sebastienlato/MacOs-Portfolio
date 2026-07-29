@@ -38,6 +38,12 @@ export interface WindowState {
   isOpen: boolean;
   isMinimized: boolean;
   isMaximized: boolean;
+  /**
+   * Latches on the first open. Windows stay unmounted until then so their
+   * images aren't fetched on page load; once mounted they stay mounted, which
+   * keeps per-window state (terminal history, scroll position) across closes.
+   */
+  hasOpened: boolean;
   zIndex: number;
   data: FinderItem | null;
 }

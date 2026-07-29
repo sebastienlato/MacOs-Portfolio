@@ -27,6 +27,12 @@ interface SystemStore {
   setVolume: (value: number) => void;
 }
 
+/** The slice of the store that is written to localStorage. */
+type PersistedSystem = Pick<
+  SystemStore,
+  "wallpaper" | "theme" | "wifiEnabled" | "brightness" | "volume"
+>;
+
 const useSystemStore = create<SystemStore>()(
   persist(
     (set) => ({
@@ -75,6 +81,7 @@ const useSystemStore = create<SystemStore>()(
     }),
     {
       name: "portfolio-system",
+      version: 1,
       // Preferences survive reloads; transient UI state (popovers) does not
       partialize: (state) => ({
         wallpaper: state.wallpaper,
@@ -83,6 +90,19 @@ const useSystemStore = create<SystemStore>()(
         brightness: state.brightness,
         volume: state.volume,
       }),
+      /**
+       * v0 stored the built-in wallpaper's file path, which changed when the
+       * assets moved to WebP. Re-resolve built-ins by id so an old visit
+       * doesn't restore a 404; uploads (data URLs) are kept as-is.
+       */
+      migrate: (persisted, version) => {
+        const state = persisted as PersistedSystem;
+        if (version >= 1 || !state?.wallpaper || state.wallpaper.id === "custom")
+          return state;
+
+        const current = wallpapers.find((wp) => wp.id === state.wallpaper.id);
+        return { ...state, wallpaper: current ?? DEFAULT_WALLPAPER };
+      },
     }
   )
 );
