@@ -447,7 +447,9 @@ body {
         @apply grid grid-cols-12 space-x-5;
 
         img {
-          @apply size-full rounded-md object-cover;
+          /* aspect-square reserves the box before the file loads, so the
+             window is measured at its final height when it opens */
+          @apply size-full aspect-square rounded-md object-cover;
         }
 
         .content {
