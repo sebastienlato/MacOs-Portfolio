@@ -20,7 +20,7 @@ body {
 
   /* macOS 26 rounds windows far more than the 12px this used to use, and keeps
      the header's top corners concentric with them. */
-  --radius-window: 20px;
+  --radius-window: 16px;
   --radius-panel: 18px;
 }
 
@@ -179,18 +179,16 @@ body {
   }
 
   nav {
+    /*
+     * No background at all. Sampling a real macOS 26 bar across its bottom
+     * edge showed luminance running 110.8 -> 113.7 unbroken into the wallpaper
+     * below it: the bar contributes nothing, not even a scrim. Legibility comes
+     * from `.menu-bar-on-light`, which flips the tint when the wallpaper behind
+     * is bright — the same trick that lets the real one get away with this.
+     */
     @apply flex justify-between items-center p-2 px-5 select-none relative z-[9999] text-white;
 
-    /* macOS 26 dropped the menu bar fill entirely. A solid bar can't come back
-       for legibility, because every wallpaper here is dark at the top and the
-       old bg-white/50 washed them out — so this is just a scrim, thin enough
-       that the wallpaper still reads through it. */
-    background: linear-gradient(
-      to bottom,
-      rgb(0 0 0 / 0.32),
-      rgb(0 0 0 / 0.04)
-    );
-    text-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+    text-shadow: 0 0 3px rgb(0 0 0 / 0.28);
 
     /* Direct children only, so popover internals (Control Center) aren't forced into a row */
     > div {
@@ -213,10 +211,27 @@ body {
       @apply text-sm font-medium;
     }
 
-    /* Popovers are children of <nav>, so they must opt out of its scrim text */
+    /* Popovers are children of <nav>, so they must opt out of its bar text */
     .dropdown,
     .cc-panel {
       text-shadow: none;
+    }
+  }
+
+  /* Bright wallpaper behind the bar: dark glyphs, and the icons stop inverting */
+  main.menu-bar-on-light > nav {
+    @apply text-black/85;
+    text-shadow: 0 0 3px rgb(255 255 255 / 0.35);
+
+    > div > .apple-menu > button > img,
+    > div > ul img.icon-hover,
+    #control-center > button > img {
+      filter: none;
+    }
+
+    .apple-menu > button:hover,
+    #control-center > button:hover {
+      @apply bg-black/10;
     }
   }
 }

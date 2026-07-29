@@ -15,6 +15,7 @@ export default defineConfig({
       "#store": resolve(root, "src/store"),
       "#hoc": resolve(root, "src/hoc"),
       "#windows": resolve(root, "src/windows"),
+      "#utils": resolve(root, "src/utils"),
       "#types": resolve(root, "src/types.ts"),
     },
   },
