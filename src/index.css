@@ -65,6 +65,11 @@ body {
     );
     --glass-inner-glow: inset 0 1px 0 0 rgb(255 255 255 / 0.5);
 
+    /* Space a zoomed window must leave for the dock: the container's own 72px
+       plus its bottom-5 offset. Grows at 3xl, where the icons step up to
+       size-20, and collapses below sm, where the dock is hidden entirely. */
+    --dock-inset: 92px;
+
     --glass-chrome-alpha: 0.72;
     /* The one place more blur is right: chrome should wash the colour of what
        is behind it, not let you read a window through a sidebar. */
@@ -92,6 +97,19 @@ body {
 
     --glass-chrome-alpha: 0.62;
     --glass-hairline: rgb(255 255 255 / 0.12);
+  }
+
+  @media (width >= 1920px) {
+    :root {
+      --dock-inset: 116px;
+    }
+  }
+
+  /* No dock below sm, so a zoomed window gets the whole height back */
+  @media (width < 40rem) {
+    :root {
+      --dock-inset: 0px;
+    }
   }
 }
 
@@ -468,8 +486,19 @@ body {
     @apply fixed inset-0 bg-black pointer-events-none z-[9998] transition-opacity duration-200;
   }
 
+  /*
+   * Zoom, not full screen — which is what the green button and the Window menu
+   * item both call it. macOS fills the space *between* the menu bar and the
+   * dock rather than covering them, so the window stops short of the dock and
+   * keeps its corner radius, leaving the desktop visible underneath.
+   *
+   * (True full screen is the other macOS behaviour: its own Space, with the
+   * menu bar and dock hidden until you push the pointer at the edge.)
+   */
   .maximized {
-    @apply !fixed !top-10 !left-0 !w-screen !max-w-none !h-[calc(100dvh-2.5rem)] !max-h-none !rounded-none flex flex-col;
+    @apply !fixed !top-10 !left-0 !w-screen !max-w-none !max-h-none flex flex-col;
+
+    height: calc(100dvh - 2.5rem - var(--dock-inset));
 
     /* Stretch the content area (the child before the resize handle) to fill */
     > :nth-last-child(2) {
