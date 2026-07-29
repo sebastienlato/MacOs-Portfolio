@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import {
   Image as ImageIcon,
   Moon,
@@ -15,6 +15,16 @@ import useSystemStore from "#store/system";
 import useWindowStore from "#store/window";
 
 const MIN_BRIGHTNESS = 20;
+
+/**
+ * How far the slider's track is filled, as the `--value` the CSS gradient
+ * stops at. Rescaled against the slider's own min so a brightness of 20 reads
+ * as empty rather than a fifth full.
+ */
+const fillTo = (value: number, min = 0, max = 100) =>
+  ({
+    "--value": `${((value - min) / (max - min)) * 100}%`,
+  }) as CSSProperties;
 
 const ControlCenter = () => {
   const {
@@ -62,7 +72,7 @@ const ControlCenter = () => {
         <img
           src="/icons/mode.svg"
           alt=""
-          className="w-4 dark:invert"
+          className="w-4 invert"
         />
       </button>
 
@@ -100,6 +110,7 @@ const ControlCenter = () => {
                 max={100}
                 value={brightness}
                 onChange={(e) => setBrightness(Number(e.target.value))}
+                style={fillTo(brightness, MIN_BRIGHTNESS)}
                 aria-label="Brightness"
               />
             </div>
@@ -115,6 +126,7 @@ const ControlCenter = () => {
                 max={100}
                 value={volume}
                 onChange={(e) => setVolume(Number(e.target.value))}
+                style={fillTo(volume)}
                 aria-label="Volume"
               />
             </div>
