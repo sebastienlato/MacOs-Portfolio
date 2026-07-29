@@ -3,7 +3,13 @@ import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// Served from our own origin rather than a CDN: the worker is what renders the
+// page, so a blocked or unreachable unpkg used to mean a blank resume. `?url`
+// makes Vite emit it as an asset and hand back its hashed path, which also
+// keeps it locked to the pdfjs-dist version react-pdf was built against.
+import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+
+pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 /**
  * Every react-pdf/pdf.js import lives in this module so the viewer ships as its

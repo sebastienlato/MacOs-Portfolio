@@ -12,6 +12,8 @@ const MIN_HEIGHT = 220;
 const MENU_BAR_HEIGHT = 40;
 /** How much of a window must stay reachable when restoring a saved position. */
 const EDGE_MARGIN = 100;
+/** Gap kept around a window the first time it is placed. */
+const VIEWPORT_MARGIN = 12;
 
 const WindowWrapper = <P extends object>(
   Component: ComponentType<P>,
@@ -27,14 +29,17 @@ const WindowWrapper = <P extends object>(
       useLayoutStore.getState().saveLayout(windowKey, layout);
 
     /**
-     * Applies the persisted size, then returns the persisted x/y clamped so
-     * the window stays reachable if the viewport shrank since last visit.
+     * Applies the persisted size, then returns the offsets to open at.
+     *
+     * A saved position is only nudged far enough to stay reachable — the
+     * visitor put it there deliberately. A window opening for the first time
+     * keeps its designed CSS position, pulled onto the screen when that
+     * position would hang off the edge of a smaller viewport.
      */
     const restoreLayout = (el: HTMLElement) => {
       const layout = useLayoutStore.getState().layouts[windowKey];
-      if (!layout) return { x: 0, y: 0 };
 
-      if (layout.w && layout.h) {
+      if (layout?.w && layout.h) {
         el.classList.add("user-resized");
         el.style.width = `${layout.w}px`;
         el.style.height = `${layout.h}px`;
@@ -44,6 +49,23 @@ const WindowWrapper = <P extends object>(
       const rect = el.getBoundingClientRect();
       const baseLeft = rect.left - Number(gsap.getProperty(el, "x"));
       const baseTop = rect.top - Number(gsap.getProperty(el, "y"));
+
+      if (!layout) {
+        // Offsets that would sit the window flush against each edge
+        const left = VIEWPORT_MARGIN - baseLeft;
+        const right = window.innerWidth - VIEWPORT_MARGIN - rect.width - baseLeft;
+        const top = MENU_BAR_HEIGHT + VIEWPORT_MARGIN - baseTop;
+        const bottom =
+          window.innerHeight - VIEWPORT_MARGIN - rect.height - baseTop;
+
+        // Start from the CSS position and pull in only where it overflows. When
+        // the window is bigger than the viewport the lower bound wins, which
+        // favours the top-left corner so the title bar stays grabbable.
+        return {
+          x: Math.max(left, Math.min(0, right)),
+          y: Math.max(top, Math.min(0, bottom)),
+        };
+      }
 
       let { x, y } = layout;
       x = Math.min(x, window.innerWidth - baseLeft - EDGE_MARGIN);
