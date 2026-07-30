@@ -10,6 +10,7 @@ interface SystemStore {
   theme: Theme;
   spotlightOpen: boolean;
   controlCenterOpen: boolean;
+  notificationCenterOpen: boolean;
   wifiEnabled: boolean;
   brightness: number;
   volume: number;
@@ -22,6 +23,8 @@ interface SystemStore {
   toggleSpotlight: () => void;
   setControlCenterOpen: (open: boolean) => void;
   toggleControlCenter: () => void;
+  setNotificationCenterOpen: (open: boolean) => void;
+  toggleNotificationCenter: () => void;
   toggleWifi: () => void;
   setBrightness: (value: number) => void;
   setVolume: (value: number) => void;
@@ -40,6 +43,7 @@ const useSystemStore = create<SystemStore>()(
       theme: "light",
       spotlightOpen: false,
       controlCenterOpen: false,
+      notificationCenterOpen: false,
       wifiEnabled: true,
       brightness: 100,
       volume: 65,
@@ -72,6 +76,16 @@ const useSystemStore = create<SystemStore>()(
 
       toggleControlCenter: () =>
         set((state) => ({ controlCenterOpen: !state.controlCenterOpen })),
+
+      setNotificationCenterOpen: (open) =>
+        set({ notificationCenterOpen: open }),
+
+      // The two panels are mutually exclusive, as they are in the menu bar
+      toggleNotificationCenter: () =>
+        set((state) => ({
+          notificationCenterOpen: !state.notificationCenterOpen,
+          controlCenterOpen: false,
+        })),
 
       toggleWifi: () => set((state) => ({ wifiEnabled: !state.wifiEnabled })),
 
