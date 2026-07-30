@@ -14,6 +14,7 @@ import {
   Spotlight,
   DesktopMenu,
   KeyboardShortcuts,
+  SnapPreview,
 } from "#components";
 import {
   Finder,
@@ -88,6 +89,7 @@ const App = () => {
       <DesktopMenu />
       <Spotlight />
       <KeyboardShortcuts />
+      <SnapPreview />
 
       <div
         className="brightness-overlay"
