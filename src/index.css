@@ -532,6 +532,42 @@ body {
     width: calc(50vw - 1px) !important;
   }
 
+  /*
+   * The ghost shown while a window is held against a screen edge. It occupies
+   * exactly the region the window will take, so it doubles as a check that the
+   * snap zones and the tile classes agree. Sits above the windows but below
+   * the dock, and never takes the pointer — the drag is still in progress.
+   */
+  .snap-preview {
+    @apply glass fixed top-10 z-[9400] pointer-events-none rounded-[var(--radius-window)];
+
+    height: calc(100dvh - 2.5rem - var(--dock-inset));
+    animation: snap-in 120ms ease-out;
+  }
+
+  .snap-fill {
+    @apply left-0 w-screen;
+  }
+
+  .snap-left {
+    @apply left-0;
+    width: calc(50vw - 1px);
+  }
+
+  .snap-right {
+    left: calc(50vw + 1px);
+    width: calc(50vw - 1px);
+  }
+
+  @keyframes snap-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
   .resize-handle {
     @apply absolute bottom-0 right-0 size-4 cursor-nwse-resize z-10;
   }

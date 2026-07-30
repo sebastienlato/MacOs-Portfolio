@@ -7,6 +7,7 @@ import BootScreen from "#components/BootScreen";
 import Spotlight from "#components/Spotlight";
 import ControlCenter from "#components/ControlCenter";
 import DesktopMenu from "#components/DesktopMenu";
+import SnapPreview from "#components/SnapPreview";
 import KeyboardShortcuts from "#components/KeyboardShortcuts";
 
 export {
@@ -19,5 +20,6 @@ export {
   Spotlight,
   ControlCenter,
   DesktopMenu,
+  SnapPreview,
   KeyboardShortcuts,
 };

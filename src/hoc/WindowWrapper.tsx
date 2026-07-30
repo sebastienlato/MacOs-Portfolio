@@ -1,11 +1,12 @@
 import useWindowStore from "#store/window";
 import useLayoutStore from "#store/layout";
+import useSnapStore from "#store/snap";
 import clsx from "clsx";
 import { useLayoutEffect, useRef, type ComponentType } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { Draggable } from "gsap/Draggable";
-import type { WindowKey } from "#types";
+import type { WindowKey, WindowTile } from "#types";
 
 const MIN_WIDTH = 360;
 const MIN_HEIGHT = 220;
@@ -14,6 +15,23 @@ const MENU_BAR_HEIGHT = 40;
 const EDGE_MARGIN = 100;
 /** Gap kept around a window the first time it is placed. */
 const VIEWPORT_MARGIN = 12;
+/** How close to an edge the pointer must get before that edge arms. */
+const SNAP_ZONE = 26;
+
+/**
+ * Which region a drag would tile into, from the pointer alone — the window's
+ * own box is the wrong thing to test, since you can hold a wide window's title
+ * bar anywhere along it.
+ *
+ * The top edge wins over the sides so the corners resolve to Fill, which is
+ * what the gesture reads as when you throw a window at the menu bar.
+ */
+const snapZoneFor = (x: number, y: number): WindowTile | null => {
+  if (y <= MENU_BAR_HEIGHT + SNAP_ZONE) return "fill";
+  if (x <= SNAP_ZONE) return "left";
+  if (x >= window.innerWidth - SNAP_ZONE) return "right";
+  return null;
+};
 
 const WindowWrapper = <P extends object>(
   Component: ComponentType<P>,
@@ -141,12 +159,37 @@ const WindowWrapper = <P extends object>(
       const [instance] = Draggable.create(el, {
         trigger: header ?? el,
         onPress: () => focusWindow(windowKey),
+        // Held against an edge, the window tiles there on release
+        onDrag: () =>
+          useSnapStore
+            .getState()
+            .setZone(snapZoneFor(instance.pointerX, instance.pointerY)),
       });
-      instance.addEventListener("dragend", () =>
-        saveLayout({ x: instance.x, y: instance.y })
-      );
 
-      return () => instance.kill();
+      instance.addEventListener("dragend", () => {
+        const { zone, setZone } = useSnapStore.getState();
+        setZone(null);
+
+        if (zone) {
+          // Clear the drag's transform here rather than leaving it to the tile
+          // effect. Tiling positions with CSS left/width, which a leftover
+          // translate offsets — the window landed 121px right of the edge.
+          gsap.set(el, { x: 0, y: 0, xPercent: 0, yPercent: 0 });
+
+          // Tiling owns the geometry from here, so the drag offset is discarded
+          // rather than saved — restoring later should use the pre-drag spot.
+          useWindowStore.getState().tileWindow(windowKey, zone);
+          return;
+        }
+
+        saveLayout({ x: instance.x, y: instance.y });
+      });
+
+      return () => {
+        // A drag interrupted by an unmount would otherwise strand the ghost
+        useSnapStore.getState().setZone(null);
+        instance.kill();
+      };
       // hasOpened is a dependency because the element does not exist until the
       // first open — without it the Draggable would never be created.
     }, [tile, hasOpened]);
