@@ -26,7 +26,8 @@ const navIconActions = {
 
 const Navbar = () => {
   const { openWindow } = useWindowStore();
-  const { toggleSpotlight, wifiEnabled } = useSystemStore();
+  const { toggleSpotlight, wifiEnabled, toggleNotificationCenter } =
+    useSystemStore();
   const iconHandlers = { toggleSpotlight };
   const [menuOpen, setMenuOpen] = useState(false);
   const [now, setNow] = useState(dayjs());
@@ -117,7 +118,10 @@ const Navbar = () => {
 
         <ControlCenter />
 
-        <time>{now.format("ddd MMM D h:mm A")}</time>
+        {/* The clock is the Notification Center's handle, as in macOS */}
+        <time onClick={toggleNotificationCenter} role="button" tabIndex={0}>
+          {now.format("ddd MMM D h:mm A")}
+        </time>
       </div>
     </nav>
   );

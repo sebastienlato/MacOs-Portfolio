@@ -9,6 +9,7 @@ import ControlCenter from "#components/ControlCenter";
 import DesktopMenu from "#components/DesktopMenu";
 import SnapPreview from "#components/SnapPreview";
 import MissionControl from "#components/MissionControl";
+import NotificationCenter from "#components/NotificationCenter";
 import KeyboardShortcuts from "#components/KeyboardShortcuts";
 
 export {
@@ -23,5 +24,6 @@ export {
   DesktopMenu,
   SnapPreview,
   MissionControl,
+  NotificationCenter,
   KeyboardShortcuts,
 };
