@@ -147,6 +147,8 @@ const dockApps: DockApp[] = [
     name: "Trash",
     icon: "trash.webp",
     canOpen: true,
+    // The dock's one divider: apps on the left, files and Trash on the right
+    separatorBefore: true,
   },
 ];
 
@@ -577,4 +579,22 @@ const WINDOW_CONFIG: Record<WindowKey, WindowState> = {
   about: { ...WINDOW_DEFAULTS },
 };
 
-export { INITIAL_Z_INDEX, WINDOW_CONFIG };
+/**
+ * Everything that is a window or system chrome — i.e. everything that is *not*
+ * the bare desktop. Right-clicking or marquee-dragging inside any of it should
+ * be left alone. Windows are derived from the config so a new one is covered
+ * the moment it is registered.
+ */
+const NON_DESKTOP_SELECTOR = [
+  "nav",
+  "#dock",
+  "#welcome",
+  "#spotlight",
+  "#control-center",
+  "#notification-center",
+  ".mission-control",
+  ".context-menu",
+  ...Object.keys(WINDOW_CONFIG).map((key) => `#${key}`),
+].join(", ");
+
+export { INITIAL_Z_INDEX, WINDOW_CONFIG, NON_DESKTOP_SELECTOR };

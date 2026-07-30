@@ -1,23 +1,34 @@
 import { useRef, type ChangeEvent } from "react";
-import { ImagePlus, Moon, RotateCcw, Sun } from "lucide-react";
+import { ImagePlus, Moon, RotateCcw, Sun, SunMoon } from "lucide-react";
 import clsx from "clsx";
 
 import WindowWrapper from "#hoc/WindowWrapper";
 import { WindowControls } from "#components";
 import { wallpapers } from "#constants/index";
 import useSystemStore from "#store/system";
-import type { Wallpaper } from "#types";
+import type { Appearance, Wallpaper } from "#types";
 
 const MAX_UPLOAD_BYTES = 4 * 1024 * 1024; // localStorage-friendly cap
+
+const APPEARANCE_OPTIONS: {
+  id: Appearance;
+  label: string;
+  Icon: typeof Sun;
+}[] = [
+  { id: "light", label: "Light", Icon: Sun },
+  { id: "dark", label: "Dark", Icon: Moon },
+  { id: "auto", label: "Auto", Icon: SunMoon },
+];
 
 const Settings = () => {
   const {
     wallpaper,
+    appearance,
     theme,
     setWallpaper,
     setCustomWallpaper,
     resetWallpaper,
-    setTheme,
+    setAppearance,
   } = useSystemStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -55,25 +66,24 @@ const Settings = () => {
         <div className="section-title">
           <h3>Appearance</h3>
         </div>
-        <p className="hint">How the menu bar, windows, and dock look.</p>
+        <p className="hint">
+          How the menu bar, windows, and dock look.
+          {appearance === "auto" &&
+            ` Auto follows your system, which is currently ${theme}.`}
+        </p>
 
         <div className="appearance">
-          <button
-            type="button"
-            className={clsx(theme === "light" && "selected")}
-            onClick={() => setTheme("light")}
-          >
-            <Sun size={16} />
-            Light
-          </button>
-          <button
-            type="button"
-            className={clsx(theme === "dark" && "selected")}
-            onClick={() => setTheme("dark")}
-          >
-            <Moon size={16} />
-            Dark
-          </button>
+          {APPEARANCE_OPTIONS.map(({ id, label, Icon }) => (
+            <button
+              key={id}
+              type="button"
+              className={clsx(appearance === id && "selected")}
+              onClick={() => setAppearance(id)}
+            >
+              <Icon size={16} />
+              {label}
+            </button>
+          ))}
         </div>
 
         <div className="section-title">

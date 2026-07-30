@@ -1,12 +1,22 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { wallpapers } from "#constants/index";
-import type { Theme, Wallpaper } from "#types";
+import type { Appearance, Theme, Wallpaper } from "#types";
 
 const DEFAULT_WALLPAPER = wallpapers[0];
 
+const prefersDark = () =>
+  window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
+
+/** "auto" is a preference, not a theme — this is what it currently means. */
+const resolveTheme = (appearance: Appearance): Theme =>
+  appearance === "auto" ? (prefersDark() ? "dark" : "light") : appearance;
+
 interface SystemStore {
   wallpaper: Wallpaper;
+  /** What the visitor chose. */
+  appearance: Appearance;
+  /** What that choice currently resolves to — what the UI actually renders. */
   theme: Theme;
   spotlightOpen: boolean;
   controlCenterOpen: boolean;
@@ -17,8 +27,10 @@ interface SystemStore {
   setWallpaper: (wallpaper: Wallpaper) => void;
   setCustomWallpaper: (dataUrl: string) => void;
   resetWallpaper: () => void;
-  setTheme: (theme: Theme) => void;
+  setAppearance: (appearance: Appearance) => void;
   toggleTheme: () => void;
+  /** Re-resolves "auto" after the OS flips between light and dark. */
+  syncSystemTheme: () => void;
   setSpotlightOpen: (open: boolean) => void;
   toggleSpotlight: () => void;
   setControlCenterOpen: (open: boolean) => void;
@@ -33,13 +45,14 @@ interface SystemStore {
 /** The slice of the store that is written to localStorage. */
 type PersistedSystem = Pick<
   SystemStore,
-  "wallpaper" | "theme" | "wifiEnabled" | "brightness" | "volume"
+  "wallpaper" | "appearance" | "theme" | "wifiEnabled" | "brightness" | "volume"
 >;
 
 const useSystemStore = create<SystemStore>()(
   persist(
     (set) => ({
       wallpaper: DEFAULT_WALLPAPER,
+      appearance: "light",
       theme: "light",
       spotlightOpen: false,
       controlCenterOpen: false,
@@ -62,10 +75,20 @@ const useSystemStore = create<SystemStore>()(
 
       resetWallpaper: () => set({ wallpaper: DEFAULT_WALLPAPER }),
 
-      setTheme: (theme) => set({ theme }),
+      setAppearance: (appearance) =>
+        set({ appearance, theme: resolveTheme(appearance) }),
 
+      // Flipping the theme by hand is an explicit choice, so it drops "auto"
       toggleTheme: () =>
-        set((state) => ({ theme: state.theme === "light" ? "dark" : "light" })),
+        set((state) => {
+          const theme = state.theme === "light" ? "dark" : "light";
+          return { appearance: theme, theme };
+        }),
+
+      syncSystemTheme: () =>
+        set((state) =>
+          state.appearance === "auto" ? { theme: resolveTheme("auto") } : {}
+        ),
 
       setSpotlightOpen: (open) => set({ spotlightOpen: open }),
 
@@ -95,27 +118,38 @@ const useSystemStore = create<SystemStore>()(
     }),
     {
       name: "portfolio-system",
-      version: 1,
-      // Preferences survive reloads; transient UI state (popovers) does not
+      version: 2,
+      // Preferences survive reloads; transient UI state (popovers) does not.
+      // The resolved theme is stored alongside the preference so a reload
+      // paints the right one before matchMedia is consulted.
       partialize: (state) => ({
         wallpaper: state.wallpaper,
+        appearance: state.appearance,
         theme: state.theme,
         wifiEnabled: state.wifiEnabled,
         brightness: state.brightness,
         volume: state.volume,
       }),
-      /**
-       * v0 stored the built-in wallpaper's file path, which changed when the
-       * assets moved to WebP. Re-resolve built-ins by id so an old visit
-       * doesn't restore a 404; uploads (data URLs) are kept as-is.
-       */
       migrate: (persisted, version) => {
-        const state = persisted as PersistedSystem;
-        if (version >= 1 || !state?.wallpaper || state.wallpaper.id === "custom")
-          return state;
+        let state = persisted as PersistedSystem;
+        if (!state) return state;
 
-        const current = wallpapers.find((wp) => wp.id === state.wallpaper.id);
-        return { ...state, wallpaper: current ?? DEFAULT_WALLPAPER };
+        /**
+         * v0 stored the built-in wallpaper's file path, which changed when the
+         * assets moved to WebP. Re-resolve built-ins by id so an old visit
+         * doesn't restore a 404; uploads (data URLs) are kept as-is.
+         */
+        if (version < 1 && state.wallpaper && state.wallpaper.id !== "custom") {
+          const current = wallpapers.find((wp) => wp.id === state.wallpaper.id);
+          state = { ...state, wallpaper: current ?? DEFAULT_WALLPAPER };
+        }
+
+        // v1 had no "auto": whichever theme was stored was the visitor's pick
+        if (version < 2) {
+          state = { ...state, appearance: state.theme ?? "light" };
+        }
+
+        return state;
       },
     }
   )

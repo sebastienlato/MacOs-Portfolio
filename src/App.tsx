@@ -52,6 +52,20 @@ const App = () => {
    * thing macOS does. Without this, white text lands on the yellow top of the
    * Sonoma gradient and disappears.
    */
+  /**
+   * Appearance "Auto" follows the OS. The stored theme already carries what it
+   * resolved to last visit, so this is about catching the flip — either while
+   * the tab is open, or because it happened since the visitor was last here.
+   */
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const sync = () => useSystemStore.getState().syncSystemTheme();
+
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
+
   useEffect(() => {
     let active = true;
     wallpaperNeedsDarkText(wallpaper).then((needsDark) => {
