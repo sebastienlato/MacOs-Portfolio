@@ -1,40 +1,79 @@
+import { useState } from "react";
+import { Columns3, LayoutGrid, List, Search } from "lucide-react";
+import clsx from "clsx";
+
 import { WindowControls } from "#components";
-import { Search } from "lucide-react";
 import WindowWrapper from "#hoc/WindowWrapper";
 import { locations } from "#constants/index";
 import useLocationStore from "#store/location";
-import clsx from "clsx";
 import useWindowStore from "#store/window";
 import type { FinderItem } from "#types";
+
+type ViewMode = "icon" | "list" | "column";
+
+const VIEWS: { mode: ViewMode; label: string; Icon: typeof LayoutGrid }[] = [
+  { mode: "icon", label: "as Icons", Icon: LayoutGrid },
+  { mode: "list", label: "as List", Icon: List },
+  { mode: "column", label: "as Columns", Icon: Columns3 },
+];
+
+/** What the Kind column says, from the little the data actually knows. */
+const kindOf = (item: FinderItem) => {
+  if (item.kind === "folder") return "Folder";
+  const kinds: Record<string, string> = {
+    txt: "Plain Text",
+    url: "Web Link",
+    img: "Image",
+    fig: "Figma",
+    pdf: "PDF Document",
+  };
+  return kinds[item.fileType ?? ""] ?? "Document";
+};
 
 const Finder = () => {
   const { openWindow } = useWindowStore();
   const { activeLocation, setActiveLocation } = useLocationStore();
+  const [view, setView] = useState<ViewMode>("icon");
+  /** Column view only: the folder whose contents fill the second column. */
+  const [drilled, setDrilled] = useState<FinderItem | null>(null);
+  const [drilledFrom, setDrilledFrom] = useState(activeLocation?.id);
+
+  // Moving to another location invalidates the column selection. Adjusted
+  // during render rather than in an effect, so the stale column never paints.
+  if (drilledFrom !== activeLocation?.id) {
+    setDrilledFrom(activeLocation?.id);
+    setDrilled(null);
+  }
+
+  const items = activeLocation?.children ?? [];
 
   const openItem = (item: FinderItem) => {
     if (item.fileType === "pdf") return openWindow("resume");
     if (item.kind === "folder") return setActiveLocation(item);
-    if (
-      (item.fileType === "fig" || item.fileType === "url") &&
-      item.href
-    )
+    if ((item.fileType === "fig" || item.fileType === "url") && item.href)
       return window.open(item.href, "_blank");
 
     if (item.fileType === "txt") return openWindow("txtfile", item);
     if (item.fileType === "img") return openWindow("imgfile", item);
   };
 
-  const renderList = (name: string, items: FinderItem[]) => (
+  /** In column view a folder expands the next column instead of navigating. */
+  const selectInColumn = (item: FinderItem) => {
+    if (item.kind === "folder") return setDrilled(item);
+    openItem(item);
+  };
+
+  const renderSidebarList = (name: string, entries: FinderItem[]) => (
     <div>
       <h3>{name}</h3>
 
       <ul>
-        {items.map((item) => (
+        {entries.map((item) => (
           <li
             key={item.id}
             onClick={() => setActiveLocation(item)}
             className={clsx(
-              item.id === activeLocation?.id ? "active" : "not-active"
+              item.id === activeLocation?.id ? "active" : "not-active",
             )}
           >
             <img src={item.icon} className="w-4" alt={item.name} />
@@ -44,31 +83,131 @@ const Finder = () => {
       </ul>
     </div>
   );
+
   return (
     <>
       <div id="window-header">
         <WindowControls target="finder" />
+
+        {/* Segmented control, as macOS puts the view switcher in the toolbar */}
+        <div className="view-switcher" role="group" aria-label="View options">
+          {VIEWS.map(({ mode, label, Icon }) => (
+            <button
+              key={mode}
+              type="button"
+              className={clsx(view === mode && "selected")}
+              aria-label={label}
+              aria-pressed={view === mode}
+              onClick={() => setView(mode)}
+            >
+              <Icon size={15} />
+            </button>
+          ))}
+        </div>
+
         <Search className="icon" />
       </div>
 
-      <div className="flex h-full">
+      <div className="flex h-full min-h-0">
         <div className="sidebar">
-          {renderList("Favorites", Object.values(locations))}
-          {renderList("My Projects", locations.work.children ?? [])}
+          {renderSidebarList("Favorites", Object.values(locations))}
+          {renderSidebarList("My Projects", locations.work.children ?? [])}
         </div>
 
-        <ul className="content">
-          {activeLocation?.children?.map((item) => (
-            <li
-              key={item.id}
-              className={item.position}
-              onClick={() => openItem(item)}
-            >
-              <img src={item.icon} alt={item.name} />
-              <p>{item.name}</p>
-            </li>
-          ))}
-        </ul>
+        <div className="content">
+          {view === "icon" && (
+            <ul className="icon-view">
+              {items.map((item) => (
+                <li key={item.id} onClick={() => openItem(item)}>
+                  <img src={item.icon} alt={item.name} />
+                  <p>{item.name}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {view === "list" && (
+            <div className="list-view">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Kind</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((item) => (
+                    <tr key={item.id} onClick={() => openItem(item)}>
+                      {/* The flex box is inside the cell, not the cell itself:
+                        display:flex on a <td> drops it out of the table
+                        layout and the columns stop lining up */}
+                      <td>
+                        <span className="name">
+                          <img src={item.icon} alt="" />
+                          <span className="truncate">{item.name}</span>
+                        </span>
+                      </td>
+                      <td className="kind">{kindOf(item)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {view === "column" && (
+            <div className="column-view">
+              <ul>
+                {items.map((item) => (
+                  <li
+                    key={item.id}
+                    className={clsx(item.id === drilled?.id && "selected")}
+                    onClick={() => selectInColumn(item)}
+                  >
+                    <img src={item.icon} alt="" />
+                    <span className="truncate">{item.name}</span>
+                    {item.kind === "folder" && (
+                      <span className="chevron">›</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+
+              {/* The second column only exists once a folder is chosen, which
+                  is how macOS reveals depth one step at a time */}
+              {drilled && (
+                <ul>
+                  {(drilled.children ?? []).map((item) => (
+                    <li key={item.id} onClick={() => openItem(item)}>
+                      <img src={item.icon} alt="" />
+                      <span className="truncate">{item.name}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
+          {/* Path bar, pinned to the bottom as in macOS */}
+          <div className="path-bar">
+            {activeLocation && (
+              <>
+                <img src={activeLocation.icon} alt="" />
+                <span>{activeLocation.name}</span>
+              </>
+            )}
+            {drilled && view === "column" && (
+              <>
+                <span className="sep">›</span>
+                <img src={drilled.icon} alt="" />
+                <span>{drilled.name}</span>
+              </>
+            )}
+            <span className="count">
+              {items.length} item{items.length === 1 ? "" : "s"}
+            </span>
+          </div>
+        </div>
       </div>
     </>
   );

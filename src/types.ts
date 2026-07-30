@@ -23,8 +23,6 @@ export interface FinderItem {
   type?: string;
   fileType?: FileType;
   href?: string;
-  /** Tailwind classes positioning the icon inside a Finder window. */
-  position?: string;
   /** Tailwind classes positioning a Finder window opened from the desktop. */
   windowPosition?: string;
   imageUrl?: string;

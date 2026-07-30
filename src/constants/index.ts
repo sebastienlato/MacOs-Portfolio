@@ -313,7 +313,6 @@ const WORK_LOCATION: FinderItem = {
       name: "SecureVault",
       icon: "/images/folder.png",
       kind: "folder",
-      position: "top-10 left-5", // icon position inside Finder
       windowPosition: "top-[5vh] left-5", // optional: Finder window position
       children: [
         {
@@ -322,7 +321,6 @@ const WORK_LOCATION: FinderItem = {
           icon: "/images/txt.png",
           kind: "file",
           fileType: "txt",
-          position: "top-5 left-10",
           description: [
             "SecureVault is a SwiftUI password manager purpose-built for iOS. It keeps every credential encrypted on-device,",
             "unlocks with biometrics, and presents a thoughtfully designed UI for organising, auditing, and sharing passwords.",
@@ -336,7 +334,6 @@ const WORK_LOCATION: FinderItem = {
           kind: "file",
           fileType: "url",
           href: "https://github.com/sebastienlato/SecureVault",
-          position: "top-10 right-20",
         },
         {
           id: 4,
@@ -344,7 +341,6 @@ const WORK_LOCATION: FinderItem = {
           icon: "/images/image.png",
           kind: "file",
           fileType: "img",
-          position: "top-52 right-80",
           imageUrl: "/images/project-1.webp",
         },
         {
@@ -354,7 +350,6 @@ const WORK_LOCATION: FinderItem = {
           kind: "file",
           fileType: "fig",
           href: "https://google.com",
-          position: "top-60 right-20",
         },
       ],
     },
@@ -365,7 +360,6 @@ const WORK_LOCATION: FinderItem = {
       name: "PetSitterQR",
       icon: "/images/folder.png",
       kind: "folder",
-      position: "top-52 right-80",
       windowPosition: "top-[20vh] left-7",
       children: [
         {
@@ -374,7 +368,6 @@ const WORK_LOCATION: FinderItem = {
           icon: "/images/txt.png",
           kind: "file",
           fileType: "txt",
-          position: "top-5 right-10",
           description: [
             "PetSitterQR is a SwiftUI app for creating and sharing pet care cards via QR codes.",
             "Owners can manage pets locally with optional photos and generate text-only QR codes.",
@@ -390,7 +383,6 @@ const WORK_LOCATION: FinderItem = {
           kind: "file",
           fileType: "url",
           href: "https://github.com/sebastienlato/PetSitterQR",
-          position: "top-20 left-20",
         },
         {
           id: 4,
@@ -398,7 +390,6 @@ const WORK_LOCATION: FinderItem = {
           icon: "/images/image.png",
           kind: "file",
           fileType: "img",
-          position: "top-52 left-80",
           imageUrl: "/images/project-2.webp",
         },
         {
@@ -408,7 +399,6 @@ const WORK_LOCATION: FinderItem = {
           kind: "file",
           fileType: "fig",
           href: "https://google.com",
-          position: "top-60 left-5",
         },
       ],
     },
@@ -419,7 +409,6 @@ const WORK_LOCATION: FinderItem = {
       name: "SleepSoundsApp",
       icon: "/images/folder.png",
       kind: "folder",
-      position: "top-10 left-80",
       windowPosition: "top-[33vh] left-7",
       children: [
         {
@@ -428,7 +417,6 @@ const WORK_LOCATION: FinderItem = {
           icon: "/images/txt.png",
           kind: "file",
           fileType: "txt",
-          position: "top-5 left-10",
           description: [
             "Sleep Sounds App lets you stack calming ambient loops like rain, ocean waves, and fireplace crackles.",
             "Each sound has one-tap play/pause, animated volume controls, and its own accent color + SF Symbol.",
@@ -444,7 +432,6 @@ const WORK_LOCATION: FinderItem = {
           kind: "file",
           fileType: "url",
           href: "https://github.com/sebastienlato/SleepSoundsApp",
-          position: "top-10 right-20",
         },
         {
           id: 4,
@@ -452,7 +439,6 @@ const WORK_LOCATION: FinderItem = {
           icon: "/images/image.png",
           kind: "file",
           fileType: "img",
-          position: "top-52 right-80",
           imageUrl: "/images/project-3.webp",
         },
         {
@@ -462,7 +448,6 @@ const WORK_LOCATION: FinderItem = {
           kind: "file",
           fileType: "fig",
           href: "https://google.com",
-          position: "top-60 right-20",
         },
       ],
     },
@@ -482,7 +467,6 @@ const ABOUT_LOCATION: FinderItem = {
       icon: "/images/image.png",
       kind: "file",
       fileType: "img",
-      position: "top-10 left-5",
       imageUrl: "/images/sebastien.webp",
     },
     {
@@ -491,7 +475,6 @@ const ABOUT_LOCATION: FinderItem = {
       icon: "/images/image.png",
       kind: "file",
       fileType: "img",
-      position: "top-28 right-72",
       imageUrl: "/images/sebastien-2.webp",
     },
     {
@@ -500,7 +483,6 @@ const ABOUT_LOCATION: FinderItem = {
       icon: "/images/image.png",
       kind: "file",
       fileType: "img",
-      position: "top-52 left-80",
       imageUrl: "/images/sebastien-3.webp",
     },
     {
@@ -509,7 +491,6 @@ const ABOUT_LOCATION: FinderItem = {
       icon: "/images/txt.png",
       kind: "file",
       fileType: "txt",
-      position: "top-60 left-5",
       subtitle: "Meet the Developer Behind the Code",
       image: "/images/sebastien.webp",
       description: [
@@ -552,7 +533,6 @@ const TRASH_LOCATION: FinderItem = {
       icon: "/images/image.png",
       kind: "file",
       fileType: "img",
-      position: "top-10 left-10",
       imageUrl: "/images/trash-1.webp",
     },
     {
@@ -561,7 +541,6 @@ const TRASH_LOCATION: FinderItem = {
       icon: "/images/image.png",
       kind: "file",
       fileType: "img",
-      position: "top-40 left-80",
       imageUrl: "/images/trash-2.webp",
     },
   ],
