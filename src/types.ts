@@ -55,6 +55,12 @@ export interface WindowState {
 
 export type Theme = "light" | "dark";
 
+/**
+ * What the visitor picked in Settings. "auto" isn't a theme of its own — it
+ * defers to the OS's prefers-color-scheme and re-resolves when that flips.
+ */
+export type Appearance = Theme | "auto";
+
 export interface Wallpaper {
   id: string;
   name: string;
@@ -67,6 +73,8 @@ export interface DockApp {
   name: string;
   icon: string;
   canOpen: boolean;
+  /** Draws the dock's vertical rule to the left of this app. */
+  separatorBefore?: boolean;
 }
 
 export interface BlogPost {

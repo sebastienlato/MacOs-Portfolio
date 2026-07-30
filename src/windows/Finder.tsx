@@ -32,7 +32,7 @@ const kindOf = (item: FinderItem) => {
 
 const Finder = () => {
   const { openWindow } = useWindowStore();
-  const { activeLocation, setActiveLocation } = useLocationStore();
+  const { activeLocation, setActiveLocation, trashItems } = useLocationStore();
   const [view, setView] = useState<ViewMode>("icon");
   /** Column view only: the folder whose contents fill the second column. */
   const [drilled, setDrilled] = useState<FinderItem | null>(null);
@@ -45,7 +45,12 @@ const Finder = () => {
     setDrilled(null);
   }
 
-  const items = activeLocation?.children ?? [];
+  // Trash is the one folder that can be emptied, so its contents come from the
+  // store rather than from the static location tree.
+  const items =
+    activeLocation?.type === "trash"
+      ? trashItems
+      : (activeLocation?.children ?? []);
 
   const openItem = (item: FinderItem) => {
     if (item.fileType === "pdf") return openWindow("resume");

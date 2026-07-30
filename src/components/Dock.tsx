@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { Fragment, useCallback, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import gsap from "gsap";
 
@@ -6,15 +6,26 @@ import { dockApps, locations } from "#constants/index";
 import { useGSAP } from "@gsap/react";
 import useWindowStore from "#store/window";
 import useLocationStore from "#store/location";
+import ContextMenu, { type ContextMenuItem } from "#components/ContextMenu";
 import type { DockApp, WindowKey } from "#types";
 
 const isWindowKey = (id: string): id is WindowKey =>
   id in useWindowStore.getState().windows;
 
+interface DockMenuState {
+  app: DockApp;
+  x: number;
+  y: number;
+}
+
 const Dock = () => {
-  const { openWindow, focusWindow, windows } = useWindowStore();
-  const { setActiveLocation } = useLocationStore();
+  const { openWindow, focusWindow, closeWindow, minimizeWindow, windows } =
+    useWindowStore();
+  const { setActiveLocation, trashItems, emptyTrash } = useLocationStore();
   const dockRef = useRef<HTMLDivElement>(null);
+  const [menu, setMenu] = useState<DockMenuState | null>(null);
+
+  const closeMenu = useCallback(() => setMenu(null), []);
 
   useGSAP(() => {
     const dock = dockRef.current;
@@ -66,13 +77,14 @@ const Dock = () => {
     };
   }, []);
 
+  const openTrash = () => {
+    setActiveLocation(locations.trash);
+    openWindow("finder");
+  };
+
   const toggleApp = (app: Pick<DockApp, "id" | "canOpen">) => {
     // Trash opens the Finder pointed at the Trash location, like the real dock
-    if (app.id === "trash") {
-      setActiveLocation(locations.trash);
-      openWindow("finder");
-      return;
-    }
+    if (app.id === "trash") return openTrash();
 
     if (!app.canOpen || !isWindowKey(app.id)) return;
 
@@ -86,30 +98,98 @@ const Dock = () => {
     }
   };
 
+  /** The menu macOS shows on a dock icon, minus the parts we can't do. */
+  const menuItems = (app: DockApp): ContextMenuItem[] => {
+    if (app.id === "trash") {
+      return [
+        { id: "open", label: "Open", onSelect: openTrash },
+        { id: "d1", divider: true },
+        {
+          id: "empty",
+          label: "Empty Trash",
+          disabled: trashItems.length === 0,
+          onSelect: emptyTrash,
+        },
+      ];
+    }
+
+    if (!isWindowKey(app.id)) return [];
+
+    const key = app.id;
+    const win = windows[key];
+    const isVisible = win.isOpen && !win.isMinimized;
+
+    return [
+      isVisible
+        ? { id: "hide", label: "Hide", onSelect: () => minimizeWindow(key) }
+        : {
+            id: "open",
+            // openWindow un-minimizes, so one action covers both
+            label: win.isOpen ? "Show" : "Open",
+            onSelect: () => openWindow(key),
+          },
+      { id: "d1", divider: true },
+      {
+        id: "quit",
+        label: "Quit",
+        disabled: !win.isOpen,
+        onSelect: () => closeWindow(key),
+      },
+    ];
+  };
+
   return (
     <section id="dock">
       <div ref={dockRef} className="dock-container">
-        {dockApps.map(({ id, name, icon, canOpen }) => (
-          <div key={id} className="relative flex justify-center">
-            <button
-              type="button"
-              className="dock-icon"
-              aria-label={name}
-              data-tooltip-id="dock-tooltip"
-              data-tooltip-content={name}
-              data-tooltip-delay-show={150}
-              disabled={!canOpen}
-              onClick={() => toggleApp({ id, canOpen })}
-            >
-              <img src={`/images/${icon}`} alt={name} loading="lazy" />
-            </button>
-            {isWindowKey(id) && windows[id].isOpen && (
-              <span className="running-dot" />
-            )}
-          </div>
-        ))}
+        {dockApps.map((app) => {
+          const { id, name, icon, canOpen, separatorBefore } = app;
+
+          return (
+            <Fragment key={id}>
+              {separatorBefore && (
+                <span className="dock-divider" aria-hidden="true" />
+              )}
+              <div className="relative flex justify-center">
+                <button
+                  type="button"
+                  className="dock-icon"
+                  aria-label={name}
+                  data-tooltip-id="dock-tooltip"
+                  data-tooltip-content={name}
+                  data-tooltip-delay-show={150}
+                  disabled={!canOpen}
+                  onClick={() => toggleApp({ id, canOpen })}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    const { top, left, width } =
+                      e.currentTarget.getBoundingClientRect();
+                    // Anchored to the icon, not the pointer — the dock's menu
+                    // rises from the icon it belongs to
+                    setMenu({ app, x: left + width / 2, y: top - 8 });
+                  }}
+                >
+                  <img src={`/images/${icon}`} alt={name} loading="lazy" />
+                </button>
+                {isWindowKey(id) && windows[id].isOpen && (
+                  <span className="running-dot" />
+                )}
+              </div>
+            </Fragment>
+          );
+        })}
         <Tooltip id="dock-tooltip" place="top" className="tooltip" />
       </div>
+
+      {menu && (
+        <ContextMenu
+          x={menu.x}
+          y={menu.y}
+          items={menuItems(menu.app)}
+          onClose={closeMenu}
+          placement="above"
+          align="center"
+        />
+      )}
     </section>
   );
 };
