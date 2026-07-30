@@ -568,6 +568,34 @@ body {
     }
   }
 
+  /*
+   * Mission Control's backdrop. Sits under the windows (which start at z-1000)
+   * so they stay legible above it, and catches the click that dismisses the
+   * overview when you pick nothing.
+   */
+  .mission-control {
+    @apply fixed inset-0 z-[999] bg-black/45;
+
+    animation: snap-in 200ms ease-out;
+  }
+
+  /*
+   * While the overview is up a window is a target, not a workspace: its
+   * contents stop taking the pointer so any click lands on the window itself,
+   * where onMouseDown focuses it and drops out of the overview.
+   */
+  main:has(> .mission-control) > section[id] {
+    @apply cursor-pointer;
+
+    * {
+      @apply pointer-events-none;
+    }
+
+    .resize-handle {
+      @apply hidden;
+    }
+  }
+
   .resize-handle {
     @apply absolute bottom-0 right-0 size-4 cursor-nwse-resize z-10;
   }

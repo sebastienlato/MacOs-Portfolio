@@ -32,6 +32,9 @@ interface WindowStore {
   nextZIndex: number;
   /** null when nothing is open — the menu bar falls back to Finder. */
   activeWindow: WindowKey | null;
+  /** True while every open window is scaled down into the overview grid. */
+  missionControl: boolean;
+  toggleMissionControl: () => void;
   openWindow: (windowKey: WindowKey, data?: FinderItem | null) => void;
   closeWindow: (windowKey: WindowKey) => void;
   minimizeWindow: (windowKey: WindowKey) => void;
@@ -47,6 +50,12 @@ const useWindowStore = create<WindowStore>()(
     windows: WINDOW_CONFIG,
     nextZIndex: INITIAL_Z_INDEX + 1,
     activeWindow: null,
+    missionControl: false,
+
+    toggleMissionControl: () =>
+      set((state) => {
+        state.missionControl = !state.missionControl;
+      }),
 
     openWindow: (windowKey, data = null) =>
       set((state) => {
@@ -59,6 +68,7 @@ const useWindowStore = create<WindowStore>()(
         win.data = data ?? win.data;
         state.nextZIndex++;
         state.activeWindow = windowKey;
+        state.missionControl = false;
       }),
 
     closeWindow: (windowKey) =>
@@ -107,6 +117,8 @@ const useWindowStore = create<WindowStore>()(
         if (!win) return;
         win.zIndex = state.nextZIndex++;
         state.activeWindow = windowKey;
+        // Picking a window is the whole point of the overview, so leave it
+        state.missionControl = false;
       }),
   }))
 );
