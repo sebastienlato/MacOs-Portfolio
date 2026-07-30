@@ -1310,19 +1310,125 @@ body {
       }
     }
 
+    .view-switcher {
+      @apply flex items-center gap-0.5 rounded-lg p-0.5 bg-black/[0.06] dark:bg-white/10;
+
+      button {
+        @apply flex-center rounded-md px-2 py-1 text-gray-500 cursor-pointer transition-colors hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100;
+
+        &.selected {
+          @apply bg-white text-gray-900 shadow-sm dark:bg-white/20 dark:text-white;
+        }
+      }
+    }
+
     .content {
-      @apply flex-1 p-8 bg-white max-w-2xl relative dark:bg-neutral-900;
+      @apply flex-1 min-w-0 flex flex-col bg-white dark:bg-neutral-900;
+    }
+
+    /*
+     * Icons flow in a grid rather than being placed by hand. Each item used to
+     * carry a Tailwind position string in the constants, which meant every new
+     * file needed coordinates picked for it and could silently overlap another.
+     */
+    .icon-view {
+      @apply flex-1 min-h-0 overflow-auto p-6 grid gap-x-4 gap-y-6 content-start;
+      grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
 
       li {
-        @apply absolute flex items-center flex-col gap-3;
+        @apply flex flex-col items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors hover:bg-black/5 dark:hover:bg-white/10;
 
         img {
-          @apply object-contain object-center size-16 relative group-hover:scale-105;
+          @apply size-16 object-contain object-center;
         }
 
         p {
-          @apply text-sm text-center font-medium w-40 dark:text-gray-200;
+          @apply text-[13px] text-center font-medium leading-tight dark:text-gray-200;
         }
+      }
+    }
+
+    /* The scroll box is the wrapper, not the table: a table given a height
+       stretches its rows to fill it instead of keeping them compact. */
+    .list-view {
+      @apply flex-1 min-h-0 overflow-auto;
+
+      table {
+        @apply w-full text-left border-collapse;
+      }
+
+      th {
+        @apply sticky top-0 px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-gray-500 bg-gray-50 dark:bg-neutral-800 dark:text-gray-400;
+        border-bottom: 1px solid var(--glass-hairline);
+      }
+
+      tbody tr {
+        @apply cursor-pointer transition-colors hover:bg-blue-500 hover:text-white;
+      }
+
+      td {
+        @apply px-4 py-1.5 text-[13px] align-middle dark:text-gray-200;
+      }
+
+      .name {
+        @apply flex items-center gap-2 min-w-0;
+      }
+
+      img {
+        @apply size-4 shrink-0 object-contain;
+      }
+
+      .kind {
+        @apply text-gray-500 dark:text-gray-400;
+      }
+
+      tr:hover .kind {
+        @apply text-white/80;
+      }
+    }
+
+    .column-view {
+      @apply flex-1 min-h-0 flex;
+
+      > ul {
+        @apply w-1/2 min-w-0 overflow-auto p-1.5 space-y-0.5;
+
+        &:first-child {
+          border-right: 1px solid var(--glass-hairline);
+        }
+
+        li {
+          @apply flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[13px] cursor-pointer transition-colors hover:bg-black/5 dark:text-gray-200 dark:hover:bg-white/10;
+
+          &.selected {
+            @apply bg-blue-500 text-white hover:bg-blue-500;
+          }
+        }
+
+        img {
+          @apply size-4 shrink-0 object-contain;
+        }
+
+        .chevron {
+          @apply ml-auto shrink-0 opacity-50;
+        }
+      }
+    }
+
+    .path-bar {
+      @apply flex items-center gap-1.5 px-3 py-1.5 text-[11px] text-gray-500 shrink-0 dark:text-gray-400;
+      border-top: 1px solid var(--glass-hairline);
+
+      img {
+        @apply size-3.5 object-contain;
+      }
+
+      .sep {
+        @apply opacity-50;
+      }
+
+      .count {
+        @apply ml-auto shrink-0;
       }
     }
   }
