@@ -8,6 +8,7 @@ import Spotlight from "#components/Spotlight";
 import ControlCenter from "#components/ControlCenter";
 import DesktopMenu from "#components/DesktopMenu";
 import SnapPreview from "#components/SnapPreview";
+import MissionControl from "#components/MissionControl";
 import KeyboardShortcuts from "#components/KeyboardShortcuts";
 
 export {
@@ -21,5 +22,6 @@ export {
   ControlCenter,
   DesktopMenu,
   SnapPreview,
+  MissionControl,
   KeyboardShortcuts,
 };

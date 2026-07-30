@@ -55,6 +55,8 @@ export const runMenuAction = (action: MenuAction) => {
       return window.location.reload();
     case "spotlight":
       return useSystemStore.getState().toggleSpotlight();
+    case "missionControl":
+      return useWindowStore.getState().toggleMissionControl();
     case "toggleTheme":
       return useSystemStore.getState().toggleTheme();
 

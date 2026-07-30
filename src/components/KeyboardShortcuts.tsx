@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 import type { MenuAction } from "#constants/menus";
 import useSystemStore from "#store/system";
+import useWindowStore from "#store/window";
 import { runMenuAction } from "#utils/menuActions";
 
 interface Binding {
@@ -43,8 +44,22 @@ const KeyboardShortcuts = () => {
         // close windows — that is ⌘W, and macOS never bound Escape to it.
         const { spotlightOpen, setSpotlightOpen, controlCenterOpen, setControlCenterOpen } =
           useSystemStore.getState();
+        const { missionControl, toggleMissionControl } = useWindowStore.getState();
         if (spotlightOpen) setSpotlightOpen(false);
         else if (controlCenterOpen) setControlCenterOpen(false);
+        else if (missionControl) toggleMissionControl();
+        return;
+      }
+
+      /*
+       * F3 and ⌃↑ are what macOS itself binds to Mission Control, which means
+       * macOS claims them before any browser sees them. Bound regardless, for
+       * the platforms and contexts where they do arrive — the Window menu is
+       * the path that always works.
+       */
+      if (e.key === "F3" || (e.ctrlKey && e.key === "ArrowUp")) {
+        e.preventDefault();
+        runMenuAction("missionControl");
         return;
       }
 

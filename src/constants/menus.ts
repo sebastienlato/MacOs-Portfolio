@@ -15,6 +15,7 @@ export type MenuAction =
   | "openPhotos"
   | "openSafari"
   | "spotlight"
+  | "missionControl"
   | "toggleTheme"
   | "downloadResume";
 
@@ -64,6 +65,7 @@ const windowMenu = (): MenuDef => ({
     { id: "minimize", label: "Minimize", shortcut: "⌘M", action: "minimize" },
     { id: "zoom", label: "Zoom", action: "zoom" },
     divider("d1"),
+    { id: "mission", label: "Mission Control", shortcut: "F3", action: "missionControl" },
     { id: "bring-all", label: "Bring All to Front", disabled: true },
   ],
 });
