@@ -139,11 +139,28 @@ const Home = () => {
               project.windowPosition,
               selected.includes(project.id) && "selected"
             )}
-            onClick={(e) => handleSelect(project, e.shiftKey || e.metaKey)}
-            onDoubleClick={() => handleOpenProjectFinder(project)}
           >
-            <img src="/images/folder.png" alt={project.name} draggable={false} />
-            <p>{project.name}</p>
+            {/*
+              A real button, so the icons are reachable by keyboard at all — as
+              bare <li> elements they were pointer-only. Click still selects and
+              double-click still opens, the way the desktop works; Enter opens,
+              the way everything else on the web does.
+            */}
+            <button
+              type="button"
+              aria-label={project.name}
+              aria-pressed={selected.includes(project.id)}
+              onClick={(e) => handleSelect(project, e.shiftKey || e.metaKey)}
+              onDoubleClick={() => handleOpenProjectFinder(project)}
+              onKeyDown={(e) => {
+                if (e.key !== "Enter") return;
+                e.preventDefault();
+                handleOpenProjectFinder(project);
+              }}
+            >
+              <img src="/images/folder.png" alt="" draggable={false} />
+              <p>{project.name}</p>
+            </button>
           </li>
         ))}
       </ul>

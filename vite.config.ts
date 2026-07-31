@@ -14,6 +14,7 @@ export default defineConfig({
       "#constants": resolve(root, "src/constants"),
       "#store": resolve(root, "src/store"),
       "#hoc": resolve(root, "src/hoc"),
+      "#hooks": resolve(root, "src/hooks"),
       "#mobile": resolve(root, "src/mobile"),
       "#windows": resolve(root, "src/windows"),
       "#utils": resolve(root, "src/utils"),

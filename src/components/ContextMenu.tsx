@@ -2,6 +2,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import clsx from "clsx";
 
+import useMenuKeyboard from "#hooks/useMenuKeyboard";
+
 export interface ContextMenuItem {
   id: string;
   divider?: boolean;
@@ -83,6 +85,10 @@ const ContextMenu = ({
     };
   }, [onClose]);
 
+  // Shift+F10 raises this menu from the keyboard, so it has to be operable from
+  // there too. Focus lands on the first item as soon as it is positioned.
+  useMenuKeyboard(menuRef, { onClose, autoFocus: Boolean(position) });
+
   const select = (item: ContextMenuItem) => {
     if (item.disabled) return;
     item.onSelect?.();
@@ -110,6 +116,7 @@ const ContextMenu = ({
             key={item.id}
             role="menuitem"
             aria-disabled={item.disabled}
+            tabIndex={item.disabled ? undefined : -1}
             className={clsx(item.disabled && "disabled")}
             onClick={() => select(item)}
           >

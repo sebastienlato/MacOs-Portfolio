@@ -1,6 +1,8 @@
 import useWindowStore from "#store/window";
 import useLayoutStore from "#store/layout";
 import useSnapStore from "#store/snap";
+import { APP_MENUS } from "#constants/menus";
+import { seconds } from "#utils/motion";
 import clsx from "clsx";
 import { useLayoutEffect, useRef, type ComponentType } from "react";
 import { useGSAP } from "@gsap/react";
@@ -106,7 +108,7 @@ const WindowWrapper = <P extends object>(
       gsap.fromTo(
         el,
         { scale: 0.8, opacity: 0, x, y: y + 40 },
-        { scale: 1, opacity: 1, y, duration: 0.4, ease: "power3.out" }
+        { scale: 1, opacity: 1, y, duration: seconds(0.4), ease: "power3.out" }
       );
     }, [isOpen]);
 
@@ -124,7 +126,7 @@ const WindowWrapper = <P extends object>(
           scale: 0.4,
           opacity: 0,
           y: window.innerHeight,
-          duration: 0.35,
+          duration: seconds(0.35),
           ease: "power2.in",
           onComplete: () => {
             el.style.display = "none";
@@ -136,7 +138,7 @@ const WindowWrapper = <P extends object>(
           scale: 1,
           opacity: 1,
           y: useLayoutStore.getState().layouts[windowKey]?.y ?? 0,
-          duration: 0.35,
+          duration: seconds(0.35),
           ease: "power2.out",
         });
       }
@@ -239,6 +241,9 @@ const WindowWrapper = <P extends object>(
         id={windowKey}
         ref={ref}
         style={{ zIndex }}
+        /* A labelled section is a region landmark, which is how a screen
+           reader user gets a list of the open windows and jumps between them */
+        aria-label={APP_MENUS[windowKey].name}
         onMouseDown={() => focusWindow(windowKey)}
         className={clsx(
           "absolute",

@@ -1,8 +1,5 @@
 import type { OpenOrigin } from "#mobile/store";
 
-export const prefersReducedMotion = () =>
-  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
 /**
  * The app's collapsed state: the shape it grows out of when opened, and shrinks
  * back into when dismissed.

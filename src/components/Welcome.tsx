@@ -2,6 +2,8 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
+import { prefersReducedMotion } from "#utils/motion";
+
 type TextType = "title" | "subtitle";
 
 const FONT_WEIGHTS: Record<
@@ -25,7 +27,8 @@ const renderText = (text: string, className: string, baseWeight = 400) => {
 };
 
 const setupTextHover = (container: HTMLElement | null, type: TextType) => {
-  if (!container) return () => {};
+  // Letters thickening under the pointer is the definition of decorative motion
+  if (!container || prefersReducedMotion()) return () => {};
 
   const letters = container.querySelectorAll("span");
   const { min, max, default: base } = FONT_WEIGHTS[type];

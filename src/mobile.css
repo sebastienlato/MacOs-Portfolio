@@ -771,21 +771,4 @@
     }
   }
 
-  /*
-   * The open and dismiss tweens are skipped in JS; these cover the CSS-driven
-   * ones — the Control Center's slide and the press states on every tile.
-   */
-  @media (prefers-reduced-motion: reduce) {
-    .mobile-shell {
-      .cc-sheet {
-        animation: none;
-      }
-
-      *,
-      *::before,
-      *::after {
-        transition-duration: 1ms !important;
-      }
-    }
-  }
 }

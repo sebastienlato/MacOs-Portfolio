@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import dayjs from "dayjs";
 import { Wifi, WifiOff } from "lucide-react";
 import { navIcons } from "#constants/index";
@@ -6,6 +6,7 @@ import useWindowStore from "#store/window";
 import useSystemStore from "#store/system";
 import ControlCenter from "#components/ControlCenter";
 import AppMenus from "#components/AppMenus";
+import useMenuKeyboard from "#hooks/useMenuKeyboard";
 import type { WindowKey } from "#types";
 
 type AppleMenuItem =
@@ -32,6 +33,15 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [now, setNow] = useState(dayjs());
   const menuRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLUListElement>(null);
+
+  const closeAppleMenu = useCallback(() => {
+    setMenuOpen(false);
+    // Hand focus back to the logo, so the bar is where you left it
+    menuRef.current?.querySelector("button")?.focus();
+  }, []);
+
+  useMenuKeyboard(dropdownRef, { onClose: closeAppleMenu, autoFocus: menuOpen });
 
   // Keep the menu bar clock ticking like a real one
   useEffect(() => {
@@ -71,7 +81,7 @@ const Navbar = () => {
           </button>
 
           {menuOpen && (
-            <ul className="dropdown" role="menu">
+            <ul className="dropdown" role="menu" ref={dropdownRef} aria-label="Apple">
               {appleMenuItems.map((item) =>
                 item.divider ? (
                   <li key={item.id} className="divider" role="separator" />
@@ -79,6 +89,7 @@ const Navbar = () => {
                   <li
                     key={item.id}
                     role="menuitem"
+                    tabIndex={-1}
                     onClick={() => handleMenuItem(item.action)}
                   >
                     {item.label}

@@ -8,6 +8,7 @@ import { blogPosts, locations, socials } from "#constants/index";
 import useSystemStore from "#store/system";
 import useWindowStore from "#store/window";
 import useLocationStore from "#store/location";
+import { seconds } from "#utils/motion";
 import type { FinderItem, WindowKey } from "#types";
 
 interface SpotlightItem {
@@ -186,7 +187,7 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
     gsap.fromTo(
       panel,
       { opacity: 0, scale: 0.97, y: -10 },
-      { opacity: 1, scale: 1, y: 0, duration: 0.18, ease: "power2.out" }
+      { opacity: 1, scale: 1, y: 0, duration: seconds(0.18), ease: "power2.out" }
     );
   }, []);
 
@@ -208,14 +209,26 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
   };
 
   return (
-    <div id="spotlight" onMouseDown={close}>
+    <div
+      id="spotlight"
+      onMouseDown={close}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Spotlight Search"
+    >
       <div
         ref={panelRef}
         className="panel"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="search-row">
-          <Search size={22} />
+          <Search size={22} aria-hidden="true" />
+          {/*
+            A combobox driving a listbox: the arrow keys move `selected`, which
+            is published through aria-activedescendant so a screen reader reads
+            each result as it is highlighted. Focus itself never leaves the
+            input, which is what keeps typing and choosing in one place.
+          */}
           <input
             autoFocus
             value={query}
@@ -228,15 +241,23 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
             spellCheck={false}
             autoComplete="off"
             aria-label="Spotlight search"
+            role="combobox"
+            aria-expanded={results.length > 0}
+            aria-controls="spotlight-results"
+            aria-autocomplete="list"
+            aria-activedescendant={results[selected]?.id}
           />
           <kbd>⌘K</kbd>
         </div>
 
         {results.length > 0 ? (
-          <ul className="results">
+          <ul className="results" id="spotlight-results" role="listbox">
             {results.map((item, i) => (
               <li
                 key={item.id}
+                id={item.id}
+                role="option"
+                aria-selected={i === selected}
                 className={clsx(i === selected && "selected")}
                 onMouseEnter={() => setSelected(i)}
                 onClick={() => run(item)}
@@ -248,7 +269,10 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
             ))}
           </ul>
         ) : (
-          <p className="empty">No results for “{query}”</p>
+          /* Announced, since the only sign of it is text appearing */
+          <p className="empty" role="status">
+            No results for “{query}”
+          </p>
         )}
       </div>
     </div>
