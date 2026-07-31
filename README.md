@@ -106,7 +106,7 @@ The two screenshots at the top live in `docs/` (kept out of `public/` so they ar
 npm run screenshots
 ```
 
-That boots the app on its own port, waits for the boot screen and the fonts, opens a Finder window for the desktop shot, and writes both `docs/screenshot.webp` and `docs/screenshot-mobile.webp` from the same run — so the pair can never show two different versions of the app.
+That boots the app on its own port, waits for the boot screen and the fonts, opens a Finder window for the desktop shot, and writes both `docs/screenshot.webp` and `docs/screenshot-mobile.webp` from the same run — so the pair can never show two different versions of the app. It then composes those two into `public/og.jpg`, the 1200×630 card that link previews use, which keeps the shared image in step with the site.
 
 Each file is only rewritten when something visibly moved. The clock is pinned to 9:41 before the shutter, and Chromium's rasteriser drifts by a pixel value or two between runs, so without that check every regeneration would dirty the working tree. Viewports, output sizes and the threshold are at the top of `scripts/screenshots.mjs`.
 
@@ -127,7 +127,7 @@ src/
 scripts/
   screenshots.mjs # Regenerates the two README screenshots
 public/
-  files, icons, images, macbook.png
+  files, icons, images, macbook.png, og.jpg
 docs/
   screenshot.webp, screenshot-mobile.webp
 ```

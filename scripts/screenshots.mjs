@@ -195,6 +195,106 @@ const warmUp = async (browser, url) => {
   await context.close();
 };
 
+/**
+ * The link preview card, composed from the two shots rather than captured from
+ * the app — neither shell on its own says what this is any more.
+ *
+ * Built from the files on disk, not from the buffers just rendered, so that
+ * whenever the screenshots come out unchanged this comes out identical too.
+ *
+ * Stays 1200x630 JPEG: those are the dimensions and the type index.html already
+ * declares to scrapers, and they are not worth disagreeing with.
+ */
+const renderOgCard = async (browser) => {
+  const uri = async (path, mime) =>
+    `data:${mime};base64,${(await readFile(resolve(root, path))).toString("base64")}`;
+
+  const [wallpaper, desktop, phone] = await Promise.all([
+    uri("public/images/wallpaper.webp", "image/webp"),
+    uri("docs/screenshot.webp", "image/webp"),
+    uri("docs/screenshot-mobile.webp", "image/webp"),
+  ]);
+
+  const html = `<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Georama:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; width: 1200px; height: 630px; overflow: hidden;
+    font-family: Georama, system-ui, -apple-system, sans-serif;
+  }
+  /* The desktop's own wallpaper, pushed back so the shots read in front of it */
+  .bg {
+    position: absolute; inset: -30px;
+    background: url(${wallpaper}) center / cover;
+    filter: blur(16px) saturate(1.15) brightness(0.5);
+  }
+  .scrim {
+    position: absolute; inset: 0;
+    background: linear-gradient(100deg,
+      rgb(8 8 30 / 0.94) 0%, rgb(8 8 30 / 0.78) 34%,
+      rgb(8 8 30 / 0.34) 68%, rgb(8 8 30 / 0.22) 100%);
+  }
+  .wrap { position: relative; height: 100%; display: flex; align-items: center; }
+  .copy { width: 366px; padding-left: 60px; color: #fff; }
+  .copy .eyebrow {
+    font-size: 13px; font-weight: 600; letter-spacing: 0.16em;
+    text-transform: uppercase; color: rgb(255 255 255 / 0.55);
+  }
+  .copy h1 {
+    margin: 12px 0 0; font-size: 50px; font-weight: 700;
+    letter-spacing: -0.5px; line-height: 1.05;
+  }
+  .copy p {
+    margin: 16px 0 0; font-size: 20px; font-weight: 300;
+    line-height: 1.45; color: rgb(255 255 255 / 0.8);
+  }
+  .shots { position: absolute; right: 40px; top: 0; width: 724px; height: 100%; }
+  .shots img { position: absolute; display: block; }
+  /* Overlapped the way a device line-up is shown: the big one behind */
+  .shots .desktop {
+    left: 0; top: 112px; width: 600px; border-radius: 11px;
+    box-shadow: 0 26px 64px rgb(0 0 0 / 0.55);
+  }
+  .shots .phone {
+    right: 0; top: 72px; height: 486px; border-radius: 27px;
+    border: 3px solid rgb(255 255 255 / 0.16);
+    box-shadow: 0 26px 64px rgb(0 0 0 / 0.62);
+  }
+</style></head>
+<body>
+  <div class="bg"></div><div class="scrim"></div>
+  <div class="wrap">
+    <div class="copy">
+      <div class="eyebrow">Portfolio</div>
+      <h1>Sebastien Lato</h1>
+      <p>A macOS desktop you can actually use — and an iOS Home Screen on your phone.</p>
+    </div>
+    <div class="shots">
+      <img class="desktop" src="${desktop}" alt="">
+      <img class="phone" src="${phone}" alt="">
+    </div>
+  </div>
+</body></html>`;
+
+  const context = await browser.newContext({
+    viewport: { width: 1200, height: 630 },
+    deviceScaleFactor: 2,
+  });
+  const page = await context.newPage();
+
+  await page.setContent(html, { waitUntil: "load" });
+  await page.evaluate(() => document.fonts.ready);
+
+  const raw = await page.screenshot();
+  await context.close();
+
+  return sharp(raw).resize({ width: 1200 }).jpeg({ quality: 86 }).toBuffer();
+};
+
 /** True when the two encoded images differ by more than the rasteriser's drift. */
 const differsVisibly = async (next, path) => {
   let current;
@@ -270,6 +370,13 @@ const run = async () => {
 
       console.log(`  docs/${shot.name}.webp  ${changed ? "updated" : "unchanged"}`);
     }
+
+    const card = await renderOgCard(browser);
+    const ogPath = resolve(root, "public", "og.jpg");
+    const ogChanged = await differsVisibly(card, ogPath);
+    if (ogChanged) await writeFile(ogPath, card);
+
+    console.log(`  public/og.jpg         ${ogChanged ? "updated" : "unchanged"}`);
   } finally {
     await browser.close();
     await server.close();
