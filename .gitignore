@@ -12,9 +12,6 @@ dist
 dist-ssr
 *.local
 
-# Intermediate PNGs from `npm run screenshots`, left behind if a run fails
-docs/*.raw.png
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

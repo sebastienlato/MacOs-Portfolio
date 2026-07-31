@@ -1,5 +1,6 @@
-import { mkdir, rm } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
+import { setTimeout } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
 import { chromium } from "playwright";
@@ -29,6 +30,99 @@ const PORT = 5199;
  */
 const CLOCK = { desktop: "Fri Sep 12 9:41 AM", phone: "9:41" };
 
+/**
+ * Chromium does not rasterise a page identically twice. Resampling the
+ * wallpaper leaves a drift of roughly ±2 per channel scattered through its
+ * gradients — measured across many runs it never exceeded 24, and it is
+ * invisible, but it is enough to change the encoded bytes every single time.
+ *
+ * So the file is rewritten only when something *visible* moved. Any real change
+ * — a repositioned window, an edited label, a new icon — swings pixels by well
+ * over 100 in far more than a handful of places, which is nowhere near this
+ * floor. Without it, `npm run screenshots` would dirty the working tree on
+ * every run and there would be no way to tell a real diff from noise.
+ */
+const NOISE_CEILING = 48;
+const NOISE_ALLOWANCE = 200;
+
+/**
+ * Polls a reading until it stops changing, and hands back the last one.
+ *
+ * Waiting on the animated property instead does not work. Chromium serializes a
+ * computed opacity of 0.99997 as "1", so a tween reads as finished about 3%
+ * before it has landed — which was leaving the window a visible fraction of a
+ * pixel short of where the next run would put it.
+ */
+const stillness = async (read, label) => {
+  let previous = await read();
+
+  for (let attempt = 0; attempt < 40; attempt++) {
+    await setTimeout(100);
+    const next = await read();
+    if (next === previous) return next;
+    previous = next;
+  }
+
+  throw new Error(`${label} never came to rest`);
+};
+
+const boxOf = (page, selector) => () =>
+  page.locator(selector).boundingBox().then(JSON.stringify);
+
+/** Every icon's transform at once — the dock eases them back one by one. */
+const dockAtRest = (page) => () =>
+  page.$$eval("#dock .dock-icon", (icons) =>
+    icons.map((icon) => getComputedStyle(icon).transform).join(" ")
+  );
+
+/**
+ * Opens the Finder so the shot shows the thing that makes this a desktop —
+ * a window, and the per-app menu bar that swaps in behind it — rather than
+ * just a wallpaper.
+ */
+const openFinder = async (page) => {
+  await page.click('#dock button[aria-label="Portfolio"]');
+  await page.waitForSelector("#finder");
+
+  /*
+   * Drop the window far enough that its bottom edge clears the hero.
+   *
+   * Where it opens, it stops partway down the word "portfolio", and a
+   * half-covered letterform reads as a broken render rather than as one thing
+   * in front of another. Covering the hero outright is honest — windows cover
+   * the wallpaper — while clearing it entirely is impossible, since the two are
+   * centred on the same screen. Nudging beats resizing: the window keeps the
+   * proportions it was designed at, instead of gaining a band of empty pane.
+   */
+  const finder = JSON.parse(
+    await stillness(boxOf(page, "#finder"), "the Finder window")
+  );
+  const hero = await page.locator("#welcome").boundingBox();
+  // Rounded so the drag lands on a whole pixel rather than wherever the
+  // measurement happened to fall
+  const drop = Math.round(hero.y + hero.height + 24 - (finder.y + finder.height));
+
+  const header = await page.locator("#finder #window-header").boundingBox();
+  const x = header.x + header.width / 2;
+  const y = header.y + header.height / 2;
+
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x, y + drop, { steps: 12 });
+  await page.mouse.up();
+
+  // The pointer is now inside the window, and was over the dock before that —
+  // which leaves an icon magnified and its tooltip up. Park it over empty
+  // wallpaper, clear of the desktop icons and of the hero, whose letters
+  // animate under the cursor.
+  await page.mouse.move(40, 760);
+
+  await stillness(boxOf(page, "#finder"), "the Finder window");
+  // The magnified icons ease back over 0.3s, and a shot taken mid-flight
+  // catches one of them still raised
+  await stillness(dockAtRest(page), "the dock");
+};
+
 const SHOTS = [
   {
     name: "screenshot",
@@ -37,6 +131,7 @@ const SHOTS = [
     /** Captured at 2x and resized down, which is sharper than rendering at 1x. */
     width: 2000,
     hasTouch: false,
+    prepare: openFinder,
   },
   {
     name: "screenshot-mobile",
@@ -81,6 +176,50 @@ const freezeClock = (page) =>
     if (status) status.textContent = phone;
   }, CLOCK);
 
+/**
+ * Chromium's first paint in a fresh process does not match the ones after it,
+ * so one frame is rendered and thrown away before any real shot is taken.
+ */
+const warmUp = async (browser, url) => {
+  const context = await browser.newContext({
+    viewport: SHOTS[0].viewport,
+    deviceScaleFactor: 2,
+  });
+  const page = await context.newPage();
+
+  await page.goto(url, { waitUntil: "load" });
+  await page.waitForSelector(".boot-screen", { state: "detached", timeout: 30_000 });
+  await page.evaluate(() => document.fonts.ready);
+  await page.screenshot();
+
+  await context.close();
+};
+
+/** True when the two encoded images differ by more than the rasteriser's drift. */
+const differsVisibly = async (next, path) => {
+  let current;
+  try {
+    current = await readFile(path);
+  } catch {
+    return true; // nothing to compare against yet
+  }
+
+  const [a, b] = await Promise.all([
+    sharp(current).raw().toBuffer({ resolveWithObject: true }),
+    sharp(next).raw().toBuffer({ resolveWithObject: true }),
+  ]);
+
+  if (a.data.length !== b.data.length) return true;
+
+  let loud = 0;
+  for (let i = 0; i < a.data.length; i++) {
+    if (Math.abs(a.data[i] - b.data[i]) <= NOISE_CEILING) continue;
+    if (++loud > NOISE_ALLOWANCE) return true;
+  }
+
+  return false;
+};
+
 const run = async () => {
   await mkdir(outDir, { recursive: true });
 
@@ -93,9 +232,12 @@ const run = async () => {
   await server.listen();
 
   const url = server.resolvedUrls.local[0];
-  const browser = await chromium.launch();
+  // Pinned so the host display's colour profile cannot tint the output
+  const browser = await chromium.launch({ args: ["--force-color-profile=srgb"] });
 
   try {
+    await warmUp(browser, url);
+
     for (const shot of SHOTS) {
       const context = await browser.newContext({
         viewport: shot.viewport,
@@ -112,20 +254,21 @@ const run = async () => {
       await page.goto(url, { waitUntil: "load" });
 
       await settle(page);
+      await shot.prepare?.(page);
       await freezeClock(page);
 
-      const raw = resolve(outDir, `${shot.name}.raw.png`);
-      await page.screenshot({ path: raw });
-
-      await sharp(raw)
+      const encoded = await sharp(await page.screenshot())
         .resize({ width: shot.width })
         .webp({ quality: 82 })
-        .toFile(resolve(outDir, `${shot.name}.webp`));
+        .toBuffer();
 
-      await rm(raw);
       await context.close();
 
-      console.log(`  docs/${shot.name}.webp  ${shot.width}px wide`);
+      const target = resolve(outDir, `${shot.name}.webp`);
+      const changed = await differsVisibly(encoded, target);
+      if (changed) await writeFile(target, encoded);
+
+      console.log(`  docs/${shot.name}.webp  ${changed ? "updated" : "unchanged"}`);
     }
   } finally {
     await browser.close();
