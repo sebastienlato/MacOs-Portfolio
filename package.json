@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "screenshots": "node scripts/screenshots.mjs",
     "typecheck": "tsc -b"
   },
   "dependencies": {
@@ -35,6 +36,8 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "playwright": "^1.62.1",
+    "sharp": "^0.35.3",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.62.1",
     "vite": "^7.2.4"
