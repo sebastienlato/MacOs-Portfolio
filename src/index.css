@@ -22,6 +22,9 @@ body {
   --font-roboto: "Roboto Mono", monospace;
   --breakpoint-3xl: 1920px;
 
+  /* macOS draws its focus ring in the accent colour; this is the default one */
+  --color-focus-ring: #0a84ff;
+
   /* macOS 26 rounds windows far more than the 12px this used to use, and keeps
      the header's top corners concentric with them. */
   --radius-window: 16px;
@@ -225,6 +228,48 @@ body {
 }
 
 @layer base {
+  /*
+   * The keyboard's answer to the pointer's hover states. Nothing here had a
+   * focus style at all, so tabbing through the desktop was invisible.
+   *
+   * :focus-visible rather than :focus, so the ring appears for the keyboard and
+   * stays out of the way of a click. The halo is what makes one ring work
+   * everywhere: the blue alone disappears against a blue wallpaper.
+   */
+  :focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgb(255 255 255 / 0.45);
+  }
+
+  .dark :focus-visible {
+    box-shadow: 0 0 0 4px rgb(0 0 0 / 0.5);
+  }
+
+  /* A menu item already fills with the accent colour when focused, so the blue
+     ring would vanish into it — the outline flips to white and drops the halo */
+  [role="menuitem"]:focus-visible {
+    outline-color: #fff;
+    outline-offset: -2px;
+    box-shadow: none;
+  }
+
+  /*
+   * Everything driven by CSS — the snap ghost, the Notification Center's slide,
+   * every Tailwind transition. The GSAP timelines opt out separately, in
+   * `#utils/motion`, since a duration of zero is what they need instead.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 1ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
   main {
     @apply w-dvw h-dvh overflow-hidden;
   }
@@ -327,7 +372,11 @@ body {
       @apply glass glass-thick absolute top-8 left-0 !flex flex-col items-stretch gap-0 min-w-52 rounded-[var(--radius-panel)] p-1.5 z-[10000] text-gray-900 dark:text-gray-100;
 
       li {
-        @apply text-sm px-3 py-1.5 rounded-lg cursor-pointer hover:bg-blue-500 hover:text-white transition-colors;
+        @apply text-sm px-3 py-1.5 rounded-lg cursor-pointer transition-colors;
+
+        &:not(.divider):is(:hover, :focus-visible) {
+          @apply bg-blue-500 text-white;
+        }
       }
 
       .divider {
@@ -361,7 +410,8 @@ body {
       li {
         @apply flex items-center gap-8 text-sm px-3 py-1.5 rounded-lg cursor-pointer transition-colors;
 
-        &:not(.disabled):not(.divider):hover {
+        /* Arrowing onto an item highlights it exactly as hovering does */
+        &:not(.disabled):not(.divider):is(:hover, :focus-visible) {
           @apply bg-blue-500 text-white;
         }
 
@@ -484,10 +534,14 @@ body {
     @apply glass glass-thick fixed min-w-52 rounded-[var(--radius-panel)] p-1.5 z-[15000] select-none text-gray-900 dark:text-gray-100;
 
     li {
-      @apply text-sm px-3 py-1.5 rounded-lg cursor-pointer hover:bg-blue-500 hover:text-white transition-colors;
+      @apply text-sm px-3 py-1.5 rounded-lg cursor-pointer transition-colors;
+
+      &:not(.disabled):is(:hover, :focus-visible) {
+        @apply bg-blue-500 text-white;
+      }
 
       &.disabled {
-        @apply opacity-40 cursor-default hover:bg-transparent hover:text-inherit;
+        @apply opacity-40 cursor-default;
       }
     }
 
@@ -1476,7 +1530,14 @@ body {
 
     ul {
       li {
-        @apply absolute z-0 select-none flex items-center flex-col;
+        @apply absolute z-0 select-none;
+
+        /* The icon's layout moved onto the button when the icons became
+           keyboard-reachable; the <li> is still what drag and the marquee
+           look for, so it keeps the positioning and nothing else. */
+        > button {
+          @apply flex flex-col items-center cursor-default;
+        }
 
         img {
           @apply group-hover:bg-gray-950/10 p-1 rounded-md transition-colors;

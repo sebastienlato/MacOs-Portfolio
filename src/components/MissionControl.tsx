@@ -3,6 +3,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 
 import useWindowStore from "#store/window";
+import { seconds } from "#utils/motion";
 
 const MENU_BAR_HEIGHT = 40;
 const GAP = 24;
@@ -68,7 +69,7 @@ const MissionControl = () => {
       els.forEach((el) => {
         const prev = restore.current.get(el.id);
         if (!prev) return;
-        gsap.to(el, { ...prev, duration: 0.3, ease: "power2.out" });
+        gsap.to(el, { ...prev, duration: seconds(0.3), ease: "power2.out" });
       });
       restore.current.clear();
       return;
@@ -99,7 +100,7 @@ const MissionControl = () => {
         x: x + (slot.cx - centreX),
         y: y + (slot.cy - centreY),
         scale: target,
-        duration: 0.35,
+        duration: seconds(0.35),
         ease: "power3.out",
       });
     });

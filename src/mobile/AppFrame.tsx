@@ -4,8 +4,9 @@ import gsap from "gsap";
 import { ChevronLeft } from "lucide-react";
 
 import { appById } from "#mobile/constants";
-import { EXPANDED, collapsedTo, prefersReducedMotion } from "#mobile/motion";
+import { EXPANDED, collapsedTo } from "#mobile/motion";
 import useMobileStore from "#mobile/store";
+import { prefersReducedMotion } from "#utils/motion";
 
 /** Far enough up the home bar to read as a flick rather than a stray touch. */
 const SWIPE_DISMISS = 40;

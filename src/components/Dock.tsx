@@ -7,6 +7,7 @@ import { useGSAP } from "@gsap/react";
 import useWindowStore from "#store/window";
 import useLocationStore from "#store/location";
 import ContextMenu, { type ContextMenuItem } from "#components/ContextMenu";
+import { prefersReducedMotion } from "#utils/motion";
 import type { DockApp, WindowKey } from "#types";
 
 const isWindowKey = (id: string): id is WindowKey =>
@@ -30,6 +31,10 @@ const Dock = () => {
   useGSAP(() => {
     const dock = dockRef.current;
     if (!dock) return;
+
+    // Magnification is motion for its own sake — an icon that leaps to full
+    // size without travelling is no better, so it is simply not wired up
+    if (prefersReducedMotion()) return;
 
     const icons = dock.querySelectorAll<HTMLElement>(".dock-icon");
 

@@ -2,8 +2,18 @@ import { useRef, useState } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
+import { prefersReducedMotion } from "#utils/motion";
+
 const BootScreen = () => {
-  const [done, setDone] = useState(false);
+  /*
+   * The boot screen is motion and nothing else, so asking for less of it skips
+   * the sequence outright and the desktop is simply there.
+   *
+   * Collapsing the durations to zero was the obvious move and does not work: a
+   * GSAP timeline with no length never fires onComplete, so the screen would
+   * stay up forever — which is how this arrived as a hang rather than a jump.
+   */
+  const [done, setDone] = useState(prefersReducedMotion);
   const containerRef = useRef<HTMLDivElement>(null);
   const barRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLImageElement>(null);

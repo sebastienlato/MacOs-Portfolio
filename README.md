@@ -44,6 +44,12 @@ Below 768px – or on a touch device too short for a desktop, i.e. a phone held 
 - **Back leaves the app, not the site** – Each app sits one history entry deep, so the phone's Back gesture steps out to the Home Screen.
 - **Honours `prefers-reduced-motion`** – The open and dismiss animations are skipped rather than shortened.
 
+### Accessibility
+
+- **Reduced motion** – `prefers-reduced-motion` is honoured in both shells. The boot sequence is skipped, windows open and minimise without travelling, the dock stops magnifying, the hero's letters stop thickening, and every CSS transition and keyframe is collapsed. GSAP opts out through `src/utils/motion.ts`; the CSS side is one rule in `src/index.css`.
+- **Keyboard** – The menu bar takes ↑/↓ within a menu and ←/→ along the bar, with Escape handing focus back to the title. The Apple menu and the right-click menus share the same arrow-key handling. Desktop icons are real buttons: Tab reaches them, Enter opens them. Spotlight is a combobox driving a listbox, so each result is announced as it is highlighted.
+- **Focus** – A visible ring on every control, `:focus-visible` so it appears for the keyboard and stays out of a mouse user's way, with a halo that keeps it legible over any wallpaper.
+
 ## Tech Stack
 
 - [React 19](https://react.dev) + [TypeScript](https://www.typescriptlang.org) + [Vite](https://vitejs.dev) for the SPA foundation
