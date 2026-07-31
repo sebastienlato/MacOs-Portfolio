@@ -30,6 +30,8 @@ import {
   Settings,
   About,
 } from "#windows";
+import MobileShell from "#mobile/MobileShell";
+import useIsMobile from "#mobile/useIsMobile";
 import useSystemStore from "#store/system";
 
 gsap.registerPlugin(Draggable);
@@ -39,6 +41,7 @@ const App = () => {
   const theme = useSystemStore((state) => state.theme);
   const brightness = useSystemStore((state) => state.brightness);
   const [lightMenuBar, setLightMenuBar] = useState(false);
+  const isMobile = useIsMobile();
 
   const backgroundImage =
     wallpaper.type === "gradient" ? wallpaper.value : `url(${wallpaper.value})`;
@@ -85,29 +88,41 @@ const App = () => {
         lightMenuBar && "menu-bar-on-light"
       )}
     >
-      <Navbar />
-      <Welcome />
-      <Dock />
+      {/*
+        One shell or the other, never both. Below the breakpoint the desktop
+        does not merely hide — it never mounts, so no window is left sized for a
+        screen that isn't there and no Draggable is listening for a pointer the
+        visitor doesn't have.
+      */}
+      {isMobile ? (
+        <MobileShell />
+      ) : (
+        <>
+          <Navbar />
+          <Welcome />
+          <Dock />
 
-      <Terminal />
-      <Safari />
-      <Resume />
-      <Finder />
-      <Text />
-      <Image />
-      <Contact />
-      <Photos />
-      <Settings />
-      <About />
+          <Terminal />
+          <Safari />
+          <Resume />
+          <Finder />
+          <Text />
+          <Image />
+          <Contact />
+          <Photos />
+          <Settings />
+          <About />
 
-      <Home />
+          <Home />
 
-      <DesktopMenu />
-      <Spotlight />
-      <KeyboardShortcuts />
-      <SnapPreview />
-      <MissionControl />
-      <NotificationCenter />
+          <DesktopMenu />
+          <Spotlight />
+          <KeyboardShortcuts />
+          <SnapPreview />
+          <MissionControl />
+          <NotificationCenter />
+        </>
+      )}
 
       <div
         className="brightness-overlay"

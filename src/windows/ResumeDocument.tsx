@@ -11,18 +11,27 @@ import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 
 pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
+interface ResumeDocumentProps {
+  /**
+   * Rasterise the page to this width instead of its natural 612pt. Only the
+   * phone passes it — a desktop window is wide enough for the real thing, and
+   * scaling there would cost sharpness for nothing.
+   */
+  width?: number;
+}
+
 /**
  * Every react-pdf/pdf.js import lives in this module so the viewer ships as its
  * own chunk, fetched the first time the Resume window opens rather than on load.
  * Nothing else may import from here, or the chunk gets pulled back into the
  * main bundle — Resume.tsx owns the loading placeholder for that reason.
  */
-const ResumeDocument = () => (
+const ResumeDocument = ({ width }: ResumeDocumentProps) => (
   <Document
     file="files/resume.pdf"
     loading={<div className="resume-loading">Loading resume…</div>}
   >
-    <Page pageNumber={1} renderTextLayer renderAnnotationLayer />
+    <Page pageNumber={1} width={width} renderTextLayer renderAnnotationLayer />
   </Document>
 );
 
