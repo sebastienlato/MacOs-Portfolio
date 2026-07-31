@@ -7,14 +7,14 @@ On a phone it becomes an iOS-style Home Screen instead: same content, same prefe
 <p align="center">
   <img
     src="docs/screenshot.webp"
-    alt="The desktop shell: a macOS-style menu bar, tiled Finder window, desktop icons and a magnifying dock."
+    alt="The desktop shell: a macOS-style menu bar, project folders on the desktop, the portfolio hero, and a magnifying dock."
     width="67%"
     align="top"
   />
   <img
     src="docs/screenshot-mobile.webp"
     alt="The phone shell: an iOS-style Home Screen with app icons, the portfolio hero, and a dock."
-    width="20%"
+    width="21%"
     align="top"
   />
 </p>
@@ -75,6 +75,9 @@ npm run build
 
 # preview the production build locally
 npm run preview
+
+# regenerate the README screenshots (needs `npx playwright install chromium` once)
+npm run screenshots
 ```
 
 To see the phone shell, narrow the window under 768px or use your browser's device toolbar.
@@ -97,7 +100,13 @@ Shared types (window keys, Finder items, wallpapers, …) are in `src/types.ts`.
 
 Update the image files under `public/images` and `public/files` (or add new assets) to match your own projects.
 
-The two screenshots at the top live in `docs/` — `screenshot.webp` for the desktop and `screenshot-mobile.webp` for the phone, kept out of `public/` so they are not deployed. Retake the phone one from a 375×812 viewport (a device toolbar at 2× gives a crisp 750×1624) so it stays the same shape as the one it replaces.
+The two screenshots at the top live in `docs/` (kept out of `public/` so they are not deployed) and are generated rather than taken by hand:
+
+```bash
+npm run screenshots
+```
+
+That boots the app on its own port, waits for the boot screen and the fonts, and writes both `docs/screenshot.webp` and `docs/screenshot-mobile.webp` from the same run — so the pair can never show two different versions of the app. The clock is pinned to 9:41 before the shutter, so regenerating only produces a diff when something real has changed. Viewports and output sizes are at the top of `scripts/screenshots.mjs`.
 
 ## Project Structure
 
@@ -113,8 +122,12 @@ src/
   index.css       # Desktop styles, Liquid Glass utilities, design tokens
   mobile.css      # Phone styles (imported by index.css)
   types.ts        # Shared TypeScript types
+scripts/
+  screenshots.mjs # Regenerates the two README screenshots
 public/
   files, icons, images, macbook.png
+docs/
+  screenshot.webp, screenshot-mobile.webp
 ```
 
 Feel free to fork, remix, and deploy – just update the constants, assets, and copy to make it your own.
