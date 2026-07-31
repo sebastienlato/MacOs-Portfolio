@@ -8,57 +8,33 @@ import {
 
 import WindowWrapper from "#hoc/WindowWrapper";
 import WindowControls from "#components/WindowControls";
-import { aboutSpecs, dockApps, techStack, locations } from "#constants/index";
+import { locations } from "#constants/index";
 import useWindowStore from "#store/window";
 import useLocationStore from "#store/location";
+import {
+  PROMPT,
+  initialLines,
+  isClearCommand,
+  runCommand,
+  type TerminalLine,
+  type TerminalTarget,
+} from "#utils/terminal";
 import type { WindowKey } from "#types";
 
-interface TerminalLine {
-  text: string;
-  kind: "input" | "output" | "error";
-}
-
-/** Friendly names users might type, mapped to real window keys. */
-const OPENABLE: Record<string, WindowKey> = {
+/**
+ * Every terminal target is a window here except Trash, which macOS opens in the
+ * Finder rather than in an app of its own.
+ */
+const WINDOW_FOR: Record<Exclude<TerminalTarget, "trash">, WindowKey> = {
   finder: "finder",
-  portfolio: "finder",
-  projects: "finder",
   safari: "safari",
-  articles: "safari",
-  blog: "safari",
   photos: "photos",
-  gallery: "photos",
   contact: "contact",
+  resume: "resume",
   terminal: "terminal",
   settings: "settings",
   about: "about",
-  resume: "resume",
 };
-
-const HELP_TEXT = [
-  "Available commands:",
-  "  help              show this help",
-  "  ls                list installed apps",
-  "  open <app>        open an app (e.g. open safari)",
-  "  stack             print my tech stack",
-  "  neofetch          system info",
-  "  whoami            who is behind this portfolio",
-  "  date              current date and time",
-  "  echo <text>       print text",
-  "  clear             clear the screen",
-  "  exit              close the terminal",
-];
-
-const PROMPT = "sebastien@portfolio ~ %";
-
-const initialLines: TerminalLine[] = [
-  {
-    text: `Last login: ${new Date().toDateString()} on ttys001`,
-    kind: "output",
-  },
-  { text: "Welcome to Sebastien's portfolio terminal.", kind: "output" },
-  { text: "Type 'help' to see what you can do.", kind: "output" },
-];
 
 const Terminal = () => {
   const { openWindow, closeWindow } = useWindowStore();
@@ -76,89 +52,16 @@ const Terminal = () => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
   }, [lines]);
 
-  const print = (
-    texts: string[],
-    kind: TerminalLine["kind"] = "output"
-  ): TerminalLine[] => texts.map((text) => ({ text, kind }));
-
-  const runCommand = (raw: string): TerminalLine[] => {
-    const [command = "", ...args] = raw.trim().split(/\s+/);
-    const arg = args.join(" ").toLowerCase();
-
-    switch (command.toLowerCase()) {
-      case "":
-        return [];
-
-      case "help":
-        return print(HELP_TEXT);
-
-      case "ls":
-        return print(
-          dockApps.map((app) => `${app.id.padEnd(12)}${app.name}`)
-        );
-
-      case "open": {
-        if (!arg) return print(["usage: open <app>  (try 'ls')"], "error");
-        if (arg === "trash") {
-          setActiveLocation(locations.trash);
-          openWindow("finder");
-          return print(["Opening trash…"]);
-        }
-        const key = OPENABLE[arg];
-        if (!key) return print([`open: no app named '${arg}'`], "error");
-        openWindow(key);
-        return print([`Opening ${arg}…`]);
+  const handlers = {
+    open: (target: TerminalTarget) => {
+      if (target === "trash") {
+        setActiveLocation(locations.trash);
+        openWindow("finder");
+        return;
       }
-
-      case "stack":
-        return print(
-          techStack.map(
-            ({ category, items }) =>
-              `${category.padEnd(12)}${items.join(", ")}`
-          )
-        );
-
-      case "neofetch":
-        return print([
-          "            ,--.       sebastien@portfolio",
-          "           |oo  )      -------------------",
-          "  _.------._  /        OS: portfolioOS 1.0",
-          " (          `-.        Host: MacBook Pro (Portfolio Edition)",
-          "  \\            \\       Shell: zsh (pretend)",
-          "   \\    (o)  (o)       Uptime: since you opened this tab",
-          ...aboutSpecs.map(
-            ({ label, value }) => `                       ${label}: ${value}`
-          ),
-        ]);
-
-      case "whoami":
-        return print([
-          "Sebastien Lato — mobile & web developer.",
-          "Swift / SwiftUI / React / Next.js / TypeScript.",
-        ]);
-
-      case "date":
-        return print([new Date().toString()]);
-
-      case "echo":
-        return print([args.join(" ")]);
-
-      case "sudo":
-        return print(
-          ["Nice try. This incident will be reported 😄"],
-          "error"
-        );
-
-      case "exit":
-        closeWindow("terminal");
-        return [];
-
-      default:
-        return print(
-          [`zsh: command not found: ${command}  (try 'help')`],
-          "error"
-        );
-    }
+      openWindow(WINDOW_FOR[target]);
+    },
+    exit: () => closeWindow("terminal"),
   };
 
   const handleSubmit = (e: FormEvent) => {
@@ -169,18 +72,15 @@ const Terminal = () => {
 
     if (raw.trim()) setHistory((prev) => [raw, ...prev]);
 
-    const echoLine: TerminalLine = {
-      text: `${PROMPT} ${raw}`,
-      kind: "input",
-    };
-
-    if (raw.trim().toLowerCase() === "clear") {
+    if (isClearCommand(raw)) {
       setLines([]);
       return;
     }
 
+    const echoLine: TerminalLine = { text: `${PROMPT} ${raw}`, kind: "input" };
+
     // Run outside the updater: commands have side effects (opening windows)
-    const result = runCommand(raw);
+    const result = runCommand(raw, handlers);
     setLines((prev) => [...prev, echoLine, ...result]);
   };
 

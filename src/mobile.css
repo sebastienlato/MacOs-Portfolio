@@ -1,0 +1,791 @@
+/*
+ * The phone shell.
+ *
+ * Rendered instead of the desktop below the breakpoint in `useIsMobile`, so
+ * nothing in here needs a media query to stay out of the desktop's way — the
+ * two shells never exist at the same time.
+ *
+ * Theming is done with custom properties rather than `dark:` utilities. An app
+ * screen is an opaque surface sitting on top of the wallpaper, so it needs a
+ * full light/dark palette of its own, and one set of variables flipped under
+ * `.dark` is far less to read than the variant on every rule.
+ */
+
+@layer components {
+  .mobile-shell {
+    /* The notch and the home indicator, handed to us by viewport-fit=cover */
+    --sat: env(safe-area-inset-top, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --status-h: calc(var(--sat) + 2.25rem);
+    --home-h: calc(var(--sab) + 1.5rem);
+
+    /* iOS system greys. The grouped background is what a settings-style list
+       sits on; cards and rows are the layer above it. */
+    --ios-bg: #f2f2f7;
+    --ios-card: #ffffff;
+    --ios-label: #000000;
+    --ios-secondary: rgb(60 60 67 / 0.6);
+    --ios-separator: rgb(60 60 67 / 0.18);
+    --ios-fill: rgb(120 120 128 / 0.12);
+    --ios-tint: #007aff;
+
+    @apply fixed inset-0 overflow-hidden select-none;
+  }
+
+  .dark .mobile-shell {
+    --ios-bg: #000000;
+    --ios-card: #1c1c1e;
+    --ios-label: #ffffff;
+    --ios-secondary: rgb(235 235 245 / 0.6);
+    --ios-separator: rgb(84 84 88 / 0.5);
+    --ios-fill: rgb(120 120 128 / 0.32);
+    --ios-tint: #0a84ff;
+  }
+
+  /* ---------------------------------------------------------------- status */
+
+  /*
+   * Sits above both the Home Screen and any open app. On the Home Screen it is
+   * over the wallpaper, so it borrows the menu bar's trick of flipping to dark
+   * glyphs on a bright one; over an app it takes the app's own label colour.
+   */
+  /* Above an open app (z-300): iOS never covers the status bar with one */
+  .status-bar {
+    @apply fixed top-0 inset-x-0 z-[350] flex items-end justify-between px-6 pb-1.5 text-[15px] font-semibold text-white;
+
+    height: var(--status-h);
+    padding-top: var(--sat);
+    text-shadow: 0 0 3px rgb(0 0 0 / 0.28);
+
+    .status-icons {
+      @apply flex items-center gap-1.5 -mr-2 p-2 cursor-pointer;
+    }
+
+    .battery {
+      @apply relative block w-6 h-3 rounded-[3px] border border-current opacity-90;
+
+      /* The terminal nub on the positive end */
+      &::after {
+        content: "";
+        @apply absolute top-1/2 -right-[3px] w-[2px] h-1 -translate-y-1/2 rounded-r-sm bg-current;
+      }
+
+      .level {
+        @apply absolute inset-[1.5px] rounded-[1px] bg-current;
+      }
+    }
+  }
+
+  .menu-bar-on-light .mobile-shell:not(.app-open) .status-bar {
+    @apply text-black/85;
+    text-shadow: 0 0 3px rgb(255 255 255 / 0.35);
+  }
+
+  /* An app is an opaque surface, so the bar stops fighting the wallpaper */
+  .mobile-shell.app-open .status-bar {
+    color: var(--ios-label);
+    text-shadow: none;
+  }
+
+  /* …unless that app is dark in both appearances, like the terminal */
+  .mobile-shell.app-dark .status-bar {
+    @apply text-white;
+  }
+
+  /* ------------------------------------------------------------ home screen */
+
+  .springboard {
+    @apply absolute inset-0 flex flex-col overflow-y-auto;
+
+    padding-top: calc(var(--status-h) + 1rem);
+    padding-bottom: var(--home-h);
+
+    /*
+     * Sits in the gap the grid leaves above the dock, and takes all of it —
+     * which both centres the hero and pins the dock to the bottom. Pulled below
+     * the grid with `order`, since the markup leads with the heading.
+     */
+    .greeting {
+      @apply flex flex-1 select-none flex-col justify-center px-6 py-6 text-center text-white;
+
+      text-shadow: 0 1px 12px rgb(0 0 0 / 0.35);
+
+      p {
+        @apply font-georama text-lg font-light text-balance;
+      }
+
+      h1 {
+        @apply mt-1.5 font-georama text-[3.25rem] font-normal italic leading-none;
+      }
+    }
+
+    /* A short screen — a phone on its side — gets the space back */
+    @media (height < 560px) {
+      .greeting {
+        @apply hidden;
+      }
+    }
+
+    .app-grid {
+      @apply order-first grid grid-cols-4 gap-x-3 gap-y-5 px-5;
+    }
+
+    /* Pinned below the grid, and pushed to the bottom when the page is short */
+    .ios-dock {
+      @apply mt-auto px-4 pt-2;
+
+      ul {
+        @apply glass glass-tight relative flex items-center justify-around rounded-[26px] p-2.5;
+      }
+    }
+
+    /* The Home Screen's indicator is decoration — there is nowhere to go */
+    &::after {
+      content: "";
+      @apply mx-auto mt-3 mb-1 h-[5px] w-32 shrink-0 rounded-full bg-white/70;
+    }
+  }
+
+  .app-icon {
+    @apply flex flex-col items-center gap-1.5;
+
+    button,
+    a {
+      @apply block cursor-pointer transition-transform duration-150 active:scale-90;
+    }
+
+    .tile {
+      @apply flex-center size-[3.75rem] overflow-hidden;
+
+      filter: drop-shadow(0 4px 10px rgb(0 0 0 / 0.28));
+
+      img {
+        @apply size-full object-contain;
+      }
+
+      /* Apps with no icon art of their own get a tinted tile and a glyph */
+      &.glyph {
+        @apply rounded-[1.35rem] text-white;
+
+        filter: none;
+        box-shadow: 0 4px 10px rgb(0 0 0 / 0.28);
+
+        .link-glyph {
+          @apply size-7 object-contain;
+        }
+      }
+    }
+
+    p {
+      @apply max-w-[4.5rem] truncate text-center text-xs font-medium text-white;
+
+      text-shadow: 0 1px 3px rgb(0 0 0 / 0.5);
+    }
+  }
+
+  /* ------------------------------------------------------------- app window */
+
+  .mobile-app {
+    @apply fixed inset-0 z-[300] flex flex-col overflow-hidden;
+
+    background: var(--ios-bg);
+    color: var(--ios-label);
+    /* The open/dismiss tween scales the whole frame from the tapped icon */
+    transform-origin: center center;
+    will-change: transform, opacity;
+  }
+
+  .app-bar {
+    @apply glass-chrome relative z-10 flex shrink-0 items-end justify-between gap-2 px-2 pb-2;
+
+    /* Its own 2.75rem of bar, below the band the status bar occupies */
+    height: calc(var(--status-h) + 2.75rem);
+    padding-top: var(--status-h);
+    border-bottom: 1px solid var(--ios-separator);
+
+    h1 {
+      @apply flex-1 truncate px-1 text-center text-[17px] font-semibold;
+    }
+
+    .back,
+    .app-bar-action {
+      @apply flex min-w-[4.5rem] items-center gap-0.5 text-[17px];
+
+      color: var(--ios-tint);
+    }
+
+    /* Capped so a deep folder name doesn't squeeze the title out of the bar */
+    .back {
+      @apply cursor-pointer -ml-1 max-w-[6.5rem] truncate;
+
+      span {
+        @apply truncate;
+      }
+    }
+
+    .app-bar-action {
+      @apply justify-end pr-2;
+
+      a {
+        @apply cursor-pointer p-1;
+      }
+    }
+
+    .back-spacer {
+      @apply min-w-[4.5rem];
+    }
+  }
+
+  .app-body {
+    @apply flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-4 py-4;
+
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /*
+   * A dark app takes the dark palette outright rather than following the
+   * appearance setting. Overriding --glass-tint with it is what turns the
+   * navigation bar's glass dark too — it is the same material, re-tinted.
+   */
+  .mobile-app[data-variant="dark"] {
+    --ios-bg: #1d1e20;
+    --ios-card: #26272a;
+    --ios-label: #ffffff;
+    --ios-secondary: rgb(235 235 245 / 0.6);
+    --ios-separator: rgb(255 255 255 / 0.12);
+    --ios-fill: rgb(120 120 128 / 0.32);
+    --ios-tint: #0a84ff;
+    --glass-tint: 8 8 12;
+    --glass-chrome-alpha: 0.62;
+    --glass-backdrop: saturate(1.5) brightness(0.85);
+
+    /* The terminal scrolls its own transcript, so the body must not scroll */
+    .app-body {
+      @apply flex flex-col gap-0 overflow-hidden p-0;
+    }
+  }
+
+  .home-bar-area {
+    @apply flex shrink-0 items-center justify-center;
+
+    height: var(--home-h);
+    padding-bottom: var(--sab);
+
+    .home-bar {
+      @apply h-[5px] w-32 cursor-pointer rounded-full;
+
+      background: var(--ios-label);
+      opacity: 0.35;
+    }
+  }
+
+  /* ------------------------------------------------------------ shared bits */
+
+  /* iOS section header: small, caps, sitting above a grouped list */
+  .files-section {
+    @apply px-1 pb-2 pt-1 text-[13px] font-semibold uppercase tracking-wide;
+
+    color: var(--ios-secondary);
+  }
+
+  /* Inset grouped list — one card, rows separated by inset hairlines */
+  .files-list,
+  .contact-socials,
+  .spec-list {
+    @apply overflow-hidden rounded-xl;
+
+    background: var(--ios-card);
+
+    li + li {
+      border-top: 1px solid var(--ios-separator);
+    }
+  }
+
+  .files-list li {
+    button {
+      @apply flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left transition-colors active:bg-black/[0.06];
+    }
+
+    img {
+      @apply size-7 shrink-0 object-contain;
+
+      &.location {
+        @apply size-6;
+      }
+    }
+
+    .name {
+      @apply min-w-0 flex-1 truncate text-[16px];
+    }
+
+    .chevron {
+      @apply shrink-0;
+
+      color: var(--ios-secondary);
+    }
+  }
+
+  .dark .files-list li button:active {
+    @apply bg-white/10;
+  }
+
+  .files-empty {
+    @apply rounded-xl px-4 py-8 text-center text-[15px];
+
+    background: var(--ios-card);
+    color: var(--ios-secondary);
+  }
+
+  .files-detail {
+    @apply space-y-4 rounded-xl p-5;
+
+    background: var(--ios-card);
+
+    .hero {
+      @apply -mx-1 mb-1 w-[calc(100%+0.5rem)] rounded-lg object-cover;
+    }
+
+    h2 {
+      @apply text-[19px] font-semibold leading-snug;
+    }
+
+    p {
+      @apply text-[15px] leading-relaxed;
+
+      color: var(--ios-secondary);
+    }
+  }
+
+  .files-image img {
+    @apply w-full rounded-xl object-contain;
+  }
+
+  .wide-button {
+    @apply mt-4 w-full cursor-pointer rounded-xl py-3 text-center text-[16px] font-medium;
+
+    background: var(--ios-card);
+    color: var(--ios-tint);
+  }
+
+  /* ---------------------------------------------------------------- articles */
+
+  .article-list {
+    @apply space-y-3;
+
+    li {
+      @apply overflow-hidden rounded-xl;
+
+      background: var(--ios-card);
+    }
+
+    a {
+      @apply flex items-center gap-3.5 p-3;
+    }
+
+    img {
+      @apply size-[4.5rem] shrink-0 rounded-lg object-cover;
+    }
+
+    .body {
+      @apply min-w-0 flex-1;
+    }
+
+    .date {
+      @apply text-[12px];
+
+      color: var(--ios-secondary);
+    }
+
+    h2 {
+      @apply mt-0.5 text-[15px] font-semibold leading-snug;
+    }
+
+    .cta {
+      @apply mt-1.5 inline-flex items-center gap-0.5 text-[13px] font-medium;
+
+      color: var(--ios-tint);
+    }
+  }
+
+  /* ----------------------------------------------------------------- gallery */
+
+  .photo-grid {
+    @apply grid grid-cols-2 gap-2;
+
+    button {
+      @apply block w-full cursor-pointer overflow-hidden rounded-xl;
+    }
+
+    img {
+      @apply aspect-square w-full object-cover;
+    }
+  }
+
+  .photo-viewer {
+    @apply flex h-full items-center justify-center;
+
+    img {
+      @apply max-h-full w-full rounded-xl object-contain;
+    }
+  }
+
+  /* ----------------------------------------------------------------- contact */
+
+  .contact-card {
+    @apply flex flex-col items-center gap-1 pb-4 pt-2 text-center;
+
+    img {
+      @apply size-24 rounded-full object-cover;
+    }
+
+    h2 {
+      @apply mt-2 text-[22px] font-semibold;
+    }
+
+    p {
+      color: var(--ios-secondary);
+    }
+  }
+
+  .contact-blurb {
+    @apply pb-4 text-center text-[15px] leading-relaxed;
+
+    color: var(--ios-secondary);
+  }
+
+  .contact-email {
+    @apply mb-6 flex items-center gap-3 rounded-xl p-3.5;
+
+    background: var(--ios-card);
+
+    .glyph {
+      @apply flex-center size-10 shrink-0 rounded-full text-white;
+
+      background: var(--ios-tint);
+    }
+
+    strong {
+      @apply block text-[16px] font-medium;
+    }
+
+    small {
+      @apply block text-[13px];
+
+      color: var(--ios-secondary);
+    }
+  }
+
+  .contact-socials li a {
+    @apply flex items-center gap-3 px-4 py-2.5;
+
+    .glyph {
+      @apply flex-center size-8 shrink-0 rounded-lg;
+
+      img {
+        @apply size-4 object-contain;
+      }
+    }
+
+    .name {
+      @apply text-[16px];
+    }
+  }
+
+  /* ------------------------------------------------------------------ resume */
+
+  .resume-page {
+    @apply overflow-hidden rounded-xl;
+
+    background: var(--ios-card);
+
+    /* The desktop placeholder is the PDF's natural 612×792, which would push a
+       phone sideways — here it just holds a page-ish block of height */
+    .resume-loading {
+      @apply h-[60vh] w-full;
+    }
+
+    canvas {
+      @apply h-auto max-w-full;
+    }
+  }
+
+  .resume-download {
+    @apply mt-4 flex items-center justify-center gap-2 rounded-xl py-3 text-[16px] font-medium;
+
+    background: var(--ios-card);
+    color: var(--ios-tint);
+  }
+
+  /* ---------------------------------------------------------------- terminal */
+
+  /*
+   * The desktop's terminal styling is nested inside `#terminal`, so none of it
+   * reaches here — the transcript is restated rather than shared. Only the
+   * type and colours, though; the shell itself is the same module.
+   */
+  .terminal-screen.mobile {
+    @apply min-h-0 flex-1 cursor-text overflow-y-auto px-4 py-3 font-roboto text-[13px] leading-relaxed text-gray-100;
+
+    p {
+      @apply break-words whitespace-pre-wrap;
+
+      &.input {
+        @apply text-gray-400;
+      }
+
+      &.error {
+        @apply text-red-400;
+      }
+    }
+
+    .prompt-line {
+      @apply flex items-center gap-2;
+
+      .prompt {
+        @apply shrink-0 font-semibold text-[#00A154];
+      }
+
+      input {
+        @apply min-w-0 flex-1 bg-transparent text-gray-100 caret-[#00A154] outline-none;
+      }
+    }
+  }
+
+  .command-chips {
+    @apply flex shrink-0 gap-2 overflow-x-auto px-4 py-3;
+
+    border-top: 1px solid var(--ios-separator);
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      @apply hidden;
+    }
+
+    button {
+      @apply shrink-0 cursor-pointer rounded-full bg-white/10 px-3 py-1.5 font-roboto text-xs text-gray-200 transition-colors active:bg-white/20;
+    }
+  }
+
+  /* ------------------------------------------------------------------- about */
+
+  .about-hero {
+    @apply flex flex-col items-center pb-6 pt-2 text-center;
+
+    img {
+      @apply w-44 object-contain;
+    }
+
+    h2 {
+      @apply mt-3 text-[22px] font-semibold;
+    }
+
+    p {
+      @apply text-[13px];
+
+      color: var(--ios-secondary);
+    }
+  }
+
+  .spec-list li {
+    @apply flex items-baseline justify-between gap-4 px-4 py-2.5 text-[15px];
+
+    .label {
+      @apply shrink-0;
+
+      color: var(--ios-secondary);
+    }
+
+    .value {
+      @apply text-right font-medium;
+    }
+  }
+
+  /* ---------------------------------------------------------------- settings */
+
+  .settings-hint {
+    @apply px-1 pb-3 text-[13px] leading-snug;
+
+    color: var(--ios-secondary);
+  }
+
+  .settings-heading {
+    @apply flex items-end justify-between pt-6;
+
+    .reset {
+      @apply flex cursor-pointer items-center gap-1 pb-2 text-[13px];
+
+      color: var(--ios-tint);
+    }
+  }
+
+  /* iOS segmented control: one track, the selection a raised pill inside it */
+  .segmented {
+    @apply flex gap-1 rounded-[0.6rem] p-1;
+
+    background: var(--ios-fill);
+
+    button {
+      @apply flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg py-1.5 text-[14px] font-medium transition-colors;
+
+      &.selected {
+        background: var(--ios-card);
+        box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+      }
+    }
+  }
+
+  .wallpaper-tiles {
+    @apply grid grid-cols-3 gap-3 pt-1;
+
+    li {
+      @apply flex flex-col items-center gap-1.5;
+    }
+
+    p {
+      @apply truncate text-[12px];
+
+      color: var(--ios-secondary);
+    }
+
+    .thumb {
+      @apply aspect-[3/4] w-full cursor-pointer rounded-xl bg-cover bg-center transition-transform active:scale-95;
+
+      border: 1px solid var(--ios-separator);
+
+      &.selected {
+        outline: 2px solid var(--ios-tint);
+        outline-offset: 2px;
+      }
+
+      &.add {
+        @apply flex-center;
+
+        background: var(--ios-fill);
+        color: var(--ios-secondary);
+      }
+    }
+  }
+
+  /* ---------------------------------------------------------- control centre */
+
+  .cc-sheet-backdrop {
+    @apply fixed inset-0 z-[400];
+  }
+
+  .cc-sheet {
+    @apply glass glass-thick fixed inset-x-2 z-[401] space-y-3 rounded-[28px] p-3;
+
+    top: calc(var(--status-h) + 0.25rem);
+    color: var(--ios-label);
+    animation: cc-sheet-in 260ms cubic-bezier(0.32, 0.72, 0, 1);
+
+    .cc-tiles {
+      @apply grid grid-cols-2 gap-3;
+    }
+
+    .cc-tile {
+      @apply flex cursor-pointer items-center gap-3 rounded-2xl bg-white/40 p-3 text-left transition-colors active:bg-white/60;
+
+      .glyph {
+        @apply flex-center size-9 shrink-0 rounded-full bg-black/10 transition-colors;
+
+        &.on {
+          @apply bg-blue-500 text-white;
+        }
+      }
+
+      strong {
+        @apply block text-[13px] font-semibold leading-tight;
+      }
+
+      small {
+        @apply block text-[11px] leading-tight;
+
+        color: var(--ios-secondary);
+      }
+    }
+
+    /* Same tall filled track as the desktop panel, sized for a thumb */
+    .cc-slider {
+      @apply relative flex items-center;
+
+      svg {
+        @apply pointer-events-none absolute left-3 z-10 mix-blend-luminosity;
+      }
+
+      input[type="range"] {
+        @apply h-12 w-full cursor-pointer appearance-none rounded-2xl border border-black/10 bg-black/15;
+
+        background-image: linear-gradient(
+          to right,
+          rgb(255 255 255 / 0.95) 0 var(--value),
+          transparent var(--value) 100%
+        );
+
+        &::-webkit-slider-thumb {
+          @apply h-12 w-1 appearance-none opacity-0;
+        }
+
+        &::-moz-range-thumb {
+          @apply h-12 w-1 border-0 opacity-0;
+        }
+      }
+    }
+
+    .cc-footer {
+      @apply flex w-full cursor-pointer items-center gap-2 rounded-xl px-3 py-2.5 text-[13px] transition-colors active:bg-black/10;
+    }
+  }
+
+  .dark .cc-sheet {
+    .cc-tile {
+      @apply bg-white/10 active:bg-white/[0.18];
+
+      .glyph {
+        @apply bg-white/15;
+
+        &.on {
+          @apply bg-blue-500;
+        }
+      }
+    }
+
+    .cc-slider input[type="range"] {
+      @apply border-white/15 bg-black/40;
+    }
+
+    .cc-footer {
+      @apply active:bg-white/10;
+    }
+  }
+
+  @keyframes cc-sheet-in {
+    from {
+      opacity: 0;
+      transform: translateY(-12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /*
+   * The open and dismiss tweens are skipped in JS; these cover the CSS-driven
+   * ones — the Control Center's slide and the press states on every tile.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    .mobile-shell {
+      .cc-sheet {
+        animation: none;
+      }
+
+      *,
+      *::before,
+      *::after {
+        transition-duration: 1ms !important;
+      }
+    }
+  }
+}
