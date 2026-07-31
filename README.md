@@ -4,7 +4,20 @@ Interactive portfolio website that recreates the feel of a Mac. Visitors boot th
 
 On a phone it becomes an iOS-style Home Screen instead: same content, same preferences, an interface that suits the device.
 
-![macOS Portfolio screenshot](docs/screenshot.webp)
+<p align="center">
+  <img
+    src="docs/screenshot.webp"
+    alt="The desktop shell: a macOS-style menu bar, tiled Finder window, desktop icons and a magnifying dock."
+    width="67%"
+    align="top"
+  />
+  <img
+    src="docs/screenshot-mobile.webp"
+    alt="The phone shell: an iOS-style Home Screen with app icons, the portfolio hero, and a dock."
+    width="20%"
+    align="top"
+  />
+</p>
 
 ## Features
 
@@ -82,7 +95,9 @@ Two files configure a shell rather than its content:
 
 Shared types (window keys, Finder items, wallpapers, …) are in `src/types.ts`.
 
-Update the image files under `public/images` and `public/files` (or add new assets) to match your own projects. The screenshot above lives at `docs/screenshot.webp` (kept out of `public/` so it is not deployed).
+Update the image files under `public/images` and `public/files` (or add new assets) to match your own projects.
+
+The two screenshots at the top live in `docs/` — `screenshot.webp` for the desktop and `screenshot-mobile.webp` for the phone, kept out of `public/` so they are not deployed. Retake the phone one from a 375×812 viewport (a device toolbar at 2× gives a crisp 750×1624) so it stays the same shape as the one it replaces.
 
 ## Project Structure
 
