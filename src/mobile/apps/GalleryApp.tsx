@@ -4,9 +4,9 @@ import AppFrame from "#mobile/AppFrame";
 import { gallery } from "#constants/index";
 
 /**
- * Photos. The desktop lays its four images out in a hand-placed mosaic; on a
- * phone that becomes a plain square grid, which is both what iOS does and what
- * survives someone adding a fifth photo.
+ * Photos. A square grid, as on the desktop — two columns rather than as many as
+ * fit, since a phone has room for exactly that many before a thumbnail stops
+ * being worth tapping. Tapping one opens it in place instead of in a window.
  */
 const GalleryApp = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
