@@ -44,6 +44,18 @@ Below 768px – or on a touch device too short for a desktop, i.e. a phone held 
 - **Back leaves the app, not the site** – Each app sits one history entry deep, so the phone's Back gesture steps out to the Home Screen.
 - **Honours `prefers-reduced-motion`** – The open and dismiss animations are skipped rather than shortened.
 
+### Linkable
+
+Every window has an address, so a project can be sent to someone rather than described to them, and a refresh lands back where it was.
+
+```
+#/work/securevault                      Finder, inside a project
+#/work/securevault/securevault-png      …with that file open on top
+#/articles  #/gallery  #/terminal       a window that is only itself
+```
+
+Segments are slugs of the names in `src/constants/index.ts`, so renaming a folder changes its URL and nothing has to be kept in step by hand. The same links work on a phone, where they open the matching app — which matters, since a link shared from a desktop is usually opened on one. The URL names only the front window; everything else that was open is restored from the session, keeping addresses short enough to paste.
+
 ### Accessibility
 
 - **Reduced motion** – `prefers-reduced-motion` is honoured in both shells. The boot sequence is skipped, windows open and minimise without travelling, the dock stops magnifying, the hero's letters stop thickening, and every CSS transition and keyframe is collapsed. GSAP opts out through `src/utils/motion.ts`; the CSS side is one rule in `src/index.css`.

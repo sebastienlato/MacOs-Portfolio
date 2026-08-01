@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { INITIAL_Z_INDEX, WINDOW_CONFIG } from "#constants/index";
 import type { FinderItem, WindowKey, WindowState, WindowTile } from "#types";
@@ -46,7 +47,8 @@ interface WindowStore {
 }
 
 const useWindowStore = create<WindowStore>()(
-  immer((set) => ({
+  persist(
+    immer((set) => ({
     windows: WINDOW_CONFIG,
     nextZIndex: INITIAL_Z_INDEX + 1,
     activeWindow: null,
@@ -120,7 +122,28 @@ const useWindowStore = create<WindowStore>()(
         // Picking a window is the whole point of the overview, so leave it
         state.missionControl = false;
       }),
-  }))
+    })),
+    {
+      /*
+       * A refresh used to wipe the desktop while the wallpaper survived, which
+       * read as a bug rather than as a design. The session keeps whatever was
+       * open; the URL, alongside it, names only the front window, so a link
+       * stays short enough to share.
+       *
+       * sessionStorage rather than local: a refresh is the same visit and
+       * should carry on, while arriving tomorrow should start at the desktop
+       * the hero was designed for. Mission Control is left out — an overview
+       * is a thing you are doing, not a thing you have.
+       */
+      name: "portfolio-windows",
+      storage: createJSONStorage(() => sessionStorage),
+      partialize: ({ windows, nextZIndex, activeWindow }) => ({
+        windows,
+        nextZIndex,
+        activeWindow,
+      }),
+    }
+  )
 );
 
 export default useWindowStore;

@@ -32,6 +32,7 @@ import {
 } from "#windows";
 import MobileShell from "#mobile/MobileShell";
 import useIsMobile from "#mobile/useIsMobile";
+import useDeepLink from "#hooks/useDeepLink";
 import useSystemStore from "#store/system";
 
 gsap.registerPlugin(Draggable);
@@ -42,6 +43,9 @@ const App = () => {
   const brightness = useSystemStore((state) => state.brightness);
   const [lightMenuBar, setLightMenuBar] = useState(false);
   const isMobile = useIsMobile();
+
+  // The phone shell reads the same URLs, but drives its own navigation with them
+  useDeepLink(!isMobile);
 
   const backgroundImage =
     wallpaper.type === "gradient" ? wallpaper.value : `url(${wallpaper.value})`;

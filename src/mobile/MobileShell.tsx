@@ -5,6 +5,7 @@ import ControlCenterSheet from "#mobile/ControlCenterSheet";
 import Springboard from "#mobile/Springboard";
 import StatusBar from "#mobile/StatusBar";
 import useMobileStore from "#mobile/store";
+import useMobileDeepLink from "#mobile/useMobileDeepLink";
 import { appById, type MobileAppId } from "#mobile/constants";
 
 import AboutApp from "#mobile/apps/AboutApp";
@@ -38,6 +39,9 @@ const MobileShell = () => {
   const activeApp = useMobileStore((state) => state.activeApp);
   const launch = useMobileStore((state) => state.launch);
   const handleBack = useMobileStore((state) => state.handleBack);
+
+  // Only mounted on a phone, so deep linking is always this shell's job here
+  useMobileDeepLink(true);
 
   /**
    * Back leaves the app, not the site. Every app sits at one history entry

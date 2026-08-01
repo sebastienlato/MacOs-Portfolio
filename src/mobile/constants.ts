@@ -3,6 +3,7 @@ import type { LucideIcon } from "lucide-react";
 
 import { socials } from "#constants/index";
 import type { TerminalTarget } from "#utils/terminal";
+import type { WindowKey } from "#types";
 
 /** Every full-screen app the phone shell can open. */
 export type MobileAppId =
@@ -124,6 +125,23 @@ export const HOME_LINKS: MobileLink[] = socials.map(
     href: link,
   })
 );
+
+/**
+ * Which app a desktop window's URL opens on a phone, so one link works on both.
+ * Files stands in for anything that is a folder or a file on the desktop.
+ */
+export const APP_FOR_WINDOW: Record<WindowKey, MobileAppId> = {
+  finder: "files",
+  txtfile: "files",
+  imgfile: "files",
+  safari: "articles",
+  photos: "gallery",
+  contact: "contact",
+  resume: "resume",
+  terminal: "terminal",
+  settings: "settings",
+  about: "about",
+};
 
 /** Where the terminal's `open <app>` lands on a phone. */
 export const APP_FOR_TARGET: Record<TerminalTarget, MobileAppId> = {
