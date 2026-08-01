@@ -35,21 +35,26 @@ const Photos = () => {
 
         <div className="gallery">
           <ul>
-            {gallery.map(({ id, img }) => (
-              <li
-                key={id}
-                onClick={() =>
-                  openWindow("imgfile", {
-                    id,
-                    name: "Gallery image",
-                    icon: "/images/image.png",
-                    kind: "file",
-                    fileType: "img",
-                    imageUrl: img,
-                  })
-                }
-              >
-                <img src={img} alt={`Gallery image ${id}`} />
+            {gallery.map(({ id, img }, index) => (
+              <li key={id}>
+                {/* A button, so a thumbnail can be reached and opened without
+                    a pointer — the phone's gallery already works this way */}
+                <button
+                  type="button"
+                  aria-label={`Open gallery image ${index + 1}`}
+                  onClick={() =>
+                    openWindow("imgfile", {
+                      id,
+                      name: "Gallery image",
+                      icon: "/images/image.png",
+                      kind: "file",
+                      fileType: "img",
+                      imageUrl: img,
+                    })
+                  }
+                >
+                  <img src={img} alt="" />
+                </button>
               </li>
             ))}
           </ul>
