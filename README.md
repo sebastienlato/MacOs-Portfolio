@@ -96,6 +96,9 @@ npm run typecheck
 # run ESLint
 npm run lint
 
+# run the unit tests (Vitest), or `npm run test:watch` while working
+npm test
+
 # create a production build (type-checks first)
 npm run build
 
@@ -147,6 +150,7 @@ src/
   store/          # Zustand stores for window, layout, location, snap and system state
   constants/      # Portfolio content configuration
   utils/          # Terminal engine, menu actions, wallpaper luminance sampling
+  test/           # Vitest setup; the specs themselves sit beside what they test
   index.css       # Desktop styles, Liquid Glass utilities, design tokens
   mobile.css      # Phone styles (imported by index.css)
   types.ts        # Shared TypeScript types

@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
@@ -22,5 +23,19 @@ export default defineConfig({
       "#utils": resolve(root, "src/utils"),
       "#types": resolve(root, "src/types.ts"),
     },
+  },
+  /*
+   * Tests live beside what they test, and share the aliases above so a spec
+   * imports a module by the same name the app does.
+   *
+   * Node rather than a DOM environment: everything under test is pure logic
+   * over `src/constants` — routes, the terminal engine, the window store — and
+   * pulling in jsdom to satisfy one `sessionStorage` reference would be a
+   * dependency bought for a single line. `setup.ts` supplies that instead.
+   */
+  test: {
+    environment: "node",
+    include: ["src/**/*.test.ts"],
+    setupFiles: ["src/test/setup.ts"],
   },
 });
