@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronRight, ExternalLink } from "lucide-react";
 
 import AppFrame from "#mobile/AppFrame";
 import useMobileStore from "#mobile/store";
+import { writeFilesHash } from "#mobile/useMobileDeepLink";
 import { locations } from "#constants/index";
 import useLocationStore from "#store/location";
 import type { FinderItem } from "#types";
@@ -80,6 +81,10 @@ const FilesApp = () => {
 
   const current = stack.at(-1) ?? null;
   const parent = stack.at(-2) ?? null;
+
+  // Files is the one app whose address goes deeper than the app itself, so it
+  // writes its own rather than letting the shell describe it as just "Files"
+  useEffect(() => writeFilesHash(stack), [stack]);
 
   const open = (item: FinderItem) => {
     if (item.fileType === "pdf") return openApp("resume");

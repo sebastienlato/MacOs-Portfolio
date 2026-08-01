@@ -11,8 +11,11 @@ import { useEffect, useState } from "react";
 const MOBILE_QUERY =
   "(max-width: 767px), (max-height: 500px) and (pointer: coarse)";
 
-const matches = () =>
+/** The same test outside React, for the work that happens before first render. */
+export const isMobileViewport = () =>
   typeof window !== "undefined" && window.matchMedia(MOBILE_QUERY).matches;
+
+const matches = isMobileViewport;
 
 /**
  * Which shell to render. Read synchronously on the first render so the desktop
