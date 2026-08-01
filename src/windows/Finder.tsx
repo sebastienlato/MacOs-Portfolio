@@ -83,24 +83,35 @@ const Finder = () => {
 
       <ul>
         {entries.map((item) => (
-          <li
-            key={item.id}
-            onClick={() => setActiveLocation(item)}
-            className={clsx(
-              item.id === activeLocation?.id ? "active" : "not-active",
-            )}
-          >
-            <img
-              src={item.icon}
-              className={clsx("w-4", accented && "accent-glyph")}
-              style={
-                accented
-                  ? ({ "--icon": `url(${item.icon})` } as CSSProperties)
-                  : undefined
-              }
-              alt={item.name}
-            />
-            <p className="text-sm font-medium truncate">{item.name}</p>
+          <li key={item.id}>
+            {/*
+              A real button inside the <li>, as on the desktop icons: the row
+              was a bare <li> and so reachable only by pointer. The <li> keeps
+              the list semantics and nothing else — every style sits on the
+              button, which is what the visitor is actually pointing at.
+            */}
+            <button
+              type="button"
+              onClick={() => setActiveLocation(item)}
+              aria-current={item.id === activeLocation?.id ? "true" : undefined}
+              className={clsx(
+                item.id === activeLocation?.id ? "active" : "not-active",
+              )}
+            >
+              <img
+                src={item.icon}
+                className={clsx("w-4", accented && "accent-glyph")}
+                style={
+                  accented
+                    ? ({ "--icon": `url(${item.icon})` } as CSSProperties)
+                    : undefined
+                }
+                // The name is in the <p> beside it; repeating it here would
+                // have a screen reader read every row twice
+                alt=""
+              />
+              <p className="text-sm font-medium truncate">{item.name}</p>
+            </button>
           </li>
         ))}
       </ul>
@@ -141,9 +152,11 @@ const Finder = () => {
           {view === "icon" && (
             <ul className="icon-view">
               {items.map((item) => (
-                <li key={item.id} onClick={() => openItem(item)}>
-                  <img src={item.icon} alt={item.name} />
-                  <p>{item.name}</p>
+                <li key={item.id}>
+                  <button type="button" onClick={() => openItem(item)}>
+                    <img src={item.icon} alt="" />
+                    <p>{item.name}</p>
+                  </button>
                 </li>
               ))}
             </ul>
@@ -160,7 +173,23 @@ const Finder = () => {
                 </thead>
                 <tbody>
                   {items.map((item) => (
-                    <tr key={item.id} onClick={() => openItem(item)}>
+                    /*
+                      The row itself takes focus, rather than a button inside
+                      it. A button cannot wrap two cells, and putting one in
+                      the Name cell alone would leave the keyboard aiming at
+                      something narrower than what the pointer clicks.
+                    */
+                    <tr
+                      key={item.id}
+                      tabIndex={0}
+                      onClick={() => openItem(item)}
+                      onKeyDown={(e) => {
+                        if (e.key !== "Enter" && e.key !== " ") return;
+                        // Space would scroll the list out from under the row
+                        e.preventDefault();
+                        openItem(item);
+                      }}
+                    >
                       {/* The flex box is inside the cell, not the cell itself:
                         display:flex on a <td> drops it out of the table
                         layout and the columns stop lining up */}
@@ -182,16 +211,25 @@ const Finder = () => {
             <div className="column-view">
               <ul>
                 {items.map((item) => (
-                  <li
-                    key={item.id}
-                    className={clsx(item.id === drilled?.id && "selected")}
-                    onClick={() => selectInColumn(item)}
-                  >
-                    <img src={item.icon} alt="" />
-                    <span className="truncate">{item.name}</span>
-                    {item.kind === "folder" && (
-                      <span className="chevron">›</span>
-                    )}
+                  <li key={item.id}>
+                    <button
+                      type="button"
+                      className={clsx(item.id === drilled?.id && "selected")}
+                      onClick={() => selectInColumn(item)}
+                      // A folder here opens the next column rather than
+                      // navigating, which is exactly what expanded describes
+                      aria-expanded={
+                        item.kind === "folder"
+                          ? item.id === drilled?.id
+                          : undefined
+                      }
+                    >
+                      <img src={item.icon} alt="" />
+                      <span className="truncate">{item.name}</span>
+                      {item.kind === "folder" && (
+                        <span className="chevron">›</span>
+                      )}
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -201,9 +239,11 @@ const Finder = () => {
               {drilled && (
                 <ul>
                   {(drilled.children ?? []).map((item) => (
-                    <li key={item.id} onClick={() => openItem(item)}>
-                      <img src={item.icon} alt="" />
-                      <span className="truncate">{item.name}</span>
+                    <li key={item.id}>
+                      <button type="button" onClick={() => openItem(item)}>
+                        <img src={item.icon} alt="" />
+                        <span className="truncate">{item.name}</span>
+                      </button>
                     </li>
                   ))}
                 </ul>
