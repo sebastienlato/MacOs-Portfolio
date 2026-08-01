@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Working notes for picking a session back up, not project documentation
+SESSION_HANDOFF.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
