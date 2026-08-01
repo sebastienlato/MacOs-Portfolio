@@ -4,6 +4,7 @@ import gsap from "gsap";
 
 import useWindowStore from "#store/window";
 import { seconds } from "#utils/motion";
+import type { WindowKey } from "#types";
 
 const MENU_BAR_HEIGHT = 40;
 const GAP = 24;
@@ -60,9 +61,15 @@ const MissionControl = () => {
   const restore = useRef(new Map<string, gsap.TweenVars>());
 
   useGSAP(() => {
+    const { windows } = useWindowStore.getState();
+
     const els = [...document.querySelectorAll<HTMLElement>("main > section[id]")]
       .filter((el) => getComputedStyle(el).display !== "none")
-      .filter((el) => el.id in useWindowStore.getState().windows);
+      .filter((el) => el.id in windows)
+      // A minimized window is still displayed — it is parked in the dock as
+      // its own thumbnail — but it is not on the desktop to be overviewed,
+      // and dragging it into the grid would empty its slot
+      .filter((el) => !windows[el.id as WindowKey].isMinimized);
 
     if (!missionControl) {
       // Put everything back exactly where the overview found it

@@ -9,6 +9,7 @@ import { Tooltip } from "react-tooltip";
 import gsap from "gsap";
 
 import { dockApps, locations } from "#constants/index";
+import { APP_MENUS } from "#constants/menus";
 import { useGSAP } from "@gsap/react";
 import useWindowStore from "#store/window";
 import useLocationStore from "#store/location";
@@ -33,6 +34,19 @@ const Dock = () => {
   const [menu, setMenu] = useState<DockMenuState | null>(null);
 
   const closeMenu = useCallback(() => setMenu(null), []);
+
+  /*
+   * Minimized windows live to the right of the divider, beside Trash, where
+   * macOS keeps them. Each gets an empty slot; the window itself flies in and
+   * parks on top of it, so what you see there is the window rather than a
+   * picture of it — see WindowWrapper.
+   *
+   * Ordered by the window table rather than by when each was minimized, so a
+   * thumbnail never changes places under the pointer.
+   */
+  const minimized = (Object.keys(windows) as WindowKey[]).filter(
+    (key) => windows[key].isOpen && windows[key].isMinimized
+  );
 
   useGSAP(() => {
     const dock = dockRef.current;
@@ -158,7 +172,20 @@ const Dock = () => {
           return (
             <Fragment key={id}>
               {separatorBefore && (
-                <span className="dock-divider" aria-hidden="true" />
+                <>
+                  <span className="dock-divider" aria-hidden="true" />
+
+                  {minimized.map((key) => (
+                    <button
+                      key={key}
+                      type="button"
+                      className="dock-slot"
+                      data-dock-slot={key}
+                      aria-label={`${APP_MENUS[key].name}, minimized`}
+                      onClick={() => openWindow(key)}
+                    />
+                  ))}
+                </>
               )}
               <div className="relative flex justify-center">
                 <button
