@@ -4,7 +4,7 @@ import clsx from "clsx";
 
 import WindowWrapper from "#hoc/WindowWrapper";
 import { WindowControls } from "#components";
-import { wallpapers } from "#constants/index";
+import { accents, iconStyles, wallpapers } from "#constants/index";
 import useSystemStore from "#store/system";
 import type { Appearance, Wallpaper } from "#types";
 
@@ -25,6 +25,10 @@ const Settings = () => {
     wallpaper,
     appearance,
     theme,
+    accent,
+    iconStyle,
+    setAccent,
+    setIconStyle,
     setWallpaper,
     setCustomWallpaper,
     resetWallpaper,
@@ -82,6 +86,49 @@ const Settings = () => {
             >
               <Icon size={16} />
               {label}
+            </button>
+          ))}
+        </div>
+
+        <div className="section-title">
+          <h3>Accent colour</h3>
+        </div>
+        <p className="hint">
+          Used for selections, highlights, and the focus ring.
+        </p>
+
+        <ul className="accent-swatches">
+          {accents.map((option) => (
+            <li key={option.id}>
+              <button
+                type="button"
+                className={clsx(accent.id === option.id && "selected")}
+                style={{ backgroundColor: option.value }}
+                onClick={() => setAccent(option)}
+                aria-label={option.name}
+                aria-pressed={accent.id === option.id}
+              />
+            </li>
+          ))}
+        </ul>
+
+        <div className="section-title">
+          <h3>Icon style</h3>
+        </div>
+        <p className="hint">
+          How app icons are drawn — Tinted takes the accent colour.
+        </p>
+
+        <div className="appearance">
+          {iconStyles.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              className={clsx(iconStyle === option.id && "selected")}
+              onClick={() => setIconStyle(option.id)}
+              aria-pressed={iconStyle === option.id}
+            >
+              {option.name}
             </button>
           ))}
         </div>

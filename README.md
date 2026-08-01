@@ -32,6 +32,8 @@ On a phone it becomes an iOS-style Home Screen instead: same content, same prefe
 - **Finder** – Icon, list and column views over a configurable folder tree, with a sidebar, path bar and working Trash.
 - **Desktop** – Icons with click, ⌘/⇧ multi-select, rubber-band selection and drag, plus right-click menus on the desktop and the dock.
 - **Appearance** – Light, Dark or Auto (follows the OS and re-resolves when it flips), alongside macOS-style wallpapers and custom image upload. Persisted in `localStorage`.
+- **Accent colour** – Eight colours, running through every selection, highlight, sidebar glyph and focus ring in both shells. One CSS variable on `<main>`; nothing is hardcoded blue any more.
+- **Icon styles** – macOS 26's Default, Dark, Clear and Tinted. Worked out of flat artwork rather than layered icons: Dark and Clear are filters, and Tinted is a masked overlay in `mix-blend-mode: color`, which takes hue from the accent and leaves each icon's own light and shade underneath — so a tinted icon keeps its modelling instead of flattening to a silhouette.
 - **Interactive terminal** – A zsh-style terminal with command history. Try `help`, `ls`, `open safari`, `stack`, `neofetch`, or `sudo`.
 
 ### The phone

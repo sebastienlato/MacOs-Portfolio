@@ -1,9 +1,10 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { wallpapers } from "#constants/index";
-import type { Appearance, Theme, Wallpaper } from "#types";
+import { accents, wallpapers } from "#constants/index";
+import type { Accent, Appearance, IconStyle, Theme, Wallpaper } from "#types";
 
 const DEFAULT_WALLPAPER = wallpapers[0];
+const DEFAULT_ACCENT = accents[0];
 
 const prefersDark = () =>
   window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
@@ -18,6 +19,10 @@ interface SystemStore {
   appearance: Appearance;
   /** What that choice currently resolves to — what the UI actually renders. */
   theme: Theme;
+  /** The colour every selection, highlight and focus ring is drawn from. */
+  accent: Accent;
+  /** How app icons are recoloured — macOS 26's Default/Dark/Clear/Tinted. */
+  iconStyle: IconStyle;
   spotlightOpen: boolean;
   controlCenterOpen: boolean;
   notificationCenterOpen: boolean;
@@ -28,6 +33,8 @@ interface SystemStore {
   setCustomWallpaper: (dataUrl: string) => void;
   resetWallpaper: () => void;
   setAppearance: (appearance: Appearance) => void;
+  setAccent: (accent: Accent) => void;
+  setIconStyle: (iconStyle: IconStyle) => void;
   toggleTheme: () => void;
   /** Re-resolves "auto" after the OS flips between light and dark. */
   syncSystemTheme: () => void;
@@ -45,7 +52,14 @@ interface SystemStore {
 /** The slice of the store that is written to localStorage. */
 type PersistedSystem = Pick<
   SystemStore,
-  "wallpaper" | "appearance" | "theme" | "wifiEnabled" | "brightness" | "volume"
+  | "wallpaper"
+  | "appearance"
+  | "theme"
+  | "accent"
+  | "iconStyle"
+  | "wifiEnabled"
+  | "brightness"
+  | "volume"
 >;
 
 const useSystemStore = create<SystemStore>()(
@@ -54,6 +68,8 @@ const useSystemStore = create<SystemStore>()(
       wallpaper: DEFAULT_WALLPAPER,
       appearance: "light",
       theme: "light",
+      accent: DEFAULT_ACCENT,
+      iconStyle: "default",
       spotlightOpen: false,
       controlCenterOpen: false,
       notificationCenterOpen: false,
@@ -77,6 +93,10 @@ const useSystemStore = create<SystemStore>()(
 
       setAppearance: (appearance) =>
         set({ appearance, theme: resolveTheme(appearance) }),
+
+      setAccent: (accent) => set({ accent }),
+
+      setIconStyle: (iconStyle) => set({ iconStyle }),
 
       // Flipping the theme by hand is an explicit choice, so it drops "auto"
       toggleTheme: () =>
@@ -126,10 +146,27 @@ const useSystemStore = create<SystemStore>()(
         wallpaper: state.wallpaper,
         appearance: state.appearance,
         theme: state.theme,
+        accent: state.accent,
+        iconStyle: state.iconStyle,
         wifiEnabled: state.wifiEnabled,
         brightness: state.brightness,
         volume: state.volume,
       }),
+      /**
+       * The accent is stored as a whole object, so an old visit would keep a
+       * stale copy of a colour that has since been adjusted. Re-resolving it by
+       * id on every rehydrate means the palette in `constants` stays the truth
+       * — the same problem the wallpaper migration below solves once.
+       */
+      merge: (persisted, current) => {
+        const state = { ...current, ...(persisted as PersistedSystem) };
+        return {
+          ...state,
+          accent:
+            accents.find((accent) => accent.id === state.accent?.id) ??
+            DEFAULT_ACCENT,
+        };
+      },
       migrate: (persisted, version) => {
         let state = persisted as PersistedSystem;
         if (!state) return state;

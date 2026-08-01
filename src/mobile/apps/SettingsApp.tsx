@@ -3,7 +3,7 @@ import { ImagePlus, Moon, RotateCcw, Sun, SunMoon } from "lucide-react";
 import clsx from "clsx";
 
 import AppFrame from "#mobile/AppFrame";
-import { wallpapers } from "#constants/index";
+import { accents, iconStyles, wallpapers } from "#constants/index";
 import useSystemStore from "#store/system";
 import type { Appearance, Wallpaper } from "#types";
 
@@ -31,6 +31,10 @@ const SettingsApp = () => {
     wallpaper,
     appearance,
     theme,
+    accent,
+    iconStyle,
+    setAccent,
+    setIconStyle,
     setWallpaper,
     setCustomWallpaper,
     resetWallpaper,
@@ -76,6 +80,40 @@ const SettingsApp = () => {
           >
             <Icon size={15} />
             {label}
+          </button>
+        ))}
+      </div>
+
+      <h2 className="files-section settings-gap">Accent colour</h2>
+
+      <ul className="accent-swatches">
+        {accents.map((option) => (
+          <li key={option.id}>
+            <button
+              type="button"
+              className={clsx(accent.id === option.id && "selected")}
+              style={{ backgroundColor: option.value }}
+              onClick={() => setAccent(option)}
+              aria-label={option.name}
+              aria-pressed={accent.id === option.id}
+            />
+          </li>
+        ))}
+      </ul>
+
+      <h2 className="files-section settings-gap">Icon style</h2>
+      <p className="settings-hint">Tinted takes the accent colour.</p>
+
+      <div className="segmented">
+        {iconStyles.map((option) => (
+          <button
+            key={option.id}
+            type="button"
+            className={clsx(iconStyle === option.id && "selected")}
+            aria-pressed={iconStyle === option.id}
+            onClick={() => setIconStyle(option.id)}
+          >
+            {option.name}
           </button>
         ))}
       </div>

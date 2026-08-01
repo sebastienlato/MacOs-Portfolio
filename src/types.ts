@@ -68,6 +68,22 @@ export interface Wallpaper {
   value: string;
 }
 
+/** The colour macOS runs through selections, highlights and the focus ring. */
+export interface Accent {
+  id: string;
+  name: string;
+  value: string;
+  /** Text drawn on top of the accent — not white for the pale ones. */
+  on: string;
+}
+
+/**
+ * macOS 26's icon appearances. "Default" is the artwork as drawn; the other
+ * three are recolourings of it, which is why they can be approximated here
+ * from the same flat images.
+ */
+export type IconStyle = "default" | "dark" | "clear" | "tinted";
+
 export interface DockApp {
   id: string;
   name: string;

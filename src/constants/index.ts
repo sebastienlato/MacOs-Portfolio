@@ -1,7 +1,9 @@
 import type {
+  Accent,
   BlogPost,
   DockApp,
   FinderItem,
+  IconStyle,
   Social,
   TechStackEntry,
   Wallpaper,
@@ -109,6 +111,31 @@ const wallpapers: Wallpaper[] = [
     type: "gradient",
     value: "linear-gradient(180deg, #0b0b1f 0%, #1b1b3a 55%, #34345c 100%)",
   },
+];
+
+/**
+ * The accent colours macOS offers. Every selection, highlight and focus ring
+ * in the app is drawn from whichever one is picked.
+ *
+ * `on` is the text that sits on top: white everywhere except yellow, where it
+ * would be unreadable — Apple ships that contrast, this does not have to.
+ */
+const accents: Accent[] = [
+  { id: "blue", name: "Blue", value: "#0a84ff", on: "#ffffff" },
+  { id: "purple", name: "Purple", value: "#a24bd6", on: "#ffffff" },
+  { id: "pink", name: "Pink", value: "#f4479b", on: "#ffffff" },
+  { id: "red", name: "Red", value: "#ff453a", on: "#ffffff" },
+  { id: "orange", name: "Orange", value: "#ff9f0a", on: "#3d2600" },
+  { id: "yellow", name: "Yellow", value: "#ffd60a", on: "#3d3000" },
+  { id: "green", name: "Green", value: "#30d158", on: "#04310f" },
+  { id: "graphite", name: "Graphite", value: "#8e8e93", on: "#ffffff" },
+];
+
+const iconStyles: { id: IconStyle; name: string }[] = [
+  { id: "default", name: "Default" },
+  { id: "dark", name: "Dark" },
+  { id: "clear", name: "Clear" },
+  { id: "tinted", name: "Tinted" },
 ];
 
 const dockApps: DockApp[] = [
@@ -294,6 +321,8 @@ export {
   navIcons,
   dockApps,
   wallpapers,
+  accents,
+  iconStyles,
   aboutSpecs,
   blogPosts,
   techStack,

@@ -1,4 +1,10 @@
-import { Fragment, useCallback, useRef, useState } from "react";
+import {
+  Fragment,
+  useCallback,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { Tooltip } from "react-tooltip";
 import gsap from "gsap";
 
@@ -157,7 +163,11 @@ const Dock = () => {
               <div className="relative flex justify-center">
                 <button
                   type="button"
-                  className="dock-icon"
+                  className="dock-icon app-icon-art"
+                  // The icon's own URL, which masks the Tinted overlay to it
+                  style={
+                    { "--icon": `url(/images/${icon})` } as CSSProperties
+                  }
                   aria-label={name}
                   data-tooltip-id="dock-tooltip"
                   data-tooltip-content={name}
