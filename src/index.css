@@ -873,6 +873,13 @@ body {
     @apply absolute bottom-0 right-0 size-4 cursor-nwse-resize z-10;
   }
 
+  /* A window parked in the dock is a picture of itself, not a window — the
+     slot underneath it takes the click. Its contents are put beyond reach of
+     the keyboard too, with `inert` in WindowWrapper. */
+  .minimized {
+    @apply pointer-events-none;
+  }
+
   /* Once the user resizes a window, its content column stretches to fill it */
   .user-resized {
     @apply flex flex-col;
@@ -1168,6 +1175,19 @@ body {
       img {
         @apply object-cover object-center;
       }
+    }
+
+    /*
+     * Where a minimized window parks. Deliberately close to empty: the window
+     * itself lands on top of it, so this is the well underneath rather than
+     * anything you look at. It is visible for the length of the flight, which
+     * is the dock opening a gap for what is on its way in.
+     *
+     * Square, while a window thumbnail is not, so the well shows above and
+     * below it — the same letterboxing the real dock has.
+     */
+    .dock-slot {
+      @apply size-14 3xl:size-20 shrink-0 cursor-pointer rounded-lg bg-black/10 dark:bg-white/10;
     }
 
     /* Full-height hairline separating the apps from Trash, as in macOS */
