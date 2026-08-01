@@ -1098,8 +1098,68 @@ body {
       @apply glass glass-tight relative justify-between rounded-[26px] p-2 flex items-end gap-1.5;
     }
 
+    /*
+     * The app's name above its icon, the way the dock labels one.
+     *
+     * react-tooltip nests a content wrapper inside the bubble and gives both
+     * `background: inherit` — that is how it paints the arrow the same colour
+     * as the plate. With a translucent fill the tint therefore lands twice,
+     * one rounded box inside the other. The wrapper is stripped back to bare
+     * text and the material lives on the bubble alone.
+     *
+     * The arrow is the same problem in miniature, solved the same way — see
+     * where it is clipped below.
+     *
+     * The `!` prefixes are not decoration — react-tooltip ships its own class
+     * for each of these and would otherwise win on order.
+     */
     .tooltip {
-      @apply !py-1 !px-3 !w-fit !text-center !text-xs !rounded-md !bg-accent-soft !text-accent-label !shadow-2xl;
+      @apply !w-fit !rounded-md !px-2 !py-[3px] !text-center !text-[11px] !leading-4 !opacity-100;
+
+      background-color: rgb(var(--glass-tint) / var(--glass-chrome-alpha)) !important;
+      backdrop-filter: blur(var(--glass-chrome-blur)) var(--glass-backdrop);
+      -webkit-backdrop-filter: blur(var(--glass-chrome-blur))
+        var(--glass-backdrop);
+      border: 1px solid var(--glass-hairline);
+      box-shadow: 0 4px 12px -4px rgb(0 0 0 / 0.35);
+      color: #1d1d1f !important;
+
+      .dark & {
+        color: #f5f5f7 !important;
+      }
+
+      .react-tooltip-content-wrapper {
+        @apply !p-0;
+        background: none !important;
+      }
+
+      /*
+       * The arrow is react-tooltip's 11px square turned 45°, positioned so
+       * half of it sits under the plate. That buried half is what tinted the
+       * plate a second time. Clipping the square to the half that points away
+       * leaves the triangle and nothing behind it, so the fill lands once.
+       *
+       * Rotated 45°, the corner that ends up pointing down is the bottom
+       * right one — so those are the two edges that carry the hairline, and
+       * the triangle to keep is the one they meet in.
+       */
+      .react-tooltip-arrow {
+        clip-path: polygon(100% 0, 100% 100%, 0 100%);
+        border-right: 1px solid var(--glass-hairline);
+        border-bottom: 1px solid var(--glass-hairline);
+        backdrop-filter: blur(var(--glass-chrome-blur)) var(--glass-backdrop);
+        -webkit-backdrop-filter: blur(var(--glass-chrome-blur))
+          var(--glass-backdrop);
+        /*
+         * react-tooltip parks the square so that its centre — which is the
+         * flat edge of the half being kept — lands *inside* the plate, which
+         * is the doubled tint all over again in a smaller place. A rotated
+         * square's centre is half its diagonal from the tip, so this drops it
+         * to the plate's own edge, less 1px of overlap to stop the plate's
+         * hairline drawing a line across the base of the arrow.
+         */
+        bottom: calc(1px - var(--rt-arrow-size) / 1.414) !important;
+      }
     }
 
     .dock-icon {
