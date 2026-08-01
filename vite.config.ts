@@ -4,10 +4,12 @@ import tailwindcss from "@tailwindcss/vite";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
+import seo from "./scripts/seo-plugin";
+
 const root = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), seo()],
   resolve: {
     alias: {
       "#components": resolve(root, "src/components"),

@@ -44,6 +44,12 @@ Below 768px – or on a touch device too short for a desktop, i.e. a phone held 
 - **Back leaves the app, not the site** – Each app sits one history entry deep, so the phone's Back gesture steps out to the Home Screen.
 - **Honours `prefers-reduced-motion`** – The open and dismiss animations are skipped rather than shortened.
 
+### Findable
+
+The desktop keeps its content inside windows, and a window that has not been opened is not in the DOM — so a crawler arriving here found a hero, a dock, and no prose at all. `scripts/seo-plugin.ts` writes the substance into `index.html` at build time: `Person`, `WebSite` and `SoftwareApplication` structured data in the head, and a plain readable page in a `<noscript>` for anything that does not run JavaScript, which is also what a visitor with scripts turned off deserves to get. Both are generated from `src/constants`, so neither can drift from what the app shows.
+
+`robots.txt` is served from `public/`; `sitemap.xml` is emitted by the same plugin.
+
 ### Linkable
 
 Every window has an address, so a project can be sent to someone rather than described to them, and a refresh lands back where it was.

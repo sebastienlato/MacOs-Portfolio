@@ -16,7 +16,13 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    /* The SEO plugin reads src/constants, which resolves its types through
+       this alias — so the build-time project needs it as much as the app's. */
+    "paths": {
+      "#*": ["./src/*"]
+    }
   },
-  "include": ["vite.config.ts"]
+  "include": ["vite.config.ts", "scripts/**/*.ts"]
 }
