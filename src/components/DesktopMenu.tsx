@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import useSystemStore from "#store/system";
 import useWindowStore from "#store/window";
 import useLocationStore from "#store/location";
+import useDesktopStore from "#store/desktop";
 import { locations, NON_DESKTOP_SELECTOR } from "#constants/index";
 import ContextMenu, { type ContextMenuItem } from "#components/ContextMenu";
 
@@ -16,6 +17,10 @@ const DesktopMenu = () => {
   const { openWindow } = useWindowStore();
   const { setActiveLocation } = useLocationStore();
   const { theme, toggleTheme } = useSystemStore();
+  const resetIcons = useDesktopStore((state) => state.resetIcons);
+  const isTidy = useDesktopStore(
+    (state) => Object.keys(state.icons).length === 0
+  );
 
   const close = useCallback(() => setMenu(null), []);
 
@@ -49,6 +54,18 @@ const DesktopMenu = () => {
       label: "Open Terminal",
       onSelect: () => openWindow("terminal"),
     },
+    // Only offered once there is something to tidy, rather than sitting there
+    // as an item that visibly does nothing
+    ...(isTidy
+      ? []
+      : [
+          { id: "d0", divider: true },
+          {
+            id: "clean-up",
+            label: "Clean Up",
+            onSelect: resetIcons,
+          },
+        ]),
     { id: "d1", divider: true },
     {
       id: "wallpaper",

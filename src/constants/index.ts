@@ -344,7 +344,7 @@ const WORK_LOCATION: FinderItem = {
       name: "SecureVault",
       icon: "/images/folder.png",
       kind: "folder",
-      windowPosition: "top-[5vh] left-5", // optional: Finder window position
+      desktopPosition: "top-[5vh] left-5", // where its icon sits on the desktop
       children: [
         {
           id: 1,
@@ -391,7 +391,7 @@ const WORK_LOCATION: FinderItem = {
       name: "PetSitterQR",
       icon: "/images/folder.png",
       kind: "folder",
-      windowPosition: "top-[20vh] left-7",
+      desktopPosition: "top-[20vh] left-7",
       children: [
         {
           id: 1,
@@ -440,7 +440,7 @@ const WORK_LOCATION: FinderItem = {
       name: "SleepSoundsApp",
       icon: "/images/folder.png",
       kind: "folder",
-      windowPosition: "top-[33vh] left-7",
+      desktopPosition: "top-[33vh] left-7",
       children: [
         {
           id: 1,
