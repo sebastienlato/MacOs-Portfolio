@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import gsap from "gsap";
 import { Draggable } from "gsap/Draggable";
 import clsx from "clsx";
@@ -41,6 +41,8 @@ const App = () => {
   const wallpaper = useSystemStore((state) => state.wallpaper);
   const theme = useSystemStore((state) => state.theme);
   const brightness = useSystemStore((state) => state.brightness);
+  const accent = useSystemStore((state) => state.accent);
+  const iconStyle = useSystemStore((state) => state.iconStyle);
   const [lightMenuBar, setLightMenuBar] = useState(false);
   const isMobile = useIsMobile();
 
@@ -85,9 +87,18 @@ const App = () => {
 
   return (
     <main
-      style={{ backgroundImage }}
+      /* The accent is handed to CSS as a variable rather than a class, so one
+         set of rules serves all eight colours and a ninth costs nothing */
+      style={
+        {
+          backgroundImage,
+          "--color-accent": accent.value,
+          "--color-accent-on": accent.on,
+        } as CSSProperties
+      }
       className={clsx(
         "desktop",
+        `icons-${iconStyle}`,
         theme === "dark" && "dark",
         lightMenuBar && "menu-bar-on-light"
       )}

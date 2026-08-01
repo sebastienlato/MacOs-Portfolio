@@ -27,7 +27,8 @@
     --ios-secondary: rgb(60 60 67 / 0.6);
     --ios-separator: rgb(60 60 67 / 0.18);
     --ios-fill: rgb(120 120 128 / 0.12);
-    --ios-tint: #007aff;
+    /* iOS runs the accent through its own controls too */
+    --ios-tint: var(--color-accent-label);
 
     @apply fixed inset-0 overflow-hidden select-none;
   }
@@ -39,7 +40,7 @@
     --ios-secondary: rgb(235 235 245 / 0.6);
     --ios-separator: rgb(84 84 88 / 0.5);
     --ios-fill: rgb(120 120 128 / 0.32);
-    --ios-tint: #0a84ff;
+    --ios-tint: var(--color-accent-label);
   }
 
   /* ---------------------------------------------------------------- status */
@@ -255,7 +256,7 @@
     --ios-secondary: rgb(235 235 245 / 0.6);
     --ios-separator: rgb(255 255 255 / 0.12);
     --ios-fill: rgb(120 120 128 / 0.32);
-    --ios-tint: #0a84ff;
+    --ios-tint: var(--color-accent-label);
     --glass-tint: 8 8 12;
     --glass-chrome-alpha: 0.62;
     --glass-backdrop: saturate(1.5) brightness(0.85);
@@ -609,6 +610,26 @@
     color: var(--ios-secondary);
   }
 
+  /* A section that follows a control rather than opening the screen */
+  .settings-gap {
+    @apply pt-6;
+  }
+
+  .accent-swatches {
+    @apply flex flex-wrap gap-3 pb-2;
+
+    button {
+      @apply size-8 cursor-pointer rounded-full transition-transform active:scale-90;
+
+      border: 1px solid rgb(0 0 0 / 0.12);
+
+      &.selected {
+        outline: 2px solid var(--ios-label);
+        outline-offset: 2px;
+      }
+    }
+  }
+
   .settings-heading {
     @apply flex items-end justify-between pt-6;
 
@@ -691,7 +712,7 @@
         @apply flex-center size-9 shrink-0 rounded-full bg-black/10 transition-colors;
 
         &.on {
-          @apply bg-blue-500 text-white;
+          @apply bg-accent text-accent-on;
         }
       }
 
@@ -746,7 +767,7 @@
         @apply bg-white/15;
 
         &.on {
-          @apply bg-blue-500;
+          @apply bg-accent;
         }
       }
     }

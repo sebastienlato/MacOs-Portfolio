@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { Columns3, LayoutGrid, List, Search } from "lucide-react";
 import clsx from "clsx";
 
@@ -68,7 +68,16 @@ const Finder = () => {
     openItem(item);
   };
 
-  const renderSidebarList = (name: string, entries: FinderItem[]) => (
+  /**
+   * `accented` marks a list whose glyphs are flat monochrome SVGs, which lets
+   * CSS mask them and paint them in the accent colour. The project list below
+   * is full-colour folder art, and masking that would flatten it to a blob.
+   */
+  const renderSidebarList = (
+    name: string,
+    entries: FinderItem[],
+    accented = false
+  ) => (
     <div>
       <h3>{name}</h3>
 
@@ -81,7 +90,16 @@ const Finder = () => {
               item.id === activeLocation?.id ? "active" : "not-active",
             )}
           >
-            <img src={item.icon} className="w-4" alt={item.name} />
+            <img
+              src={item.icon}
+              className={clsx("w-4", accented && "accent-glyph")}
+              style={
+                accented
+                  ? ({ "--icon": `url(${item.icon})` } as CSSProperties)
+                  : undefined
+              }
+              alt={item.name}
+            />
             <p className="text-sm font-medium truncate">{item.name}</p>
           </li>
         ))}
@@ -115,7 +133,7 @@ const Finder = () => {
 
       <div className="flex h-full min-h-0">
         <div className="sidebar">
-          {renderSidebarList("Favorites", Object.values(locations))}
+          {renderSidebarList("Favorites", Object.values(locations), true)}
           {renderSidebarList("My Projects", locations.work.children ?? [])}
         </div>
 

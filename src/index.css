@@ -22,7 +22,24 @@ body {
   --font-roboto: "Roboto Mono", monospace;
   --breakpoint-3xl: 1920px;
 
-  /* macOS draws its focus ring in the accent colour; this is the default one */
+  /*
+   * The accent, as Tailwind colours, so `bg-accent`, `text-accent-label` and
+   * `bg-accent/20` all work. These are the defaults; <main> overrides them with
+   * whatever colour is picked, and descendants inherit that.
+   *
+   * They are redeclared on <main> rather than pointed at a second variable from
+   * here. A var() inside a *custom property* is resolved on the element the
+   * property is declared on — at :root, where the runtime accent does not
+   * exist — so the indirection silently froze every one of these at its
+   * fallback and no amount of setting the accent later could move it.
+   */
+  --color-accent: #0a84ff;
+  --color-accent-on: #ffffff;
+  /* The accent as a wash behind text, and as text itself */
+  --color-accent-soft: rgb(10 132 255 / 0.14);
+  --color-accent-label: #0a84ff;
+
+  /* macOS draws its focus ring in the accent colour */
   --color-focus-ring: #0a84ff;
 
   /* macOS 26 rounds windows far more than the 12px this used to use, and keeps
@@ -279,6 +296,76 @@ body {
   }
 
   /*
+   * Derived from whichever accent is set. `--color-accent` and its `-on` pair
+   * come from React; these are the shades everything else needs — a wash to sit
+   * behind text, and a version of the colour that stays readable *as* text,
+   * which means darkening it on white and lightening it on black.
+   */
+  main {
+    --color-accent-soft: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    --color-accent-label: color-mix(in srgb, var(--color-accent) 82%, #000 18%);
+    --color-focus-ring: var(--color-accent);
+  }
+
+  main.dark {
+    --color-accent-soft: color-mix(in srgb, var(--color-accent) 26%, transparent);
+    --color-accent-label: color-mix(in srgb, var(--color-accent) 72%, #fff 28%);
+  }
+
+  /*
+   * macOS 26's icon appearances, worked out of flat artwork.
+   *
+   * Apple recolours layered icons, which is not on offer here — these are one
+   * PNG each. So Dark and Clear are filters over the whole image, and Tinted is
+   * a masked overlay in `mix-blend-mode: color`, which takes hue and saturation
+   * from the accent and leaves the icon's own light and shade underneath. That
+   * last one is the trick: it produces a monochrome icon that still has its
+   * modelling, rather than a flat accent-coloured silhouette.
+   *
+   * `--icon` is the icon's own URL, set per element, and it is what confines
+   * the overlay to the artwork instead of tinting its transparent corners.
+   */
+  .app-icon-art {
+    img {
+      @apply transition-[filter,opacity] duration-200;
+    }
+  }
+
+  .icons-dark .app-icon-art img {
+    filter: brightness(0.74) saturate(0.86) contrast(1.06);
+  }
+
+  /* Frosted rather than coloured: the wallpaper reads through the glyph */
+  .icons-clear .app-icon-art img {
+    filter: grayscale(1) brightness(1.9) contrast(0.42);
+    opacity: 0.72;
+  }
+
+  .icons-clear.dark .app-icon-art img {
+    filter: grayscale(1) brightness(0.5) contrast(0.5);
+    opacity: 0.82;
+  }
+
+  .icons-tinted .app-icon-art {
+    /* Contains the blend, so the overlay meets the icon and nothing behind it */
+    @apply relative isolate;
+
+    img {
+      filter: grayscale(1) brightness(1.18) contrast(0.82);
+    }
+
+    &::after {
+      content: "";
+      @apply pointer-events-none absolute inset-0;
+
+      background: var(--color-accent);
+      mix-blend-mode: color;
+      -webkit-mask: var(--icon) center / contain no-repeat;
+      mask: var(--icon) center / contain no-repeat;
+    }
+  }
+
+  /*
    * Scoped to the direct child of <main>, which is only ever the menu bar. A
    * bare `nav` also caught the phone dock, handing it this rule's z-9999 and
    * painting it over every open app.
@@ -375,7 +462,7 @@ body {
         @apply text-sm px-3 py-1.5 rounded-lg cursor-pointer transition-colors;
 
         &:not(.divider):is(:hover, :focus-visible) {
-          @apply bg-blue-500 text-white;
+          @apply bg-accent text-accent-on;
         }
       }
 
@@ -412,7 +499,7 @@ body {
 
         /* Arrowing onto an item highlights it exactly as hovering does */
         &:not(.disabled):not(.divider):is(:hover, :focus-visible) {
-          @apply bg-blue-500 text-white;
+          @apply bg-accent text-accent-on;
         }
 
         /* macOS greys out what doesn't apply rather than hiding it */
@@ -470,7 +557,7 @@ body {
         @apply flex-center size-8 rounded-full bg-black/10 text-gray-700 shrink-0 transition-colors dark:bg-white/15 dark:text-gray-100;
 
         &.on {
-          @apply bg-blue-500 text-white;
+          @apply bg-accent text-accent-on;
         }
       }
 
@@ -537,7 +624,7 @@ body {
       @apply text-sm px-3 py-1.5 rounded-lg cursor-pointer transition-colors;
 
       &:not(.disabled):is(:hover, :focus-visible) {
-        @apply bg-blue-500 text-white;
+        @apply bg-accent text-accent-on;
       }
 
       &.disabled {
@@ -720,7 +807,7 @@ body {
       }
 
       .cta {
-        @apply mt-2 inline-block text-xs font-medium text-blue-600 dark:text-blue-400;
+        @apply mt-2 inline-block text-xs font-medium text-accent-label;
       }
     }
 
@@ -836,7 +923,7 @@ body {
         }
 
         &.selected {
-          @apply bg-blue-500 text-white;
+          @apply bg-accent text-accent-on;
         }
       }
     }
@@ -863,7 +950,13 @@ body {
   }
 
   #settings {
-    @apply w-xl absolute top-32 left-1/3 window-shadow rounded-[var(--radius-window)] overflow-hidden;
+    /* Accent and icon style pushed this past the bottom of a laptop screen, so
+       the panes scroll inside the window the way Resume and TextEdit do */
+    @apply w-xl absolute top-32 left-1/3 window-shadow rounded-[var(--radius-window)] overflow-hidden flex flex-col max-h-[calc(100dvh-12rem)];
+
+    > :nth-last-child(2) {
+      @apply min-h-0 overflow-y-auto;
+    }
 
     h2 {
       @apply font-bold text-sm text-center w-full;
@@ -895,7 +988,23 @@ body {
           @apply flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-700 cursor-pointer transition-colors hover:bg-gray-100 dark:border-neutral-600 dark:text-gray-200 dark:hover:bg-neutral-800;
 
           &.selected {
-            @apply border-blue-500 ring-1 ring-blue-500 text-blue-600 dark:text-blue-300;
+            @apply border-accent ring-1 ring-accent text-accent-label;
+          }
+        }
+      }
+
+      /* macOS shows the accents as a row of plain dots, checked when picked */
+      .accent-swatches {
+        @apply flex flex-wrap gap-2.5 mb-7;
+
+        button {
+          @apply size-6 rounded-full cursor-pointer transition-transform hover:scale-110;
+
+          border: 1px solid rgb(0 0 0 / 0.12);
+
+          &.selected {
+            outline: 2px solid var(--color-accent);
+            outline-offset: 2px;
           }
         }
       }
@@ -915,7 +1024,7 @@ body {
           @apply w-full aspect-video rounded-lg bg-cover bg-center cursor-pointer border border-gray-200 hover:scale-105 transition-transform dark:border-neutral-600;
 
           &.selected {
-            @apply ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-neutral-900;
+            @apply ring-2 ring-accent ring-offset-2 dark:ring-offset-neutral-900;
           }
 
           &.add {
@@ -990,7 +1099,7 @@ body {
     }
 
     .tooltip {
-      @apply !py-1 !px-3 !w-fit !text-center !text-xs !rounded-md !bg-blue-200 !text-blue-900 !shadow-2xl;
+      @apply !py-1 !px-3 !w-fit !text-center !text-xs !rounded-md !bg-accent-soft !text-accent-label !shadow-2xl;
     }
 
     .dock-icon {
@@ -1085,7 +1194,7 @@ body {
 
       button {
         /* Reset the traffic-light sizing these inherit from the group */
-        @apply size-auto rounded-lg bg-transparent px-2.5 py-1.5 text-[11px] whitespace-nowrap text-gray-800 transition-colors hover:bg-blue-500 hover:text-white dark:text-gray-100;
+        @apply size-auto rounded-lg bg-transparent px-2.5 py-1.5 text-[11px] whitespace-nowrap text-gray-800 transition-colors hover:bg-accent hover:text-accent-on dark:text-gray-100;
 
         &::before,
         &::after {
@@ -1179,7 +1288,7 @@ body {
           }
 
           a {
-            @apply text-blue-600 text-xs hover:underline flex items-center gap-3 dark:text-blue-400;
+            @apply text-accent-label text-xs hover:underline flex items-center gap-3;
           }
         }
       }
@@ -1278,7 +1387,7 @@ body {
           @apply flex space-y-1 items-center gap-2 px-3 py-2 rounded-md cursor-pointer transition-colors;
 
           &:first-child {
-            @apply bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300;
+            @apply bg-accent-soft text-accent-label;
           }
 
           img {
@@ -1362,8 +1471,16 @@ body {
       ul {
         @apply space-y-1;
 
+        /* Flat monochrome art, repainted in the accent by masking it with
+           itself — the glyph is its own silhouette, so nothing is lost */
+        .accent-glyph {
+          background: var(--color-accent-label);
+          -webkit-mask: var(--icon) center / contain no-repeat;
+          mask: var(--icon) center / contain no-repeat;
+        }
+
         .active {
-          @apply bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300;
+          @apply bg-accent-soft text-accent-label;
         }
 
         .not-active {
@@ -1429,7 +1546,7 @@ body {
       }
 
       tbody tr {
-        @apply cursor-pointer transition-colors hover:bg-blue-500 hover:text-white;
+        @apply cursor-pointer transition-colors hover:bg-accent hover:text-accent-on;
       }
 
       td {
@@ -1467,7 +1584,7 @@ body {
           @apply flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[13px] cursor-pointer transition-colors hover:bg-black/5 dark:text-gray-200 dark:hover:bg-white/10;
 
           &.selected {
-            @apply bg-blue-500 text-white hover:bg-blue-500;
+            @apply bg-accent text-accent-on hover:bg-accent;
           }
         }
 
@@ -1544,7 +1661,7 @@ body {
         }
 
         p {
-          @apply text-sm text-white text-center px-1 rounded-md group-hover:bg-blue-500 transition-colors max-w-40;
+          @apply text-sm text-white text-center px-1 rounded-md group-hover:bg-accent transition-colors max-w-40;
         }
 
         /* Selected outranks hover: a picked icon stays lit while you move off */
@@ -1554,7 +1671,7 @@ body {
           }
 
           p {
-            @apply bg-blue-500;
+            @apply bg-accent;
           }
         }
       }
@@ -1562,7 +1679,7 @@ body {
 
     /* The rubber band: macOS fills it with the accent colour at low alpha */
     .marquee {
-      @apply fixed rounded-xs border border-blue-400/70 bg-blue-400/20 pointer-events-none;
+      @apply fixed rounded-xs border border-accent/70 bg-accent/20 pointer-events-none;
     }
   }
 }
