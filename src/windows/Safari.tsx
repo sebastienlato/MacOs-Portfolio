@@ -16,31 +16,32 @@ import { blogPosts } from "#constants/index";
 const Safari = () => {
   return (
     <>
+      {/*
+        The toolbar sheds its groups as the window narrows, the way Safari's
+        does, and the address field is the last thing standing. Which groups
+        are still there is decided in CSS, from the width of the window rather
+        than of the screen — see the container queries on #safari.
+      */}
       <div id="window-header">
         <WindowControls target="safari" />
 
-        <PanelLeft className="ml-10 icon" />
-
-        <div className="flex items-center gap-1 ml-5">
+        <div className="toolbar-nav">
+          <PanelLeft className="icon" />
           <ChevronLeft className="icon" />
           <ChevronRight className="icon" />
         </div>
 
-        <div className="flex-1 flex-center gap-3">
+        <div className="address">
           <ShieldHalf className="icon" />
 
           <div className="search">
             <Search className="icon" />
 
-            <input
-              type="text"
-              placeholder="Search or enter website name"
-              className="flex-1"
-            />
+            <input type="text" placeholder="Search or enter website name" />
           </div>
         </div>
 
-        <div className="flex items-center gap-5">
+        <div className="toolbar-actions">
           <Share className="icon" />
           <Plus className="icon" />
           <Copy className="icon" />
