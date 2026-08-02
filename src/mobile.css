@@ -549,6 +549,7 @@
 
       input {
         @apply min-w-0 flex-1 bg-transparent text-gray-100 caret-[#00A154] outline-none;
+        box-shadow: none;
       }
     }
   }

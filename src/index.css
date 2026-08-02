@@ -301,6 +301,18 @@ body {
     box-shadow: 0 0 0 4px rgb(255 255 255 / 0.45);
   }
 
+  /*
+   * NB for anything that turns the outline off: the halo above is half of the
+   * ring, not decoration on top of it — it is what makes one blue outline
+   * legible against a blue wallpaper. `outline-none` alone leaves the halo
+   * drawing a rectangle by itself, which is how the terminal's prompt ended up
+   * in a box. Every field that suppresses one suppresses both, together, at
+   * the point where it says so.
+   *
+   * The sliders in Control Center keep both: they sit on glass over the
+   * wallpaper, which is exactly the case the halo exists for.
+   */
+
   .dark :focus-visible {
     box-shadow: 0 0 0 4px rgb(0 0 0 / 0.5);
   }
@@ -1014,6 +1026,8 @@ body {
 
       input {
         @apply flex-1 bg-transparent outline-none text-xl text-gray-900 placeholder:text-gray-400 dark:text-gray-100;
+        /* The panel is the focus indicator; see the note by :focus-visible */
+        box-shadow: none;
       }
 
       kbd {
@@ -1464,6 +1478,7 @@ body {
 
       input {
         @apply min-w-0 flex-1 truncate bg-transparent outline-none placeholder:text-gray-400;
+        box-shadow: none;
       }
     }
 
@@ -1587,6 +1602,8 @@ body {
 
         input {
           @apply flex-1 bg-transparent outline-none caret-[#00A154] text-gray-100;
+          /* The caret is the indicator here — the halo drew a box round it */
+          box-shadow: none;
         }
       }
     }
