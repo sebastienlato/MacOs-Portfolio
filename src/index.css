@@ -926,8 +926,18 @@ body {
    * that, the top edge was painted behind the title bar and the pointer never
    * reached it — the one edge of the eight that silently did nothing.
    */
+  /*
+   * The handles live inside one wrapper so that the rules which stretch or
+   * scroll "the child before the resize handles" still find the content by
+   * counting from the end. It covers the whole window, so it must not catch a
+   * pointer itself — only the eight strips inside it do.
+   */
+  .resize-handles {
+    @apply pointer-events-none absolute inset-0 z-30;
+  }
+
   .resize-handle {
-    @apply absolute z-30;
+    @apply pointer-events-auto absolute;
   }
 
   .resize-n,
