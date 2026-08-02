@@ -1380,11 +1380,61 @@ body {
   #safari {
     @apply w-4xl absolute top-40 left-2/12 window-shadow rounded-[var(--radius-window)] overflow-hidden;
 
+    /*
+     * A window is resized by hand and has nothing to do with the size of the
+     * screen, so its toolbar is laid out against its *own* width. Media
+     * queries would answer the wrong question entirely: a narrow window on a
+     * wide display is exactly the case that was breaking.
+     */
+    container: window / inline-size;
+
+    .toolbar-nav {
+      @apply ml-6 flex shrink-0 items-center gap-3;
+    }
+
+    .toolbar-actions {
+      @apply flex shrink-0 items-center gap-5;
+    }
+
+    /*
+     * min-w-0 twice over, on the group and on the field inside it. A flex item
+     * refuses to shrink below its content, and an <input> claims a default
+     * width of about twenty characters however little room it is given — which
+     * is what pushed the placeholder, and the icons after it, out through the
+     * side of the window.
+     */
+    .address {
+      @apply flex min-w-0 flex-1 items-center justify-center gap-3 px-3;
+    }
+
     .search {
-      @apply flex items-center gap-3 w-2/3 bg-white border border-gray-300 rounded-lg px-3 py-2 dark:bg-neutral-800 dark:border-neutral-600 dark:text-gray-100;
+      @apply flex min-w-0 w-full max-w-md items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-gray-100;
 
       input {
-        @apply placeholder:text-gray-400;
+        @apply min-w-0 flex-1 truncate bg-transparent outline-none placeholder:text-gray-400;
+      }
+    }
+
+    /*
+     * What Safari itself drops as it narrows, in the order it drops it: the
+     * page actions first, then the sidebar and history, and the shield last.
+     * The address field is the one thing that survives all the way down.
+     */
+    @container window (width < 44rem) {
+      .toolbar-actions {
+        @apply hidden;
+      }
+    }
+
+    @container window (width < 34rem) {
+      .toolbar-nav {
+        @apply hidden;
+      }
+    }
+
+    @container window (width < 26rem) {
+      .address > .icon {
+        @apply hidden;
       }
     }
 
@@ -1397,6 +1447,12 @@ body {
     .blog {
       @apply bg-white p-10 dark:bg-neutral-900;
 
+      /* 40px a side is a tenth of a narrow window. The reading column matters
+         more than the margin once there is little of either. */
+      @container window (width < 34rem) {
+        @apply px-6 py-8;
+      }
+
       > * {
         @apply max-w-3xl mx-auto;
       }
@@ -1405,8 +1461,10 @@ body {
         @apply text-xl font-bold text-pink-600 mb-10;
       }
 
+      /* gap, not space-x: the latter puts a margin on every child but the
+         first, which in a grid offsets the cell rather than the track */
       .blog-post {
-        @apply grid grid-cols-12 space-x-5;
+        @apply grid grid-cols-12 gap-5;
 
         img {
           /* aspect-square reserves the box before the file loads, so the
