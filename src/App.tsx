@@ -1,41 +1,24 @@
-import { useEffect, useState, type CSSProperties } from "react";
-import gsap from "gsap";
-import { Draggable } from "gsap/Draggable";
+import { lazy, Suspense, useEffect, useState, type CSSProperties } from "react";
 import clsx from "clsx";
 
 import { wallpaperNeedsDarkText } from "#utils/wallpaperLuminance";
 
-import {
-  Navbar,
-  Welcome,
-  Dock,
-  Home,
-  BootScreen,
-  Spotlight,
-  DesktopMenu,
-  KeyboardShortcuts,
-  SnapPreview,
-  MissionControl,
-  NotificationCenter,
-} from "#components";
-import {
-  Finder,
-  Resume,
-  Safari,
-  Terminal,
-  Text,
-  Image,
-  Contact,
-  Photos,
-  Settings,
-  About,
-} from "#windows";
-import MobileShell from "#mobile/MobileShell";
+import { BootScreen } from "#components";
 import useIsMobile from "#mobile/useIsMobile";
 import useDeepLink from "#hooks/useDeepLink";
 import useSystemStore from "#store/system";
 
-gsap.registerPlugin(Draggable);
+/*
+ * The two shells are the only lazy things in the app, and for one reason: a
+ * visitor gets exactly one of them, so shipping both is shipping half the
+ * bundle to nobody. The phone was downloading ten windows, the dock, Mission
+ * Control and GSAP's Draggable to render a Home Screen that uses none of it.
+ *
+ * No fallback is needed. The boot screen is painted over the top of all this
+ * and outlasts the fetch, so there is nothing to see while it arrives.
+ */
+const DesktopShell = lazy(() => import("#components/DesktopShell"));
+const MobileShell = lazy(() => import("#mobile/MobileShell"));
 
 const App = () => {
   const wallpaper = useSystemStore((state) => state.wallpaper);
@@ -49,8 +32,16 @@ const App = () => {
   // The phone shell reads the same URLs, but drives its own navigation with them
   useDeepLink(!isMobile);
 
+  /* The phone takes the smaller copy where there is one: same picture, a fifth
+     of the bytes, arriving while the bundle is still loading rather than after
+     it. Named once, because the luminance sampler has to read the same file —
+     pointing the two at different copies fetched both. */
+  const wallpaperSrc = (isMobile && wallpaper.mobileValue) || wallpaper.value;
+
   const backgroundImage =
-    wallpaper.type === "gradient" ? wallpaper.value : `url(${wallpaper.value})`;
+    wallpaper.type === "gradient"
+      ? wallpaper.value
+      : `url(${wallpaperSrc})`;
 
   // Dim the whole screen like a real display when brightness drops below max
   const dimOpacity = Math.max(0, (100 - brightness) / 100) * 0.7;
@@ -77,13 +68,13 @@ const App = () => {
 
   useEffect(() => {
     let active = true;
-    wallpaperNeedsDarkText(wallpaper).then((needsDark) => {
+    wallpaperNeedsDarkText(wallpaper, wallpaperSrc).then((needsDark) => {
       if (active) setLightMenuBar(needsDark);
     });
     return () => {
       active = false;
     };
-  }, [wallpaper]);
+  }, [wallpaper, wallpaperSrc]);
 
   return (
     <main
@@ -107,37 +98,11 @@ const App = () => {
         One shell or the other, never both. Below the breakpoint the desktop
         does not merely hide — it never mounts, so no window is left sized for a
         screen that isn't there and no Draggable is listening for a pointer the
-        visitor doesn't have.
+        visitor doesn't have. Nor is it fetched: see the imports.
       */}
-      {isMobile ? (
-        <MobileShell />
-      ) : (
-        <>
-          <Navbar />
-          <Welcome />
-          <Dock />
-
-          <Terminal />
-          <Safari />
-          <Resume />
-          <Finder />
-          <Text />
-          <Image />
-          <Contact />
-          <Photos />
-          <Settings />
-          <About />
-
-          <Home />
-
-          <DesktopMenu />
-          <Spotlight />
-          <KeyboardShortcuts />
-          <SnapPreview />
-          <MissionControl />
-          <NotificationCenter />
-        </>
-      )}
+      <Suspense fallback={null}>
+        {isMobile ? <MobileShell /> : <DesktopShell />}
+      </Suspense>
 
       <div
         className="brightness-overlay"

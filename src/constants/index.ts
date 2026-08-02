@@ -80,6 +80,9 @@ const wallpapers: Wallpaper[] = [
     name: "Sequoia",
     type: "image",
     value: "/images/wallpaper.webp",
+    /* 2880px of wallpaper on a 390px screen, at five times the weight. Made
+       with: sharp(value).resize({ width: 1440 }).webp({ quality: 82 }) */
+    mobileValue: "/images/wallpaper-mobile.webp",
   },
   {
     id: "sonoma",

@@ -75,9 +75,15 @@ const imageLuminance = (src: string) =>
  * macOS picks menu bar tint from the wallpaper behind it rather than from the
  * appearance setting, which is why a transparent bar works there at all. For
  * gradients only the first stop matters — that is the end the menu bar covers.
+ *
+ * `src` is the file actually on screen, which is not always `wallpaper.value`:
+ * the phone shows a smaller copy. Sampling the one being displayed makes this
+ * a cache hit on an image already being fetched, where sampling the desktop
+ * file downloaded a second, larger copy of the same picture to read 6% of it.
  */
 export const wallpaperNeedsDarkText = async (
-  wallpaper: Wallpaper
+  wallpaper: Wallpaper,
+  src: string = wallpaper.value
 ): Promise<boolean> => {
   if (wallpaper.type === "gradient") {
     const firstStop = wallpaper.value.match(/#[0-9a-f]{3,6}/i)?.[0];
@@ -85,6 +91,6 @@ export const wallpaperNeedsDarkText = async (
     return luminance !== null && luminance > LIGHT_THRESHOLD;
   }
 
-  const luminance = await imageLuminance(wallpaper.value);
+  const luminance = await imageLuminance(src);
   return luminance !== null && luminance > LIGHT_THRESHOLD;
 };
