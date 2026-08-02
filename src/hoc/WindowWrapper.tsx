@@ -485,16 +485,26 @@ const WindowWrapper = <P extends object>(
       >
         <Component {...props} />
 
-        {/* Eight of them, as macOS has. Pointer-only and hidden from the
-            accessibility tree: there is no keyboard gesture to expose */}
-        {RESIZE_HANDLES.map((handle) => (
-          <div
-            key={handle}
-            className={`resize-handle resize-${handle}`}
-            onPointerDown={(e) => handleResizeStart(e, handle)}
-            aria-hidden="true"
-          />
-        ))}
+        {/*
+          Eight of them, as macOS has — but wrapped, not left as eight
+          siblings. Several windows stretch or scroll "the child before the
+          resize handle", and counting from the end is how they find it; eight
+          handles moved that target onto a handle and left every window's
+          content at its natural height inside a resized frame. One element
+          keeps that relationship true however many handles sit inside it.
+
+          Pointer-only, and hidden from the accessibility tree: there is no
+          keyboard gesture here to expose.
+        */}
+        <div className="resize-handles" aria-hidden="true">
+          {RESIZE_HANDLES.map((handle) => (
+            <div
+              key={handle}
+              className={`resize-handle resize-${handle}`}
+              onPointerDown={(e) => handleResizeStart(e, handle)}
+            />
+          ))}
+        </div>
       </section>
     );
   };
