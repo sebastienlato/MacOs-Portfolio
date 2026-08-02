@@ -109,6 +109,16 @@ body {
        is behind it, not let you read a window through a sidebar. */
     --glass-chrome-blur: 26px;
     --glass-hairline: rgb(0 0 0 / 0.12);
+
+    /* A window's own edge, and the shadow it drops. Separate from the chrome
+       hairline above: this one has to hold its own against the wallpaper
+       rather than against the window's contents. */
+    --window-rim: rgb(0 0 0 / 0.14);
+    --window-rim-focused: rgb(0 0 0 / 0.2);
+    --window-shadow-soft: 0 8px 24px -10px rgb(0 0 0 / 0.35),
+      0 1px 4px rgb(0 0 0 / 0.12);
+    --window-shadow-front: 0 24px 64px -16px rgb(0 0 0 / 0.45),
+      0 2px 8px rgb(0 0 0 / 0.16);
   }
 
   .dark {
@@ -131,6 +141,19 @@ body {
 
     --glass-chrome-alpha: 0.62;
     --glass-hairline: rgb(255 255 255 / 0.12);
+
+    /*
+     * The rim flips to light and does most of the work here — a dark window
+     * against a dark wallpaper has no other edge. The shadow deepens with it:
+     * the same black that reads as a soft drop against a light desktop is
+     * barely there against this one.
+     */
+    --window-rim: rgb(255 255 255 / 0.14);
+    --window-rim-focused: rgb(255 255 255 / 0.26);
+    --window-shadow-soft: 0 8px 28px -10px rgb(0 0 0 / 0.6),
+      0 1px 4px rgb(0 0 0 / 0.35);
+    --window-shadow-front: 0 28px 72px -16px rgb(0 0 0 / 0.8),
+      0 2px 10px rgb(0 0 0 / 0.45);
   }
 
   @media (width >= 1920px) {
@@ -234,15 +257,24 @@ body {
 }
 
 /*
- * Opaque surfaces (window bodies) still want the softer, larger 26-era shadow.
- * Only the frontmost window casts it at full strength — an unfocused window
- * sits visibly lower, which is most of what separates the two states.
+ * What separates one window from the next, and the front one from the rest.
+ *
+ * A rim *and* a shadow, because in dark mode the shadow alone does nothing: it
+ * is black, cast by a near-black window, onto a dark wallpaper. Five windows
+ * open in dark mode read as one dark mass with some text on it. macOS answers
+ * that with a light hairline around every dark window, which is what the rim
+ * is — and it brightens on the front one, so focus is legible without hunting
+ * for the traffic lights.
+ *
+ * Drawn as an inset-free spread rather than a border, so it costs no layout: a
+ * border would add two pixels to every window's box, and these windows carry
+ * exact inline sizes once they have been resized.
  */
 @utility window-shadow {
-  box-shadow: 0 8px 24px -10px rgb(0 0 0 / 0.35), 0 1px 4px rgb(0 0 0 / 0.12);
+  box-shadow: 0 0 0 1px var(--window-rim), var(--window-shadow-soft);
 
   &.is-focused {
-    box-shadow: 0 24px 64px -16px rgb(0 0 0 / 0.45), 0 2px 8px rgb(0 0 0 / 0.16);
+    box-shadow: 0 0 0 1px var(--window-rim-focused), var(--window-shadow-front);
   }
 }
 
@@ -1467,8 +1499,10 @@ body {
         @apply max-w-3xl mx-auto;
       }
 
+      /* Was a hardcoded pink — the one colour in the app that ignored the
+         accent, and the harshest thing on the screen against a dark window */
       h2 {
-        @apply text-xl font-bold text-pink-600 mb-10;
+        @apply text-xl font-bold text-accent-label mb-10;
       }
 
       /* gap, not space-x: the latter puts a margin on every child but the
