@@ -869,8 +869,66 @@ body {
     }
   }
 
+  /*
+   * The grab areas for resizing: four edges and four corners, as macOS has.
+   *
+   * They sit *inside* the frame rather than straddling it, because every
+   * window clips its own overflow to keep its rounded corners — a strip hung
+   * outside would simply not be there. Narrow enough that they do not steal
+   * clicks from the content, wide enough to hit without aiming.
+   *
+   * The edges stop short of the ends so the corners own the corners, and the
+   * corners outrank them anyway where the two still meet.
+   *
+   * z-30 clears the title bar, which sits at z-20 of its own accord. Below
+   * that, the top edge was painted behind the title bar and the pointer never
+   * reached it — the one edge of the eight that silently did nothing.
+   */
   .resize-handle {
-    @apply absolute bottom-0 right-0 size-4 cursor-nwse-resize z-10;
+    @apply absolute z-30;
+  }
+
+  .resize-n,
+  .resize-s {
+    @apply inset-x-3 h-1.5 cursor-ns-resize;
+  }
+
+  .resize-e,
+  .resize-w {
+    @apply inset-y-3 w-1.5 cursor-ew-resize;
+  }
+
+  .resize-n {
+    @apply top-0;
+  }
+  .resize-s {
+    @apply bottom-0;
+  }
+  .resize-e {
+    @apply right-0;
+  }
+  .resize-w {
+    @apply left-0;
+  }
+
+  .resize-ne,
+  .resize-nw,
+  .resize-se,
+  .resize-sw {
+    @apply size-3 z-40;
+  }
+
+  .resize-nw {
+    @apply top-0 left-0 cursor-nwse-resize;
+  }
+  .resize-ne {
+    @apply top-0 right-0 cursor-nesw-resize;
+  }
+  .resize-sw {
+    @apply bottom-0 left-0 cursor-nesw-resize;
+  }
+  .resize-se {
+    @apply bottom-0 right-0 cursor-nwse-resize;
   }
 
   /* A window parked in the dock is a picture of itself, not a window — the

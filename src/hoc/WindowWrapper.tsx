@@ -15,6 +15,17 @@ const MIN_HEIGHT = 220;
 const MENU_BAR_HEIGHT = 40;
 /** The dock's own z-index, which a window parked in it has to clear. */
 const DOCK_Z = 9500;
+
+/**
+ * Every edge and corner a window can be resized from, as macOS allows.
+ *
+ * The letters are the compass points, and they are read rather than switched
+ * on: a handle containing "w" moves the left edge, one containing "n" the top.
+ * That is what makes the corners fall out of the same four rules.
+ */
+const RESIZE_HANDLES = ["n", "s", "e", "w", "ne", "nw", "se", "sw"] as const;
+
+type ResizeHandle = (typeof RESIZE_HANDLES)[number];
 /** How much of a window must stay reachable when restoring a saved position. */
 const EDGE_MARGIN = 100;
 /** Gap kept around a window the first time it is placed. */
@@ -374,7 +385,24 @@ const WindowWrapper = <P extends object>(
       parked.current = false;
     }, [isOpen]);
 
-    const handleResizeStart = (e: React.PointerEvent<HTMLDivElement>) => {
+    /**
+     * Resizing, from whichever edge or corner was grabbed.
+     *
+     * The two that grow a window — the right edge and the bottom — only change
+     * its size. The other two have to move it as well: a window is positioned
+     * from its top left, so dragging the left edge outward while leaving that
+     * corner alone would grow the window off to the right instead of toward
+     * the pointer. The offset takes up exactly what the size gave away, which
+     * pins the opposite edge in place.
+     *
+     * Reading the offset back out of the clamped size rather than out of the
+     * pointer is what makes the minimum hold: once the width stops shrinking,
+     * `startWidth - width` stops growing, and the window stops sliding.
+     */
+    const handleResizeStart = (
+      e: React.PointerEvent<HTMLDivElement>,
+      handle: ResizeHandle
+    ) => {
       const el = ref.current;
       if (!el || tile) return;
 
@@ -386,17 +414,45 @@ const WindowWrapper = <P extends object>(
       const startY = e.clientY;
       const startWidth = el.offsetWidth;
       const startHeight = el.offsetHeight;
+      const startLeft = Number(gsap.getProperty(el, "x"));
+      const startTop = Number(gsap.getProperty(el, "y"));
 
       const onMove = (ev: PointerEvent) => {
         el.classList.add("user-resized");
-        el.style.width = `${Math.max(MIN_WIDTH, startWidth + ev.clientX - startX)}px`;
-        el.style.height = `${Math.max(MIN_HEIGHT, startHeight + ev.clientY - startY)}px`;
+
+        const dx = ev.clientX - startX;
+        const dy = ev.clientY - startY;
+
+        let width = startWidth;
+        let height = startHeight;
+        let x = startLeft;
+        let y = startTop;
+
+        if (handle.includes("e")) width = Math.max(MIN_WIDTH, startWidth + dx);
+        if (handle.includes("w")) {
+          width = Math.max(MIN_WIDTH, startWidth - dx);
+          x = startLeft + (startWidth - width);
+        }
+        if (handle.includes("s")) height = Math.max(MIN_HEIGHT, startHeight + dy);
+        if (handle.includes("n")) {
+          height = Math.max(MIN_HEIGHT, startHeight - dy);
+          y = startTop + (startHeight - height);
+        }
+
+        el.style.width = `${width}px`;
+        el.style.height = `${height}px`;
+        gsap.set(el, { x, y });
       };
 
       const onUp = () => {
         window.removeEventListener("pointermove", onMove);
         window.removeEventListener("pointerup", onUp);
-        saveLayout({ w: el.offsetWidth, h: el.offsetHeight });
+        saveLayout({
+          w: el.offsetWidth,
+          h: el.offsetHeight,
+          x: Number(gsap.getProperty(el, "x")),
+          y: Number(gsap.getProperty(el, "y")),
+        });
       };
 
       window.addEventListener("pointermove", onMove);
@@ -428,11 +484,17 @@ const WindowWrapper = <P extends object>(
         )}
       >
         <Component {...props} />
-        <div
-          className="resize-handle"
-          onPointerDown={handleResizeStart}
-          aria-hidden="true"
-        />
+
+        {/* Eight of them, as macOS has. Pointer-only and hidden from the
+            accessibility tree: there is no keyboard gesture to expose */}
+        {RESIZE_HANDLES.map((handle) => (
+          <div
+            key={handle}
+            className={`resize-handle resize-${handle}`}
+            onPointerDown={(e) => handleResizeStart(e, handle)}
+            aria-hidden="true"
+          />
+        ))}
       </section>
     );
   };
