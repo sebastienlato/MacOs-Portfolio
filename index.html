@@ -19,6 +19,20 @@
 
     <link rel="icon" type="image/png" href="/macbook.png" />
     <link rel="apple-touch-icon" href="/macbook.png" />
+
+    <!--
+      Asked for here rather than discovered later inside the stylesheet. The
+      preload scanner reads this before it has parsed anything else, so both
+      font origins are connected by the time the CSS wants them — where an
+      @import made the browser walk HTML → CSS → font CSS → font files one
+      step at a time, across three origins.
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Georama:ital,wght@0,100..900;1,100..900&family=Roboto+Mono:wght@100..700&display=swap"
+    />
     <!-- Matches the desktop background so mobile browser chrome blends in -->
     <meta name="theme-color" content="#1b1b3a" />
 

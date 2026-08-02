@@ -69,6 +69,12 @@ export interface Wallpaper {
   name: string;
   type: "image" | "gradient";
   value: string;
+  /**
+   * A smaller copy for the phone. The desktop file is sized for a desktop, and
+   * on a phone it is several times more image than the screen can show while
+   * being the largest thing between the visitor and a usable page.
+   */
+  mobileValue?: string;
 }
 
 /** The colour macOS runs through selections, highlights and the focus ring. */
