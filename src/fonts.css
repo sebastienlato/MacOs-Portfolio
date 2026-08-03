@@ -1,0 +1,52 @@
+/*
+ * The two typefaces, served from here rather than linked from Google.
+ *
+ * Behind a preconnect it still cost 1354ms of render-blocking on a 1KB file,
+ * measured with Lighthouse against the live site — the browser cannot paint
+ * until a stylesheet it has been given resolves, and this one lived on a
+ * third origin that had to be found, connected to and negotiated first. From
+ * our own origin it is a request already in flight alongside everything else,
+ * on a connection already open, brotli-compressed and cached with the rest.
+ *
+ * Variable fonts, Latin only: one file per family covers every weight the app
+ * asks for, and there is no other alphabet in it. The ranges are Google's own
+ * for the latin subset, kept verbatim so a character outside them still falls
+ * back rather than rendering from the wrong file.
+ *
+ * `swap` on all three. The boot screen is painted before any of this matters,
+ * and a portfolio that shows nothing while a font loads is worse than one
+ * that shows the wrong font for 200ms.
+ */
+
+@font-face {
+  font-family: "Georama";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/georama.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+    U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Georama";
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/georama-italic.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+    U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Roboto Mono";
+  font-style: normal;
+  font-weight: 100 700;
+  font-display: swap;
+  src: url("/fonts/roboto-mono.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+    U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
