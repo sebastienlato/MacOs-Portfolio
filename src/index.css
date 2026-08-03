@@ -1059,8 +1059,11 @@ body {
   .boot-screen {
     @apply fixed inset-0 z-[99999] col-center gap-16 bg-black;
 
+    /* Visible from the first paint, not faded in: this markup is in the
+       document precisely so it is on screen before any script runs, and
+       opacity-0 would have hidden it from that paint entirely */
     img {
-      @apply w-20 invert opacity-0;
+      @apply w-20 invert;
     }
 
     .progress {
