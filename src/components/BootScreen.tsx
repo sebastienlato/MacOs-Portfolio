@@ -1,51 +1,51 @@
-import { useRef, useState } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
 import { prefersReducedMotion } from "#utils/motion";
 
+/**
+ * Drives the boot screen and then takes it away.
+ *
+ * The screen itself is markup in `index.html`, not JSX — see the comment
+ * there. Painting it from the document rather than from React is what lets it
+ * appear before the bundle has arrived, which is the whole point of it. This
+ * adopts that node instead of rendering a second copy, so there is no moment
+ * where one is swapped for the other.
+ *
+ * The logo no longer fades in. It is already on screen by the time any of this
+ * runs, and fading in something the visitor is looking at reads as a flicker.
+ */
 const BootScreen = () => {
-  /*
-   * The boot screen is motion and nothing else, so asking for less of it skips
-   * the sequence outright and the desktop is simply there.
-   *
-   * Collapsing the durations to zero was the obvious move and does not work: a
-   * GSAP timeline with no length never fires onComplete, so the screen would
-   * stay up forever — which is how this arrived as a hang rather than a jump.
-   */
-  const [done, setDone] = useState(prefersReducedMotion);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const barRef = useRef<HTMLDivElement>(null);
-  const logoRef = useRef<HTMLImageElement>(null);
-
   useGSAP(() => {
-    const container = containerRef.current;
-    const bar = barRef.current;
-    const logo = logoRef.current;
-    if (!container || !bar || !logo) return;
+    const screen = document.getElementById("boot-screen");
+    // Gone already — StrictMode runs this twice in development
+    if (!screen) return;
 
-    const tl = gsap.timeline({ onComplete: () => setDone(true) });
+    const remove = () => screen.remove();
 
-    tl.fromTo(logo, { opacity: 0 }, { opacity: 1, duration: 0.5 })
-      .fromTo(
-        bar,
-        { width: "0%" },
-        { width: "100%", duration: 1.6, ease: "power1.inOut" },
-        "-=0.1"
-      )
-      .to(container, { opacity: 0, duration: 0.45, delay: 0.15 });
+    /*
+     * Asking for less motion skips the sequence outright rather than making it
+     * instant. Collapsing the durations to zero was the obvious move and does
+     * not work: a GSAP timeline with no length never fires onComplete, so the
+     * screen would stay up for ever — which is how this arrived as a hang
+     * rather than as a jump.
+     */
+    if (prefersReducedMotion()) {
+      remove();
+      return;
+    }
+
+    gsap
+      .timeline({ onComplete: remove })
+      .to(screen.querySelector(".bar"), {
+        width: "100%",
+        duration: 1.6,
+        ease: "power1.inOut",
+      })
+      .to(screen, { opacity: 0, duration: 0.45, delay: 0.15 });
   }, []);
 
-  if (done) return null;
-
-  return (
-    <div ref={containerRef} className="boot-screen" aria-hidden="true">
-      <img ref={logoRef} src="/images/logo.svg" alt="" />
-      <div className="progress">
-        <div ref={barRef} className="bar" />
-      </div>
-    </div>
-  );
+  return null;
 };
 
 export default BootScreen;

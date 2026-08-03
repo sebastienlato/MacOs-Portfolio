@@ -57,6 +57,37 @@
     />
   </head>
   <body>
+    <!--
+      The boot screen lives here, in the HTML, rather than being rendered by
+      React — and it is the first thing painted rather than the first thing
+      React paints.
+
+      Nothing in this app exists until 130KB of JavaScript has been fetched,
+      parsed and run, so the screen stayed empty until then: first paint at
+      2.5s and a Speed Index to match, measured under Lighthouse's mobile
+      throttling. Written into the document it paints as soon as the
+      stylesheet lands — 1.4s, and a Speed Index of 1.4s with it.
+
+      It also happens to be the honest arrangement. A Mac shows its logo
+      before it has loaded anything; this one was showing it after.
+
+      `BootScreen` in React takes this node over on mount, animates it and
+      removes it. The <noscript> is the safety catch: with scripts off nothing
+      would ever take it away, and it would cover the fallback page the SEO
+      plugin writes below.
+    -->
+    <div id="boot-screen" class="boot-screen" aria-hidden="true">
+      <img src="/images/logo.svg" alt="" width="80" height="98" />
+      <div class="progress"><div class="bar"></div></div>
+    </div>
+    <noscript>
+      <style>
+        #boot-screen {
+          display: none;
+        }
+      </style>
+    </noscript>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
