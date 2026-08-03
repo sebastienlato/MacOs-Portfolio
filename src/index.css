@@ -182,7 +182,6 @@ body {
   background-color: rgb(var(--glass-tint) / var(--glass-fill, var(--glass-alpha)));
   box-shadow: var(--glass-inner-glow), var(--glass-shadow);
   backdrop-filter: blur(var(--glass-blur)) var(--glass-backdrop);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) var(--glass-backdrop);
 
   &::before,
   &::after {
@@ -206,8 +205,6 @@ body {
   &::before {
     padding: var(--glass-edge);
     backdrop-filter: blur(var(--glass-edge-blur)) var(--glass-edge-filter);
-    -webkit-backdrop-filter: blur(var(--glass-edge-blur))
-      var(--glass-edge-filter);
   }
 
   /* 3 — the specular rim */
@@ -244,8 +241,6 @@ body {
 @utility glass-chrome {
   background-color: rgb(var(--glass-tint) / var(--glass-chrome-alpha));
   backdrop-filter: blur(var(--glass-chrome-blur)) var(--glass-backdrop);
-  -webkit-backdrop-filter: blur(var(--glass-chrome-blur))
-    var(--glass-backdrop);
 }
 
 /*
@@ -1244,8 +1239,6 @@ body {
 
       background-color: rgb(var(--glass-tint) / var(--glass-chrome-alpha)) !important;
       backdrop-filter: blur(var(--glass-chrome-blur)) var(--glass-backdrop);
-      -webkit-backdrop-filter: blur(var(--glass-chrome-blur))
-        var(--glass-backdrop);
       border: 1px solid var(--glass-hairline);
       box-shadow: 0 4px 12px -4px rgb(0 0 0 / 0.35);
       color: #1d1d1f !important;
@@ -1274,8 +1267,6 @@ body {
         border-right: 1px solid var(--glass-hairline);
         border-bottom: 1px solid var(--glass-hairline);
         backdrop-filter: blur(var(--glass-chrome-blur)) var(--glass-backdrop);
-        -webkit-backdrop-filter: blur(var(--glass-chrome-blur))
-          var(--glass-backdrop);
         /*
          * react-tooltip parks the square so that its centre — which is the
          * flat edge of the half being kept — lands *inside* the plate, which
