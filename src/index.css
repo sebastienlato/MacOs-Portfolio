@@ -1,15 +1,7 @@
-/*
- * The web fonts are linked from index.html, not imported here.
- *
- * An @import put them at the end of a chain the browser could only walk one
- * step at a time: fetch the HTML, fetch this stylesheet, *find* the font CSS,
- * fetch that from a second origin, and only then fetch the files from a third.
- * Four serial round trips before a glyph is drawn, and on mobile that was the
- * single biggest thing standing between the visitor and the first paint.
- *
- * In the <head> the preload scanner finds the stylesheet immediately and the
- * preconnects have the connections open before it is asked for.
- */
+/* The @font-face rules, self-hosted — see the file for why they are not a
+   <link> to Google any more. Inlined into this bundle, so no extra request. */
+@import "./fonts.css";
+
 @import "tailwindcss";
 
 /* The phone shell, kept in its own file — it shares this file's tokens and
