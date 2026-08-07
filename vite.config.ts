@@ -26,6 +26,17 @@ export default defineConfig({
     },
   },
   /*
+   * Vite does not read `PORT` on its own — it takes `--port`, this field, or
+   * its own default, and quietly walks forward to the next free port when that
+   * one is taken. A tool that hands the dev server a port through the
+   * environment and then expects to find it there gets a server on a different
+   * port and no error, so honour `PORT` when it is set and leave Vite's own
+   * behaviour alone when it is not.
+   */
+  server: {
+    port: process.env.PORT ? Number(process.env.PORT) : undefined,
+  },
+  /*
    * Tests live beside what they test, and share the aliases above so a spec
    * imports a module by the same name the app does.
    *
