@@ -6,11 +6,12 @@ import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
 import seo from "./scripts/seo-plugin";
+import stripDsStore from "./scripts/strip-ds-store";
 
 const root = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(), seo()],
+  plugins: [react(), tailwindcss(), seo(), stripDsStore()],
   resolve: {
     alias: {
       "#components": resolve(root, "src/components"),
