@@ -85,22 +85,30 @@ const openFinder = async (page) => {
   await page.waitForSelector("#finder");
 
   /*
-   * Drop the window far enough that its bottom edge clears the hero.
+   * Put the window *below* the hero, and centre it under the hero's column.
    *
-   * Where it opens, it stops partway down the word "portfolio", and a
-   * half-covered letterform reads as a broken render rather than as one thing
-   * in front of another. Covering the hero outright is honest — windows cover
-   * the wallpaper — while clearing it entirely is impossible, since the two are
-   * centred on the same screen. Nudging beats resizing: the window keeps the
-   * proportions it was designed at, instead of gaining a band of empty pane.
+   * The two cannot both fit. The hero is centred and 446 wide; the window is
+   * 768 wide and 416 tall, against a 238px band of clear wallpaper beneath it
+   * — so there is no position at this size that clears the hero, and the shot
+   * used to solve that by covering it. Which cost the one line that says whose
+   * portfolio this is.
+   *
+   * Starting the window under the hero and letting its foot run off the bottom
+   * of the frame is how a real desktop looks anyway: a window is a pane onto
+   * something longer, and the dock passes in front of it. Nudging still beats
+   * resizing — the window keeps the proportions it was designed at rather than
+   * gaining a band of empty pane to fit a photograph.
    */
   const finder = JSON.parse(
     await stillness(boxOf(page, "#finder"), "the Finder window")
   );
   const hero = await page.locator("#welcome").boundingBox();
+  const viewport = page.viewportSize();
+
   // Rounded so the drag lands on a whole pixel rather than wherever the
   // measurement happened to fall
-  const drop = Math.round(hero.y + hero.height + 24 - (finder.y + finder.height));
+  const drop = Math.round(hero.y + hero.height + 20 - finder.y);
+  const shift = Math.round((viewport.width - finder.width) / 2 - finder.x);
 
   const header = await page.locator("#finder #window-header").boundingBox();
   const x = header.x + header.width / 2;
@@ -108,13 +116,12 @@ const openFinder = async (page) => {
 
   await page.mouse.move(x, y);
   await page.mouse.down();
-  await page.mouse.move(x, y + drop, { steps: 12 });
+  await page.mouse.move(x + shift, y + drop, { steps: 12 });
   await page.mouse.up();
 
   // The pointer is now inside the window, and was over the dock before that —
   // which leaves an icon magnified and its tooltip up. Park it over empty
-  // wallpaper, clear of the desktop icons and of the hero, whose letters
-  // animate under the cursor.
+  // wallpaper, clear of the hero, whose letters animate under the cursor.
   await page.mouse.move(40, 760);
 
   await stillness(boxOf(page, "#finder"), "the Finder window");
