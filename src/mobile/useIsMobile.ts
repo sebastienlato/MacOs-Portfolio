@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 
 /**
  * Below this the desktop stops being usable rather than merely cramped: the
- * Finder window alone is 48rem wide, and dragging, resizing, tiling and the
- * marquee all assume a pointer and a canvas to throw windows around in.
+ * Finder window alone is 48rem wide, and dragging, resizing and tiling all
+ * assume a pointer and a canvas to throw windows around in.
  *
  * The height clause catches a phone turned sideways — 844px wide, but only
  * ~390px tall, which is less room than the menu bar and dock already reserve.

@@ -23,11 +23,6 @@ export interface FinderItem {
   type?: string;
   fileType?: FileType;
   href?: string;
-  /**
-   * Tailwind classes placing this item's icon on the desktop — where it starts,
-   * before anyone drags it. Only the top-level projects carry one.
-   */
-  desktopPosition?: string;
   imageUrl?: string;
   image?: string;
   subtitle?: string;
