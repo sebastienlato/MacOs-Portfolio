@@ -5,7 +5,6 @@ import {
   Navbar,
   Welcome,
   Dock,
-  Home,
   Spotlight,
   DesktopMenu,
   KeyboardShortcuts,
@@ -58,8 +57,6 @@ const DesktopShell = () => (
     <Photos />
     <Settings />
     <About />
-
-    <Home />
 
     <DesktopMenu />
     <Spotlight />

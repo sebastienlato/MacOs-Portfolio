@@ -347,7 +347,6 @@ const WORK_LOCATION: FinderItem = {
       name: "SecureVault",
       icon: "/images/folder.png",
       kind: "folder",
-      desktopPosition: "top-[5vh] left-5", // where its icon sits on the desktop
       children: [
         {
           id: 1,
@@ -377,14 +376,6 @@ const WORK_LOCATION: FinderItem = {
           fileType: "img",
           imageUrl: "/images/project-1.webp",
         },
-        {
-          id: 5,
-          name: "Design.fig",
-          icon: "/images/plain.png",
-          kind: "file",
-          fileType: "fig",
-          href: "https://google.com",
-        },
       ],
     },
 
@@ -394,7 +385,6 @@ const WORK_LOCATION: FinderItem = {
       name: "PetSitterQR",
       icon: "/images/folder.png",
       kind: "folder",
-      desktopPosition: "top-[20vh] left-7",
       children: [
         {
           id: 1,
@@ -426,14 +416,6 @@ const WORK_LOCATION: FinderItem = {
           fileType: "img",
           imageUrl: "/images/project-2.webp",
         },
-        {
-          id: 5,
-          name: "Design.fig",
-          icon: "/images/plain.png",
-          kind: "file",
-          fileType: "fig",
-          href: "https://google.com",
-        },
       ],
     },
 
@@ -443,7 +425,6 @@ const WORK_LOCATION: FinderItem = {
       name: "SleepSoundsApp",
       icon: "/images/folder.png",
       kind: "folder",
-      desktopPosition: "top-[33vh] left-7",
       children: [
         {
           id: 1,
@@ -474,14 +455,6 @@ const WORK_LOCATION: FinderItem = {
           kind: "file",
           fileType: "img",
           imageUrl: "/images/project-3.webp",
-        },
-        {
-          id: 5,
-          name: "Design.fig",
-          icon: "/images/plain.png",
-          kind: "file",
-          fileType: "fig",
-          href: "https://google.com",
         },
       ],
     },
@@ -613,7 +586,7 @@ const WINDOW_CONFIG: Record<WindowKey, WindowState> = {
 
 /**
  * Everything that is a window or system chrome — i.e. everything that is *not*
- * the bare desktop. Right-clicking or marquee-dragging inside any of it should
+ * the bare desktop. A right-click inside any of it should
  * be left alone. Windows are derived from the config so a new one is covered
  * the moment it is registered.
  */
