@@ -467,7 +467,17 @@ body {
       }
     }
 
-    time {
+    /* The actionable icons are buttons, so that a keyboard can reach them. The
+       wrapper contributes no box of its own — the icon's own hover state is
+       still the whole of the feedback. */
+    ul > li > button {
+      @apply flex items-center cursor-pointer;
+    }
+
+    /* The clock, which is the button that opens Notification Center. Styled by
+       class rather than by element: the <time> it wraps is the text, not the
+       control, and giving the padding to both would double it. */
+    .clock {
       @apply text-sm font-medium cursor-pointer rounded-md px-1.5 py-0.5 transition-colors hover:bg-white/20;
     }
 
