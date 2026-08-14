@@ -161,10 +161,21 @@ const useSystemStore = create<SystemStore>()(
         volume: state.volume,
       }),
       /**
-       * The accent is stored as a whole object, so an old visit would keep a
-       * stale copy of a colour that has since been adjusted. Re-resolving it by
-       * id on every rehydrate means the palette in `constants` stays the truth
-       * — the same problem the wallpaper migration below solves once.
+       * Both the accent and the wallpaper are stored as whole objects, so an
+       * old visit would keep a stale copy of one that has since been adjusted
+       * — a gradient retuned, an image moved to a new path. Re-resolving them
+       * by id on every rehydrate is what keeps `constants` the truth.
+       *
+       * Doing it here rather than in a migration is the point. A migration
+       * fires once, on the version it names, so a visitor already on the
+       * current version would hold their stale copy for ever: the wallpaper
+       * used to be handled that way, and a retuned gradient never reached
+       * anyone who had it selected.
+       *
+       * Uploads are the exception and pass straight through. A custom
+       * wallpaper's data URL exists only in the persisted state, so there is
+       * nothing in `constants` to resolve it against, and looking it up by id
+       * would throw the visitor's own picture away.
        */
       merge: (persisted, current) => {
         const state = { ...current, ...(persisted as PersistedSystem) };
@@ -173,21 +184,25 @@ const useSystemStore = create<SystemStore>()(
           accent:
             accents.find((accent) => accent.id === state.accent?.id) ??
             DEFAULT_ACCENT,
+          wallpaper:
+            state.wallpaper?.id === "custom"
+              ? state.wallpaper
+              : (wallpapers.find(
+                  (wallpaper) => wallpaper.id === state.wallpaper?.id
+                ) ?? DEFAULT_WALLPAPER),
         };
       },
       migrate: (persisted, version) => {
         let state = persisted as PersistedSystem;
         if (!state) return state;
 
-        /**
-         * v0 stored the built-in wallpaper's file path, which changed when the
-         * assets moved to WebP. Re-resolve built-ins by id so an old visit
-         * doesn't restore a 404; uploads (data URLs) are kept as-is.
+        /*
+         * v0's wallpaper fix-up lived here — it stored the built-in's file
+         * path, which changed when the assets moved to WebP. `merge` now
+         * re-resolves every built-in by id on every rehydrate, which covers
+         * that case and the ones a once-only migration could not, so there is
+         * nothing version-specific left to do for it.
          */
-        if (version < 1 && state.wallpaper && state.wallpaper.id !== "custom") {
-          const current = wallpapers.find((wp) => wp.id === state.wallpaper.id);
-          state = { ...state, wallpaper: current ?? DEFAULT_WALLPAPER };
-        }
 
         // v1 had no "auto": whichever theme was stored was the visitor's pick
         if (version < 2) {
