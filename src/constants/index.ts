@@ -334,7 +334,14 @@ const aboutSpecs: AboutSpec[] = [
   { label: "Serial Number", value: "SL-PORTFOLIO-2026" },
 ];
 
+/**
+ * The address the Contact window prints and Spotlight's actions write to the
+ * clipboard. One copy, so the two can never disagree about where mail goes.
+ */
+const contactEmail = "contact@latodev.pro";
+
 export {
+  contactEmail,
   navLinks,
   navIcons,
   dockApps,
