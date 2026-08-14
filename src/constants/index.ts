@@ -76,6 +76,21 @@ const navIcons: NavIcon[] = [
 
 const wallpapers: Wallpaper[] = [
   {
+    /*
+     * Lake at dusk, which is what 26 ships: deep water at the top of the
+     * screen opening into cyan at the shoreline.
+     *
+     * The first stop has to be the one the menu bar sits over, because that is
+     * the end `wallpaperNeedsDarkText` samples — it reads the first hex in this
+     * string and nothing else. Dark there, so the bar keeps its white glyphs.
+     */
+    id: "tahoe",
+    name: "Tahoe",
+    type: "gradient",
+    value:
+      "linear-gradient(168deg, #0a1f3d 0%, #123a63 26%, #1b5b86 50%, #2a7f9b 74%, #4aa6a8 100%)",
+  },
+  {
     id: "sequoia",
     name: "Sequoia",
     type: "image",
