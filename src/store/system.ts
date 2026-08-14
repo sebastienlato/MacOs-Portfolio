@@ -3,7 +3,15 @@ import { persist } from "zustand/middleware";
 import { accents, wallpapers } from "#constants/index";
 import type { Accent, Appearance, IconStyle, Theme, Wallpaper } from "#types";
 
-const DEFAULT_WALLPAPER = wallpapers[0];
+/*
+ * Resolved by id rather than taken from the head of the list. The list is
+ * ordered newest-first, so its first entry moves every time a release is added
+ * — and what a visitor lands on, and what Reset goes back to, should not change
+ * as a side effect of that ordering. Sequoia is also the only photograph in the
+ * set, which is the better first impression than any of the gradients.
+ */
+const DEFAULT_WALLPAPER =
+  wallpapers.find((wallpaper) => wallpaper.id === "sequoia") ?? wallpapers[0];
 const DEFAULT_ACCENT = accents[0];
 
 const prefersDark = () =>
