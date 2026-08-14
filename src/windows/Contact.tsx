@@ -1,5 +1,5 @@
 import WindowWrapper from "#hoc/WindowWrapper";
-import { socials } from "#constants/index";
+import { contactEmail, socials } from "#constants/index";
 import { WindowControls } from "#components";
 
 const Contact = () => {
@@ -23,7 +23,7 @@ const Contact = () => {
 
         <h3>Let's connect</h3>
         <p>Got an idea? A bug to squash? or just wanna talk tech? I'm in.</p>
-        <p>contact@latodev.pro</p>
+        <p>{contactEmail}</p>
 
         <ul>
           {socials.map(({ id, bg, link, icon, text }) => (

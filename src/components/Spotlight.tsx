@@ -1,24 +1,55 @@
-import { useMemo, useRef, useState, type KeyboardEvent } from "react";
-import { Search } from "lucide-react";
+import {
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
+import {
+  Copy,
+  Download,
+  Image as ImageIcon,
+  LayoutGrid,
+  Link2,
+  Mail,
+  Moon,
+  Search,
+  Sun,
+  Trash2,
+} from "lucide-react";
 import clsx from "clsx";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
-import { blogPosts, locations, socials } from "#constants/index";
+import { blogPosts, contactEmail, locations, socials } from "#constants/index";
 import useSystemStore from "#store/system";
 import useWindowStore from "#store/window";
 import useLocationStore from "#store/location";
 import { seconds } from "#utils/motion";
+import { copyText } from "#utils/clipboard";
 import type { FinderItem, WindowKey } from "#types";
+
+/** The label an action carries, and what every other result is measured against. */
+const ACTION = "Action";
 
 interface SpotlightItem {
   id: string;
   title: string;
   category: string;
-  icon: string;
+  /**
+   * A path for the things that ship artwork, a node for the things that don't.
+   * Actions are drawn rather than photographed — a glyph in a tinted tile is
+   * what separates "do this" from "open this" at a glance.
+   */
+  icon: string | ReactNode;
   /** Lowercased text this item can be found by. */
   haystack: string;
   action: () => void;
+  /**
+   * macOS 26's Quick Keys: type these two letters and nothing else, and this
+   * is the top hit. Actions only — an app is already found by its name.
+   */
+  quickKey?: string;
 }
 
 const APPS: { title: string; key: WindowKey; icon: string; extra?: string }[] =
@@ -45,8 +76,9 @@ const Spotlight = () => {
 };
 
 const SpotlightPanel = ({ close }: { close: () => void }) => {
-  const { openWindow } = useWindowStore();
-  const { setActiveLocation } = useLocationStore();
+  const { openWindow, toggleMissionControl } = useWindowStore();
+  const { setActiveLocation, trashItems, emptyTrash } = useLocationStore();
+  const { theme, toggleTheme } = useSystemStore();
 
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(0);
@@ -95,6 +127,108 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
         openWindow("finder");
       },
     });
+
+    /*
+     * Actions — the half of Spotlight that does something rather than opening
+     * something, and the thing 26 rebuilt it around. A portfolio turns out to
+     * be an unusually good fit for them: what a visitor actually wants here is
+     * a verb, and the alternative is making them find the Contact window and
+     * select an address out of it by hand.
+     *
+     * All of them are silent when they land, which is what macOS does. Saying
+     * "copied" would need somewhere to say it, and this desktop has no such
+     * surface — see the note by the Quick Keys.
+     */
+    items.push(
+      {
+        id: "action-email",
+        title: "Email Sebastien",
+        category: ACTION,
+        icon: <Mail size={15} />,
+        haystack: `email mail contact write hire ${contactEmail}`.toLowerCase(),
+        quickKey: "em",
+        // `assign` rather than setting `location.href`, which the immutability
+        // rule reads as a write to a value it is guarding
+        action: () => window.location.assign(`mailto:${contactEmail}`),
+      },
+      {
+        id: "action-copy-email",
+        title: "Copy Email Address",
+        category: ACTION,
+        icon: <Copy size={15} />,
+        haystack: `copy email address clipboard ${contactEmail}`.toLowerCase(),
+        quickKey: "ce",
+        action: () => void copyText(contactEmail),
+      },
+      {
+        id: "action-resume",
+        title: "Download Résumé",
+        category: ACTION,
+        icon: <Download size={15} />,
+        haystack: "download resume résumé cv pdf",
+        quickKey: "dr",
+        action: () => {
+          const link = document.createElement("a");
+          link.href = "files/resume.pdf";
+          link.download = "resume.pdf";
+          link.click();
+        },
+      },
+      {
+        /*
+         * Worth having because the desktop is addressable: the hash already
+         * tracks whatever is frontmost, so this copies a link that reopens the
+         * view being looked at rather than the bare desktop.
+         */
+        id: "action-copy-link",
+        title: "Copy Link to This View",
+        category: ACTION,
+        icon: <Link2 size={15} />,
+        haystack: "copy link url share address permalink",
+        quickKey: "cl",
+        action: () => void copyText(window.location.href),
+      },
+      {
+        id: "action-appearance",
+        title: `Switch to ${theme === "dark" ? "Light" : "Dark"} Appearance`,
+        category: ACTION,
+        icon: theme === "dark" ? <Sun size={15} /> : <Moon size={15} />,
+        haystack: "appearance theme dark light mode switch toggle",
+        quickKey: theme === "dark" ? "la" : "da",
+        action: toggleTheme,
+      },
+      {
+        id: "action-wallpaper",
+        title: "Change Wallpaper",
+        category: ACTION,
+        icon: <ImageIcon size={15} />,
+        haystack: "change wallpaper desktop background picture",
+        quickKey: "cw",
+        action: () => openWindow("settings"),
+      },
+      {
+        id: "action-mission-control",
+        title: "Mission Control",
+        category: ACTION,
+        icon: <LayoutGrid size={15} />,
+        haystack: "mission control windows spaces overview expose",
+        quickKey: "mc",
+        action: toggleMissionControl,
+      }
+    );
+
+    // Offered only when there is something to empty, as the real menu item is
+    if (trashItems.length > 0) {
+      items.push({
+        id: "action-empty-trash",
+        title: "Empty Trash",
+        category: ACTION,
+        icon: <Trash2 size={15} />,
+        haystack: "empty trash bin delete clear",
+        quickKey: "et",
+        action: emptyTrash,
+      });
+    }
 
     for (const project of locations.work.children ?? []) {
       items.push({
@@ -160,17 +294,36 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
     }
 
     return items;
-  }, [openWindow, setActiveLocation]);
+  }, [
+    openWindow,
+    setActiveLocation,
+    toggleMissionControl,
+    trashItems,
+    emptyTrash,
+    theme,
+    toggleTheme,
+  ]);
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return index.filter((item) => item.category === "Application");
+    /*
+     * The resting list is what you can open and what you can do, which is the
+     * whole point of putting actions in: nobody discovers a verb they have to
+     * guess the name of first. Everything else waits to be searched for.
+     */
+    if (!q)
+      return index.filter(
+        (item) => item.category === "Application" || item.category === ACTION
+      );
 
     return index
       .map((item) => {
         const title = item.title.toLowerCase();
         let score = 0;
-        if (title.startsWith(q)) score = 3;
+        // A quick key is typed in full and means exactly one thing, so it
+        // outranks even a title that starts with the same letters
+        if (item.quickKey === q) score = 4;
+        else if (title.startsWith(q)) score = 3;
         else if (title.includes(q)) score = 2;
         else if (item.haystack.includes(q)) score = 1;
         return { item, score };
@@ -262,9 +415,18 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
                 onMouseEnter={() => setSelected(i)}
                 onClick={() => run(item)}
               >
-                <img src={item.icon} alt="" />
+                {typeof item.icon === "string" ? (
+                  <img src={item.icon} alt="" />
+                ) : (
+                  <span className="action-icon" aria-hidden="true">
+                    {item.icon}
+                  </span>
+                )}
                 <p>{item.title}</p>
                 <span className="category">{item.category}</span>
+                {/* Printed rather than hidden, because a shortcut nobody has
+                    been shown is a shortcut nobody uses */}
+                {item.quickKey && <kbd className="quick-key">{item.quickKey}</kbd>}
               </li>
             ))}
           </ul>

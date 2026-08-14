@@ -1063,6 +1063,13 @@ body {
           @apply size-6 object-contain;
         }
 
+        /* An action has no artwork to show, so it gets a drawn glyph on a wash
+           of the accent — the same footprint as an app icon, so the column of
+           names stays straight whichever kind of result is in the row. */
+        .action-icon {
+          @apply size-6 shrink-0 flex-center rounded-md bg-accent-soft text-accent-label;
+        }
+
         p {
           @apply truncate;
         }
@@ -1071,8 +1078,22 @@ body {
           @apply ml-auto text-xs opacity-60 shrink-0;
         }
 
+        .quick-key {
+          @apply shrink-0 rounded border px-1 py-px text-[10px] font-medium uppercase border-black/15 text-gray-500 dark:border-white/20 dark:text-gray-400;
+        }
+
         &.selected {
           @apply bg-accent text-accent-on;
+
+          /* On the accent, both of these have to stop drawing their own colour
+             and borrow the row's, or they read as holes punched in it */
+          .action-icon {
+            @apply bg-white/25 text-accent-on;
+          }
+
+          .quick-key {
+            @apply border-white/45 text-accent-on;
+          }
         }
       }
     }
