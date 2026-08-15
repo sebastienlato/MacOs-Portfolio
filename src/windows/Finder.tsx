@@ -1,4 +1,4 @@
-import { useState, type CSSProperties, type KeyboardEvent } from "react";
+import { useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { Columns3, LayoutGrid, List, Search } from "lucide-react";
 import clsx from "clsx";
 
@@ -11,6 +11,7 @@ import useWindowStore from "#store/window";
 import useQuickLookStore from "#store/quicklook";
 import useInfoStore from "#store/info";
 import ContextMenu, { type ContextMenuItem } from "#components/ContextMenu";
+import { isArrowKey, nextIndex } from "#utils/gridNav";
 import type { FinderItem } from "#types";
 
 type ViewMode = "icon" | "list" | "column";
@@ -95,6 +96,60 @@ const Finder = () => {
       e.preventDefault();
       openItem(item);
     }
+  };
+
+  const gridRef = useRef<HTMLUListElement>(null);
+
+  /**
+   * How many icons the grid is fitting across, right now.
+   *
+   * Read from the resolved template rather than counted off the DOM. The tracks
+   * are `repeat(auto-fill, minmax(7rem, 1fr))`, so the browser has already done
+   * this arithmetic and `getComputedStyle` hands back what it decided —
+   * "112px 112px 112px" — where measuring `offsetTop` would have me rediscover
+   * it through rounding. Asked at the moment of the keypress because the window
+   * is resizable: anything cached at mount is wrong the first time an edge is
+   * dragged, and the wrongness shows up as a down arrow skipping a row.
+   */
+  const columnCount = () => {
+    const grid = gridRef.current;
+    if (!grid) return 1;
+
+    // `none` when the pane has no layout to report, which splits to a length of
+    // one — the same fallback `nextIndex` would have picked anyway
+    return getComputedStyle(grid).gridTemplateColumns.split(" ").length;
+  };
+
+  const iconAt = (index: number) =>
+    gridRef.current?.querySelectorAll<HTMLButtonElement>(
+      ":scope > li > button"
+    )[index];
+
+  /**
+   * Arrow keys move the selection about the icon grid, as the Finder's do.
+   *
+   * The move is made by shifting *focus*, not by calling `setSelected`: focus
+   * already selects (see above), so this way the keyboard and the pointer
+   * cannot end up disagreeing about what is picked, and the browser scrolls the
+   * new icon into view without being asked. Anything that is not an arrow falls
+   * through to the Space/Enter handling every view shares.
+   *
+   * Arrows are swallowed whole, including the ones that move nothing. The pane
+   * scrolls on an arrow otherwise, which slides the grid out from under a
+   * selection that just moved — and at an edge, where the key is meant to do
+   * nothing at all, a scroll is the one thing that must not happen.
+   */
+  const handleIconKeyDown = (
+    e: KeyboardEvent,
+    item: FinderItem,
+    index: number
+  ) => {
+    if (!isArrowKey(e.key)) return handleItemKeyDown(e, item);
+
+    e.preventDefault();
+
+    const to = nextIndex(index, e.key, columnCount(), items.length);
+    if (to !== null) iconAt(to)?.focus();
   };
 
   /** One click selects. The open is on the second — see `onDoubleClick`. */
@@ -254,8 +309,8 @@ const Finder = () => {
 
         <div className="content">
           {view === "icon" && (
-            <ul className="icon-view" onClick={clearOnBackdrop}>
-              {items.map((item) => (
+            <ul className="icon-view" ref={gridRef} onClick={clearOnBackdrop}>
+              {items.map((item, index) => (
                 <li key={item.id}>
                   <button
                     type="button"
@@ -264,7 +319,7 @@ const Finder = () => {
                     onClick={() => selectItem(item)}
                     onDoubleClick={() => openItem(item)}
                     onFocus={() => selectItem(item)}
-                    onKeyDown={(e) => handleItemKeyDown(e, item)}
+                    onKeyDown={(e) => handleIconKeyDown(e, item, index)}
                     onContextMenu={(e) => openMenu(e, item)}
                   >
                     <ItemIcon item={item} />
