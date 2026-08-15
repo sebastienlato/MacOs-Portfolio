@@ -48,8 +48,18 @@ export const MOBILE_APPS: MobileApp[] = [
      * operating system. Safari and Photos keep theirs precisely because iOS
      * ships icons that look the same.
      */
+    /*
+     * Lighter than Files' own blue, because of where it sits. Against the
+     * dock's glass — itself a pale blue over a blue wallpaper — the true colour
+     * came out at 1.63:1, where the amber beside it manages 2.94 and reads as
+     * an icon rather than a smudge. This lifts it to 2.33.
+     *
+     * Not further: the next step up measured 2.77 and went pale with it,
+     * reading as a disabled tile and starting to compete with Safari's white
+     * one two along. Contrast is not the only thing being spent here.
+     */
     Glyph: Folder,
-    tint: "linear-gradient(160deg, #5ab0ff 0%, #0a63d8 100%)",
+    tint: "linear-gradient(160deg, #8ecdff 0%, #2f86ef 100%)",
     inDock: true,
   },
   {
