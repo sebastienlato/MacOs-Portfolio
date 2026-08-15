@@ -602,6 +602,11 @@ body {
   }
 
   /*
+   * Declared on the attribute rather than on `.item-icon`, so that anything
+   * carrying a folder colour resolves the same hue — Get Info's swatches are
+   * folder artwork too, and scoping these to the icon component left all nine
+   * of them sitting at 0deg and rendering as one identical blue.
+   *
    * The tints. One piece of artwork, rotated — the source folder sits at hue
    * 199 and each of these was solved against that rather than guessed, because
    * CSS hue-rotate is a matrix approximation and not a true rotation: the naive
@@ -614,28 +619,28 @@ body {
     filter: hue-rotate(var(--folder-hue, 0deg)) saturate(1.15);
   }
 
-  .item-icon[data-folder-color="blue"] {
+  [data-folder-color="blue"] {
     --folder-hue: 0deg;
   }
-  .item-icon[data-folder-color="teal"] {
+  [data-folder-color="teal"] {
     --folder-hue: -28deg;
   }
-  .item-icon[data-folder-color="green"] {
+  [data-folder-color="green"] {
     --folder-hue: -67deg;
   }
-  .item-icon[data-folder-color="yellow"] {
+  [data-folder-color="yellow"] {
     --folder-hue: -143deg;
   }
-  .item-icon[data-folder-color="orange"] {
+  [data-folder-color="orange"] {
     --folder-hue: -168deg;
   }
-  .item-icon[data-folder-color="red"] {
+  [data-folder-color="red"] {
     --folder-hue: -197deg;
   }
-  .item-icon[data-folder-color="pink"] {
+  [data-folder-color="pink"] {
     --folder-hue: -224deg;
   }
-  .item-icon[data-folder-color="purple"] {
+  [data-folder-color="purple"] {
     --folder-hue: -289deg;
   }
 
