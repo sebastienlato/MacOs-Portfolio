@@ -318,6 +318,10 @@
   .mobile-app {
     @apply fixed inset-0 z-[300] flex flex-col overflow-hidden;
 
+    /* The bar's height, needed in two places that must not drift: the bar sets
+       it, and the body pads itself clear of it */
+    --app-bar-h: calc(var(--status-h) + 2.75rem);
+
     background: var(--ios-bg);
     color: var(--ios-label);
     /* The open/dismiss tween scales the whole frame from the tapped icon */
@@ -325,16 +329,73 @@
     will-change: transform, opacity;
   }
 
+  /*
+   * The navigation bar sits *over* the body rather than above it, which is the
+   * whole point of its being glass: content has to pass underneath for there to
+   * be anything to blur. Out of the flex flow, so `.app-body` takes the full
+   * height and pads its content clear of the bar instead.
+   */
   .app-bar {
-    @apply glass-chrome relative z-10 flex shrink-0 items-end justify-between gap-2 px-2 pb-2;
+    @apply glass-chrome absolute inset-x-0 top-0 z-10 flex items-end justify-between gap-2 px-2 pb-2;
 
     /* Its own 2.75rem of bar, below the band the status bar occupies */
-    height: calc(var(--status-h) + 2.75rem);
+    height: var(--app-bar-h);
     padding-top: var(--status-h);
-    border-bottom: 1px solid var(--ios-separator);
 
-    h1 {
+    /* Transparent rather than absent, so the bar's height never changes when it
+       appears — a 1px shift of everything below is exactly the sort of jump
+       that reads as a bug */
+    border-bottom: 1px solid transparent;
+    transition:
+      background-color 200ms ease-out,
+      backdrop-filter 200ms ease-out,
+      border-color 200ms ease-out;
+
+    h1,
+    .bar-title {
       @apply flex-1 truncate px-1 text-center text-[17px] font-semibold;
+    }
+
+    /*
+     * With a large title below it, the bar starts empty: iOS holds the inline
+     * title back until the large one has gone under, and only then draws the
+     * hairline. Both are the same gesture, so they share a transition.
+     */
+    &.large {
+      .bar-title {
+        @apply opacity-0;
+
+        transition: opacity 200ms ease-out;
+      }
+
+      /*
+       * Clear until something is under it. With nothing scrolled there is
+       * nothing to blur, and iOS leaves the bar entirely absent — the page runs
+       * to the top of the screen. Painting the material regardless drew a pale
+       * band across the top of every app with a visible seam along its bottom
+       * edge, which is what gave the whole screen away: the bar looked like a
+       * panel sitting on the page rather than a surface the page slides beneath.
+       *
+       * Only the two properties `glass-chrome` sets are unset, so the material
+       * itself stays defined in one place and simply fades back in below.
+       */
+      &:not(.scrolled) {
+        background-color: transparent;
+        backdrop-filter: none;
+      }
+
+      &.scrolled {
+        border-bottom-color: var(--ios-separator);
+
+        .bar-title {
+          @apply opacity-100;
+        }
+      }
+    }
+
+    /* A screen with no large title is an ordinary bar, and keeps its hairline */
+    &:not(.large) {
+      border-bottom-color: var(--ios-separator);
     }
 
     .back,
@@ -367,10 +428,30 @@
   }
 
   .app-body {
-    @apply flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-4 py-4;
+    @apply flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-4 pb-4;
 
+    /* Clear of the bar it now scrolls under. Named, because a screen that wants
+       to sit *under* the bar rather than below it has to subtract exactly this
+       — see `.photo-viewer`. */
+    --body-pad-top: calc(var(--app-bar-h) + 0.5rem);
+    padding-top: var(--body-pad-top);
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
+  }
+
+  /*
+   * 34px bold, iOS's large title, left aligned and set tight. The bar's own
+   * copy stays 17px and centred, so the two read as the same title at two
+   * sizes rather than as two different headings.
+   *
+   * It wraps rather than truncating. "About This Device" measured 343px in a
+   * 343px box — fitting by nothing at all — and the next long name added would
+   * have been silently ellipsised. iOS runs a long large title onto a second
+   * line, and the collapse still works because what watches it is the box
+   * itself, not a height written down anywhere.
+   */
+  .large-title {
+    @apply mb-2 text-[34px] font-bold leading-tight tracking-[-0.02em];
   }
 
   .home-bar-area {
@@ -529,8 +610,22 @@
     }
   }
 
+  /*
+   * The one screen that wants to be *under* the navigation bar rather than
+   * below it: iOS floats the bar over a photograph and centres the picture
+   * rather than fitting it into what the chrome leaves over.
+   *
+   * Both of the body's paddings come back off, which took two goes to get
+   * right — taking back only the top left the photo 40px *high*, having
+   * over-corrected the 47px low that the new bar clearance had introduced. The
+   * home indicator's strip is left alone deliberately: it is reserved space,
+   * not padding, and the picture centres in what sits above it.
+   */
   .photo-viewer {
-    @apply flex h-full items-center justify-center;
+    @apply -mb-4 flex items-center justify-center;
+
+    margin-top: calc(-1 * var(--body-pad-top));
+    height: calc(100% + var(--body-pad-top) + 1rem);
 
     img {
       @apply max-h-full w-full rounded-xl object-contain;

@@ -17,6 +17,9 @@ const GalleryApp = () => {
       title={open ? `${openIndex! + 1} of ${gallery.length}` : "Gallery"}
       onBack={open ? () => setOpenIndex(null) : undefined}
       backLabel="Gallery"
+      // "3 of 12" is a position, not a name — iOS sets a counter like this in
+      // the bar and gives the photo the screen
+      largeTitle={!open}
     >
       {open ? (
         <div className="photo-viewer">

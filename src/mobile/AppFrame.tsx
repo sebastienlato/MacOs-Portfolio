@@ -1,6 +1,7 @@
-import { useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import clsx from "clsx";
 import { ChevronLeft } from "lucide-react";
 
 import { EXPANDED, collapsedTo } from "#mobile/motion";
@@ -17,6 +18,12 @@ interface AppFrameProps {
   backLabel?: string;
   /** Trailing navigation-bar control — a download button, say. */
   action?: ReactNode;
+  /**
+   * iOS gives a large title to a screen you scroll and an inline one to a
+   * screen you look at. The photo viewer is the second kind: a 34pt heading
+   * over a photograph is a caption nobody asked for.
+   */
+  largeTitle?: boolean;
   children: ReactNode;
 }
 
@@ -30,6 +37,7 @@ const AppFrame = ({
   onBack,
   backLabel = "Back",
   action,
+  largeTitle = true,
   children,
 }: AppFrameProps) => {
   const origin = useMobileStore((state) => state.origin);
@@ -37,6 +45,42 @@ const AppFrame = ({
   const finishClose = useMobileStore((state) => state.finishClose);
   const dismiss = useMobileStore((state) => state.dismiss);
   const ref = useRef<HTMLElement>(null);
+
+  /*
+   * Whether the large title has gone under the navigation bar, which is what
+   * fades the bar's own copy of the title in and draws the hairline beneath it.
+   *
+   * Watched rather than measured on every scroll event. The alternative is
+   * reading scrollTop against the title's height on each frame of a flick,
+   * which is both a layout read per frame and a magic number to keep in step
+   * with the type; an observer asks the browser to say when the box has left,
+   * and says nothing at all while it has not. `rootMargin` is the bar's own
+   * height, so "gone" means gone under the bar rather than off the top.
+   */
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const barRef = useRef<HTMLElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
+    const body = bodyRef.current;
+    const bar = barRef.current;
+    const heading = titleRef.current;
+    if (!body || !bar || !heading) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setCollapsed(!entry.isIntersecting),
+      {
+        root: body,
+        rootMargin: `-${Math.round(bar.getBoundingClientRect().height)}px 0px 0px 0px`,
+      }
+    );
+
+    observer.observe(heading);
+    return () => observer.disconnect();
+    // The title itself is a dependency: Files renames the heading as you drill
+    // in, and a folder with a shorter name can change how tall the box is
+  }, [largeTitle, title]);
 
   useGSAP(() => {
     const el = ref.current;
@@ -95,7 +139,10 @@ const AppFrame = ({
 
   return (
     <section ref={ref} className="mobile-app">
-      <header className="app-bar">
+      <header
+        ref={barRef}
+        className={clsx("app-bar", largeTitle && "large", collapsed && "scrolled")}
+      >
         {onBack ? (
           <button type="button" className="back" onClick={onBack}>
             <ChevronLeft size={22} />
@@ -105,12 +152,32 @@ const AppFrame = ({
           <span className="back-spacer" />
         )}
 
-        <h1>{title}</h1>
+        {/*
+          Two titles, one heading. When the large title is on it is the real
+          <h1> and this is its echo — hiding it from the accessibility tree
+          keeps a screen reader from announcing the screen's name twice, once
+          for a heading and once for the thing that fades in when you scroll.
+        */}
+        {largeTitle ? (
+          <p className="bar-title" aria-hidden="true">
+            {title}
+          </p>
+        ) : (
+          <h1>{title}</h1>
+        )}
 
         <span className="app-bar-action">{action}</span>
       </header>
 
-      <div className="app-body">{children}</div>
+      <div ref={bodyRef} className="app-body">
+        {largeTitle && (
+          <h1 ref={titleRef} className="large-title">
+            {title}
+          </h1>
+        )}
+
+        {children}
+      </div>
 
       <div className="home-bar-area" onPointerDown={handleHomeBarPointerDown}>
         <button
