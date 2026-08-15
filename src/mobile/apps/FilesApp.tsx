@@ -7,6 +7,7 @@ import { writeFilesHash } from "#mobile/useMobileDeepLink";
 import { locations } from "#constants/index";
 import useLocationStore from "#store/location";
 import type { FinderItem } from "#types";
+import ItemIcon from "#components/ItemIcon";
 
 const ROOT_TITLE = "Portfolio";
 
@@ -37,7 +38,7 @@ const FolderList = ({
         return (
           <li key={child.id}>
             <button type="button" onClick={() => onOpen(child)}>
-              <img src={child.icon} alt="" />
+              <ItemIcon item={child} />
               <span className="name">{child.name}</span>
               {leaves ? (
                 <ExternalLink size={15} className="chevron" />

@@ -26,6 +26,7 @@ import useSystemStore from "#store/system";
 import useWindowStore from "#store/window";
 import useLocationStore from "#store/location";
 import { seconds } from "#utils/motion";
+import ItemIcon from "#components/ItemIcon";
 import { copyText } from "#utils/clipboard";
 import type { FinderItem, WindowKey } from "#types";
 
@@ -235,7 +236,9 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
         id: `project-${project.id}-${project.name}`,
         title: project.name,
         category: "Project",
-        icon: "/images/folder.png",
+        // Tinted and badged here too, or a folder that is purple in the Finder
+        // would turn up plain blue the moment it is searched for
+        icon: <ItemIcon item={project} />,
         haystack: [
           project.name,
           ...(project.children ?? []).map(fileHaystack),

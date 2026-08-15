@@ -3,6 +3,7 @@ import { Columns3, LayoutGrid, List, Search } from "lucide-react";
 import clsx from "clsx";
 
 import { WindowControls } from "#components";
+import ItemIcon from "#components/ItemIcon";
 import WindowWrapper from "#hoc/WindowWrapper";
 import { locations } from "#constants/index";
 import useLocationStore from "#store/location";
@@ -98,18 +99,21 @@ const Finder = () => {
                 item.id === activeLocation?.id ? "active" : "not-active",
               )}
             >
-              <img
-                src={item.icon}
-                className={clsx("w-4", accented && "accent-glyph")}
-                style={
-                  accented
-                    ? ({ "--icon": `url(${item.icon})` } as CSSProperties)
-                    : undefined
-                }
-                // The name is in the <p> beside it; repeating it here would
-                // have a screen reader read every row twice
-                alt=""
-              />
+              {/* The masked glyphs stay a bare <img>: ItemIcon exists to tint
+                  and badge folder art, and there is neither to do to a
+                  silhouette already being repainted in the accent colour. */}
+              {accented ? (
+                <img
+                  src={item.icon}
+                  className="w-4 accent-glyph"
+                  style={{ "--icon": `url(${item.icon})` } as CSSProperties}
+                  // The name is in the <p> beside it; repeating it here would
+                  // have a screen reader read every row twice
+                  alt=""
+                />
+              ) : (
+                <ItemIcon item={item} />
+              )}
               <p className="text-sm font-medium truncate">{item.name}</p>
             </button>
           </li>
@@ -154,7 +158,7 @@ const Finder = () => {
               {items.map((item) => (
                 <li key={item.id}>
                   <button type="button" onClick={() => openItem(item)}>
-                    <img src={item.icon} alt="" />
+                    <ItemIcon item={item} />
                     <p>{item.name}</p>
                   </button>
                 </li>
@@ -195,7 +199,7 @@ const Finder = () => {
                         layout and the columns stop lining up */}
                       <td>
                         <span className="name">
-                          <img src={item.icon} alt="" />
+                          <ItemIcon item={item} />
                           <span className="truncate">{item.name}</span>
                         </span>
                       </td>
@@ -224,7 +228,7 @@ const Finder = () => {
                           : undefined
                       }
                     >
-                      <img src={item.icon} alt="" />
+                      <ItemIcon item={item} />
                       <span className="truncate">{item.name}</span>
                       {item.kind === "folder" && (
                         <span className="chevron">›</span>
@@ -241,7 +245,7 @@ const Finder = () => {
                   {(drilled.children ?? []).map((item) => (
                     <li key={item.id}>
                       <button type="button" onClick={() => openItem(item)}>
-                        <img src={item.icon} alt="" />
+                        <ItemIcon item={item} />
                         <span className="truncate">{item.name}</span>
                       </button>
                     </li>
@@ -255,14 +259,14 @@ const Finder = () => {
           <div className="path-bar">
             {activeLocation && (
               <>
-                <img src={activeLocation.icon} alt="" />
+                <ItemIcon item={activeLocation} />
                 <span>{activeLocation.name}</span>
               </>
             )}
             {drilled && view === "column" && (
               <>
                 <span className="sep">›</span>
-                <img src={drilled.icon} alt="" />
+                <ItemIcon item={drilled} />
                 <span>{drilled.name}</span>
               </>
             )}

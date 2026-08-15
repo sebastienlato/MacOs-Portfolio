@@ -515,6 +515,94 @@ body {
     @apply cursor-pointer transition-opacity hover:opacity-70;
   }
 
+  /*
+   * A Finder item's icon, and the folder customisation macOS 26 added.
+   *
+   * The wrapper deliberately has no size of its own. It is used at 64px in the
+   * icon grid and at 14px in the path bar, and every one of those contexts
+   * already sizes `img` — those rules still reach through this, so the wrapper
+   * takes the icon's size wherever it lands and the badge follows in percent.
+   */
+  .item-icon {
+    @apply relative inline-flex shrink-0;
+  }
+
+  /*
+   * The tints. One piece of artwork, rotated — the source folder sits at hue
+   * 199 and each of these was solved against that rather than guessed, because
+   * CSS hue-rotate is a matrix approximation and not a true rotation: the naive
+   * arithmetic misses by up to 40 degrees at the warm end.
+   *
+   * The saturate() nudge is there because the rotation alone leaves the warm
+   * hues looking washed against the blue they came from.
+   */
+  .item-icon[data-folder-color] img {
+    filter: hue-rotate(var(--folder-hue, 0deg)) saturate(1.15);
+  }
+
+  .item-icon[data-folder-color="blue"] {
+    --folder-hue: 0deg;
+  }
+  .item-icon[data-folder-color="teal"] {
+    --folder-hue: -28deg;
+  }
+  .item-icon[data-folder-color="green"] {
+    --folder-hue: -67deg;
+  }
+  .item-icon[data-folder-color="yellow"] {
+    --folder-hue: -143deg;
+  }
+  .item-icon[data-folder-color="orange"] {
+    --folder-hue: -168deg;
+  }
+  .item-icon[data-folder-color="red"] {
+    --folder-hue: -197deg;
+  }
+  .item-icon[data-folder-color="pink"] {
+    --folder-hue: -224deg;
+  }
+  .item-icon[data-folder-color="purple"] {
+    --folder-hue: -289deg;
+  }
+
+  /* Graphite is the one that is not a rotation — there is no hue that reads as
+     "no colour", so the saturation comes out instead */
+  .item-icon[data-folder-color="graphite"] img {
+    filter: saturate(0.12) brightness(0.96);
+  }
+
+  /*
+   * The badge, sitting on the folder's face rather than its centre: the tab
+   * along the top means the body's middle is a little below the icon's.
+   *
+   * Sized in percent so one rule serves every scale, and the width/height here
+   * override the attributes lucide renders onto its <svg>.
+   */
+  .folder-badge {
+    @apply absolute left-1/2 top-[58%] -translate-x-1/2 -translate-y-1/2 text-white;
+    width: 40%;
+    height: 40%;
+    stroke-width: 2.4;
+    /* Yellow folders are light enough that a white glyph needs its own edge */
+    filter: drop-shadow(0 1px 1.5px rgb(0 0 0 / 0.35));
+    /*
+     * Hidden by default and switched on where there is room, rather than the
+     * other way round. At 40% of a 16px list row the glyph is 6px across with
+     * a 2.4px stroke — more stroke than symbol, and it reads as a smudge on
+     * the folder rather than as a lock. Defaulting to off means a context
+     * added later shows no badge until someone looks at it, instead of
+     * quietly shipping the smudge.
+     *
+     * The tint still tells the folders apart at those sizes, which is what
+     * macOS falls back on as its own badges get small.
+     */
+    display: none;
+  }
+
+  #finder .icon-view .folder-badge {
+    display: block;
+  }
+
   .apple-menu {
     @apply relative;
 
@@ -1793,6 +1881,13 @@ body {
            hover fill and the focus ring cover the same box the pointer does */
         li > button {
           @apply w-full flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer transition-colors;
+        }
+
+        /* The projects list draws its folders through ItemIcon, which carries
+           no size of its own — every other context sizes `img` by a descendant
+           rule and this one sized it by a class on the element instead */
+        .item-icon img {
+          @apply w-4;
         }
       }
     }

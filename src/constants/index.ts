@@ -369,6 +369,8 @@ const WORK_LOCATION: FinderItem = {
       name: "SecureVault",
       icon: "/images/folder.png",
       kind: "folder",
+      folderColor: "graphite",
+      folderBadge: "lock",
       children: [
         {
           id: 1,
@@ -407,6 +409,8 @@ const WORK_LOCATION: FinderItem = {
       name: "PetSitterQR",
       icon: "/images/folder.png",
       kind: "folder",
+      folderColor: "orange",
+      folderBadge: "paw",
       children: [
         {
           id: 1,
@@ -447,6 +451,8 @@ const WORK_LOCATION: FinderItem = {
       name: "SleepSoundsApp",
       icon: "/images/folder.png",
       kind: "folder",
+      folderColor: "purple",
+      folderBadge: "moon",
       children: [
         {
           id: 1,
