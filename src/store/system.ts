@@ -1,7 +1,14 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { accents, wallpapers } from "#constants/index";
-import type { Accent, Appearance, IconStyle, Theme, Wallpaper } from "#types";
+import { accents, soundOutputs, wallpapers } from "#constants/index";
+import type {
+  Accent,
+  AirDropMode,
+  Appearance,
+  IconStyle,
+  Theme,
+  Wallpaper,
+} from "#types";
 
 /*
  * Resolved by id rather than taken from the head of the list. The list is
@@ -35,6 +42,12 @@ interface SystemStore {
   controlCenterOpen: boolean;
   notificationCenterOpen: boolean;
   wifiEnabled: boolean;
+  bluetoothEnabled: boolean;
+  airdrop: AirDropMode;
+  /** The id of the active Focus, or null when none is on. */
+  focus: string | null;
+  /** The id of the chosen sound output. */
+  output: string;
   brightness: number;
   volume: number;
   setWallpaper: (wallpaper: Wallpaper) => void;
@@ -53,6 +66,11 @@ interface SystemStore {
   setNotificationCenterOpen: (open: boolean) => void;
   toggleNotificationCenter: () => void;
   toggleWifi: () => void;
+  toggleBluetooth: () => void;
+  setAirdrop: (mode: AirDropMode) => void;
+  /** Passing the id that is already on turns Focus off, as the real one does. */
+  setFocus: (id: string | null) => void;
+  setOutput: (id: string) => void;
   setBrightness: (value: number) => void;
   setVolume: (value: number) => void;
 }
@@ -66,6 +84,10 @@ type PersistedSystem = Pick<
   | "accent"
   | "iconStyle"
   | "wifiEnabled"
+  | "bluetoothEnabled"
+  | "airdrop"
+  | "focus"
+  | "output"
   | "brightness"
   | "volume"
 >;
@@ -82,6 +104,10 @@ const useSystemStore = create<SystemStore>()(
       controlCenterOpen: false,
       notificationCenterOpen: false,
       wifiEnabled: true,
+      bluetoothEnabled: true,
+      airdrop: "contacts",
+      focus: null,
+      output: soundOutputs[0].id,
       brightness: 100,
       volume: 65,
 
@@ -140,6 +166,20 @@ const useSystemStore = create<SystemStore>()(
 
       toggleWifi: () => set((state) => ({ wifiEnabled: !state.wifiEnabled })),
 
+      toggleBluetooth: () =>
+        set((state) => ({ bluetoothEnabled: !state.bluetoothEnabled })),
+
+      setAirdrop: (airdrop) => set({ airdrop }),
+
+      /*
+       * Choosing the Focus that is already on turns it off. That is what the
+       * real control does, and it is the only way out of a Focus from this
+       * panel — there is no separate "off" row to click.
+       */
+      setFocus: (id) => set((state) => ({ focus: state.focus === id ? null : id })),
+
+      setOutput: (output) => set({ output }),
+
       setBrightness: (value) => set({ brightness: value }),
 
       setVolume: (value) => set({ volume: value }),
@@ -157,6 +197,10 @@ const useSystemStore = create<SystemStore>()(
         accent: state.accent,
         iconStyle: state.iconStyle,
         wifiEnabled: state.wifiEnabled,
+        bluetoothEnabled: state.bluetoothEnabled,
+        airdrop: state.airdrop,
+        focus: state.focus,
+        output: state.output,
         brightness: state.brightness,
         volume: state.volume,
       }),

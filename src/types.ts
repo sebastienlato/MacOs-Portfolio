@@ -149,3 +149,24 @@ export interface Social {
   bg: string;
   link: string;
 }
+
+/**
+ * How discoverable the Mac is over AirDrop. Three states rather than a toggle,
+ * because that is what the real control offers.
+ */
+export type AirDropMode = "off" | "contacts" | "everyone";
+
+/** A Focus, as Control Center lists them. `null` anywhere means Focus is off. */
+export interface FocusMode {
+  id: string;
+  name: string;
+  /** lucide glyph name, resolved where it is drawn rather than stored. */
+  icon: "moon" | "briefcase" | "user" | "bed" | "gamepad";
+}
+
+/** Somewhere sound can come out of. */
+export interface SoundOutput {
+  id: string;
+  name: string;
+  kind: "speakers" | "headphones" | "airplay";
+}
