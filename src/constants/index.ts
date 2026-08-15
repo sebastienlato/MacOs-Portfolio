@@ -260,7 +260,7 @@ const socials: Social[] = [
   },
   {
     id: 2,
-    text: "Platform",
+    text: "Website",
     icon: "/icons/atom.svg",
     bg: "#4bcb63",
     link: "https://sebastienlato.com/",

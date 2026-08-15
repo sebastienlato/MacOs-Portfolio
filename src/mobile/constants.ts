@@ -141,7 +141,7 @@ export interface MobileLink {
 export const HOME_LINKS: MobileLink[] = socials.map(
   ({ id, text, icon, bg, link }) => ({
     id,
-    name: text === "Platform" ? "Website" : text,
+    name: text,
     icon,
     tint: bg,
     href: link,
