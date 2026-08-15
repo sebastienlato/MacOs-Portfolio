@@ -3,7 +3,9 @@ import type {
   BlogPost,
   DockApp,
   FinderItem,
+  FocusMode,
   IconStyle,
+  SoundOutput,
   Social,
   TechStackEntry,
   Wallpaper,
@@ -340,8 +342,28 @@ const aboutSpecs: AboutSpec[] = [
  */
 const contactEmail = "contact@latodev.pro";
 
+/**
+ * The Focuses Control Center offers. Apple's own defaults, minus the ones that
+ * only mean anything with a calendar or a car attached.
+ */
+const focusModes: FocusMode[] = [
+  { id: "dnd", name: "Do Not Disturb", icon: "moon" },
+  { id: "work", name: "Work", icon: "briefcase" },
+  { id: "personal", name: "Personal", icon: "user" },
+  { id: "sleep", name: "Sleep", icon: "bed" },
+];
+
+/** Where sound goes. Named after this Mac, which is the one in About This Mac. */
+const soundOutputs: SoundOutput[] = [
+  { id: "internal", name: "MacBook Pro Speakers", kind: "speakers" },
+  { id: "airpods", name: "Sebastien's AirPods Pro", kind: "headphones" },
+  { id: "display", name: "Studio Display", kind: "airplay" },
+];
+
 export {
   contactEmail,
+  focusModes,
+  soundOutputs,
   navLinks,
   navIcons,
   dockApps,

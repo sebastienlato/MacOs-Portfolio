@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
 import dayjs from "dayjs";
 
-import { blogPosts, locations, socials } from "#constants/index";
+import { BellOff } from "lucide-react";
+
+import { blogPosts, focusModes, locations, socials } from "#constants/index";
 import useSystemStore from "#store/system";
 import useWindowStore from "#store/window";
 
@@ -48,10 +50,11 @@ const useNotifications = () => {
 };
 
 const NotificationCenter = () => {
-  const { notificationCenterOpen, setNotificationCenterOpen } =
+  const { notificationCenterOpen, setNotificationCenterOpen, focus } =
     useSystemStore();
   const { openWindow } = useWindowStore();
   const notifications = useNotifications();
+  const activeFocus = focusModes.find((mode) => mode.id === focus) ?? null;
   const panelRef = useRef<HTMLElement>(null);
   const now = dayjs();
 
@@ -83,26 +86,40 @@ const NotificationCenter = () => {
         ref={panelRef}
         aria-label="Notification Center"
       >
-        <section className="notifications">
-          {notifications.map((n) => (
-            <button
-              key={n.id}
-              type="button"
-              className="notification"
-              onClick={() => run(n.onClick)}
-            >
-              <img src={n.icon} alt="" />
-              <div className="body">
-                <div className="meta">
-                  <span className="app">{n.app}</span>
-                  <span className="time">{n.time}</span>
+        {/*
+          A Focus silences notifications, which is the whole of what turning one
+          on means. Without this the switch in Control Center would light up and
+          change nothing — and the panel it changes is two clicks away, so the
+          disconnect would be easy to notice.
+        */}
+        {activeFocus ? (
+          <section className="notifications silenced" role="status">
+            <BellOff size={20} aria-hidden="true" />
+            <h4>Notifications Silenced</h4>
+            <p>{activeFocus.name} is on.</p>
+          </section>
+        ) : (
+          <section className="notifications">
+            {notifications.map((n) => (
+              <button
+                key={n.id}
+                type="button"
+                className="notification"
+                onClick={() => run(n.onClick)}
+              >
+                <img src={n.icon} alt="" />
+                <div className="body">
+                  <div className="meta">
+                    <span className="app">{n.app}</span>
+                    <span className="time">{n.time}</span>
+                  </div>
+                  <h4>{n.title}</h4>
+                  <p>{n.body}</p>
                 </div>
-                <h4>{n.title}</h4>
-                <p>{n.body}</p>
-              </div>
-            </button>
-          ))}
-        </section>
+              </button>
+            ))}
+          </section>
+        )}
 
         <section className="widgets">
           <div className="widget calendar">
