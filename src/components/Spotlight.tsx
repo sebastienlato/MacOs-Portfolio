@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import {
+  ClipboardList,
   Copy,
   Download,
   Image as ImageIcon,
@@ -28,15 +29,40 @@ import useLocationStore from "#store/location";
 import { seconds } from "#utils/motion";
 import ItemIcon from "#components/ItemIcon";
 import { copyText } from "#utils/clipboard";
+import useClipboardStore from "#store/clipboard";
 import type { FinderItem, WindowKey } from "#types";
 
 /** The label an action carries, and what every other result is measured against. */
 const ACTION = "Action";
 
+/**
+ * What a result *is*, as opposed to what its category line says.
+ *
+ * The categories are display text — "File — SecureVault" names its folder — and
+ * the browse modes below have to group by something stabler than that.
+ */
+type Kind = "app" | "file" | "action" | "link" | "clip";
+
+/**
+ * macOS 26's browse modes, on the shortcuts it gives them. Spotlight opens on
+ * everything at once and these narrow it to one kind, which is what makes it a
+ * browser rather than only a search box.
+ */
+type Mode = "all" | Kind;
+
+const MODES: { id: Mode; label: string; key?: string }[] = [
+  { id: "all", label: "All" },
+  { id: "app", label: "Apps", key: "1" },
+  { id: "file", label: "Files", key: "2" },
+  { id: "action", label: "Actions", key: "3" },
+  { id: "clip", label: "Clipboard", key: "4" },
+];
+
 interface SpotlightItem {
   id: string;
   title: string;
   category: string;
+  kind: Kind;
   /**
    * A path for the things that ship artwork, a node for the things that don't.
    * Actions are drawn rather than photographed — a glyph in a tinted tile is
@@ -81,7 +107,11 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
   const { setActiveLocation, trashItems, emptyTrash } = useLocationStore();
   const { theme, toggleTheme } = useSystemStore();
 
+  const clips = useClipboardStore((state) => state.entries);
+  const record = useClipboardStore((state) => state.record);
+
   const [query, setQuery] = useState("");
+  const [mode, setMode] = useState<Mode>("all");
   const [selected, setSelected] = useState(0);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -111,6 +141,7 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
         id: `app-${app.key}-${app.title}`,
         title: app.title,
         category: "Application",
+        kind: "app",
         icon: app.icon,
         haystack: `${app.title} ${app.extra ?? ""}`.toLowerCase(),
         action: () => openWindow(app.key),
@@ -121,6 +152,7 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
       id: "app-trash",
       title: "Trash",
       category: "Application",
+      kind: "app",
       icon: "/images/trash.webp",
       haystack: "trash bin archive",
       action: () => {
@@ -145,6 +177,7 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
         id: "action-email",
         title: "Email Sebastien",
         category: ACTION,
+        kind: "action",
         icon: <Mail size={15} />,
         haystack: `email mail contact write hire ${contactEmail}`.toLowerCase(),
         quickKey: "em",
@@ -156,15 +189,20 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
         id: "action-copy-email",
         title: "Copy Email Address",
         category: ACTION,
+        kind: "action",
         icon: <Copy size={15} />,
         haystack: `copy email address clipboard ${contactEmail}`.toLowerCase(),
         quickKey: "ce",
-        action: () => void copyText(contactEmail),
+        action: () =>
+          void copyText(contactEmail).then((ok) => {
+            if (ok) record(contactEmail, "Email address");
+          }),
       },
       {
         id: "action-resume",
         title: "Download Résumé",
         category: ACTION,
+        kind: "action",
         icon: <Download size={15} />,
         haystack: "download resume résumé cv pdf",
         quickKey: "dr",
@@ -184,15 +222,20 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
         id: "action-copy-link",
         title: "Copy Link to This View",
         category: ACTION,
+        kind: "action",
         icon: <Link2 size={15} />,
         haystack: "copy link url share address permalink",
         quickKey: "cl",
-        action: () => void copyText(window.location.href),
+        action: () =>
+          void copyText(window.location.href).then((ok) => {
+            if (ok) record(window.location.href, "Link to this view");
+          }),
       },
       {
         id: "action-appearance",
         title: `Switch to ${theme === "dark" ? "Light" : "Dark"} Appearance`,
         category: ACTION,
+        kind: "action",
         icon: theme === "dark" ? <Sun size={15} /> : <Moon size={15} />,
         haystack: "appearance theme dark light mode switch toggle",
         quickKey: theme === "dark" ? "la" : "da",
@@ -202,6 +245,7 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
         id: "action-wallpaper",
         title: "Change Wallpaper",
         category: ACTION,
+        kind: "action",
         icon: <ImageIcon size={15} />,
         haystack: "change wallpaper desktop background picture",
         quickKey: "cw",
@@ -211,6 +255,7 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
         id: "action-mission-control",
         title: "Mission Control",
         category: ACTION,
+        kind: "action",
         icon: <LayoutGrid size={15} />,
         haystack: "mission control windows spaces overview expose",
         quickKey: "mc",
@@ -224,6 +269,7 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
         id: "action-empty-trash",
         title: "Empty Trash",
         category: ACTION,
+        kind: "action",
         icon: <Trash2 size={15} />,
         haystack: "empty trash bin delete clear",
         quickKey: "et",
@@ -236,6 +282,7 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
         id: `project-${project.id}-${project.name}`,
         title: project.name,
         category: "Project",
+        kind: "file",
         // Tinted and badged here too, or a folder that is purple in the Finder
         // would turn up plain blue the moment it is searched for
         icon: <ItemIcon item={project} />,
@@ -256,6 +303,7 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
           id: `file-${project.id}-${file.id}-${file.name}`,
           title: file.name,
           category: `File — ${project.name}`,
+          kind: "file",
           icon: file.icon,
           haystack: fileHaystack(file),
           action: () => openFile(file, project),
@@ -268,6 +316,7 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
         id: `about-${file.id}-${file.name}`,
         title: file.name,
         category: "File — About me",
+        kind: "file",
         icon: file.icon,
         haystack: fileHaystack(file),
         action: () => openFile(file, locations.about),
@@ -279,6 +328,7 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
         id: `blog-${post.id}`,
         title: post.title,
         category: "Blog Post",
+        kind: "link",
         icon: "/images/safari.png",
         haystack: post.title.toLowerCase(),
         action: () => window.open(post.link, "_blank"),
@@ -290,14 +340,35 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
         id: `social-${social.id}`,
         title: social.text,
         category: "Link",
+        kind: "link",
         icon: social.icon,
         haystack: `${social.text} ${social.link}`.toLowerCase(),
         action: () => window.open(social.link, "_blank"),
       });
     }
 
+    /*
+     * Clipboard History, which is only ever what this desktop put there: a page
+     * cannot read the system clipboard back without a permission prompt. So the
+     * two copy actions above record what they wrote, and picking one here
+     * writes it again — which is the whole of what the real one does with it.
+     */
+    for (const clip of clips) {
+      items.push({
+        id: `clip-${clip.id}`,
+        title: clip.text,
+        category: clip.label,
+        kind: "clip",
+        icon: <ClipboardList size={15} />,
+        haystack: `${clip.text} ${clip.label}`.toLowerCase(),
+        action: () => void copyText(clip.text),
+      });
+    }
+
     return items;
   }, [
+    clips,
+    record,
     openWindow,
     setActiveLocation,
     toggleMissionControl,
@@ -309,17 +380,24 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
+    // A mode is a narrowing of the same index, not a separate one
+    const pool = mode === "all" ? index : index.filter((i) => i.kind === mode);
+
     /*
-     * The resting list is what you can open and what you can do, which is the
+     * With nothing typed, a mode lists everything it holds — that is what makes
+     * it a browse rather than a filter waiting on a query. "All" is the
+     * exception and shows what you can open and what you can do, which is the
      * whole point of putting actions in: nobody discovers a verb they have to
-     * guess the name of first. Everything else waits to be searched for.
+     * guess the name of first.
      */
-    if (!q)
-      return index.filter(
+    if (!q) {
+      if (mode !== "all") return pool;
+      return pool.filter(
         (item) => item.category === "Application" || item.category === ACTION
       );
+    }
 
-    return index
+    return pool
       .map((item) => {
         const title = item.title.toLowerCase();
         let score = 0;
@@ -335,7 +413,7 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
       .sort((a, b) => b.score - a.score)
       .slice(0, 8)
       .map(({ item }) => item);
-  }, [index, query]);
+  }, [index, query, mode]);
 
   useGSAP(() => {
     const panel = panelRef.current;
@@ -352,7 +430,26 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
     item.action();
   };
 
+  const pickMode = (next: Mode) => {
+    setMode(next);
+    setSelected(0);
+  };
+
   const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    /*
+     * ⌘1–⌘4 switch modes, as macOS 26 binds them. Taken before the browser
+     * sees them because those are its own tab-switching shortcuts, and a
+     * Spotlight that jumped you to another tab would be worse than no binding.
+     */
+    if (e.metaKey || e.ctrlKey) {
+      const picked = MODES.find((m) => m.key && m.key === e.key);
+      if (picked) {
+        e.preventDefault();
+        pickMode(picked.id);
+      }
+      return;
+    }
+
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setSelected((s) => Math.min(s + 1, results.length - 1));
@@ -406,6 +503,27 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
           <kbd>⌘K</kbd>
         </div>
 
+        {/*
+          The modes, which is what turns Spotlight from a search box into
+          something you can browse. Named as well as keyed: ⌘1–⌘4 are worth
+          having and worth nobody having to guess at.
+        */}
+        <div className="modes" role="tablist" aria-label="Spotlight modes">
+          {MODES.map((m) => (
+            <button
+              key={m.id}
+              type="button"
+              role="tab"
+              aria-selected={mode === m.id}
+              className={clsx(mode === m.id && "selected")}
+              onClick={() => pickMode(m.id)}
+            >
+              {m.label}
+              {m.key && <kbd>⌘{m.key}</kbd>}
+            </button>
+          ))}
+        </div>
+
         {results.length > 0 ? (
           <ul className="results" id="spotlight-results" role="listbox">
             {results.map((item, i) => (
@@ -436,7 +554,11 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
         ) : (
           /* Announced, since the only sign of it is text appearing */
           <p className="empty" role="status">
-            No results for “{query}”
+            {query
+              ? `No results for “${query}”`
+              : mode === "clip"
+                ? "Nothing copied yet. The two copy actions land here."
+                : "Nothing here yet."}
           </p>
         )}
       </div>

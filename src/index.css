@@ -1335,6 +1335,26 @@ body {
       }
     }
 
+    /* The browse modes, sitting between the field and the list the way 26
+       puts them under the search row */
+    .modes {
+      @apply flex items-center gap-1 border-t px-2.5 py-1.5 border-black/10 dark:border-white/10;
+
+      button {
+        @apply flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium cursor-pointer text-gray-600 transition-colors hover:bg-black/[0.06] dark:text-gray-400 dark:hover:bg-white/10;
+
+        &.selected {
+          @apply bg-accent-soft text-accent-label;
+        }
+
+        /* The shortcut is a hint, not a second label — it steps back until the
+           mode it belongs to is the one being pointed at */
+        kbd {
+          @apply text-[10px] opacity-55;
+        }
+      }
+    }
+
     .results {
       @apply border-t py-1.5 max-h-96 overflow-y-auto border-black/10 dark:border-white/10;
 
