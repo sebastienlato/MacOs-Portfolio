@@ -11,6 +11,7 @@ import {
   SnapPreview,
   MissionControl,
   NotificationCenter,
+  QuickLook,
 } from "#components";
 import {
   Finder,
@@ -64,6 +65,7 @@ const DesktopShell = () => (
     <SnapPreview />
     <MissionControl />
     <NotificationCenter />
+    <QuickLook />
   </>
 );
 
