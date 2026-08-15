@@ -599,7 +599,11 @@ body {
     display: none;
   }
 
-  #finder .icon-view .folder-badge {
+  /* The two places an icon is drawn big enough to carry one: the Finder's icon
+     grid at 64px, and Quick Look's header icon at 80px. The child rows inside
+     that same panel are 16px and stay bare. */
+  #finder .icon-view .folder-badge,
+  #quick-look .ql-folder-icon .folder-badge {
     display: block;
   }
 
@@ -1188,6 +1192,87 @@ body {
 
     .empty {
       @apply border-t px-4 py-6 text-center text-sm text-gray-500 border-black/10 dark:border-white/10 dark:text-gray-400;
+    }
+  }
+
+  /*
+   * Quick Look. Sits above the windows and below Spotlight, which is the order
+   * the two appear in: Spotlight is summoned over everything, this is summoned
+   * over the Finder.
+   */
+  #quick-look {
+    @apply fixed inset-0 z-[17000] flex-center bg-black/25;
+
+    .panel {
+      @apply glass glass-thick relative flex flex-col w-[34rem] max-w-[90vw] max-h-[76vh] overflow-hidden rounded-[22px] text-gray-900 dark:text-gray-100;
+      /* Text-bearing, and floats over arbitrary content — the same case
+         Spotlight's fill exists for */
+      --glass-fill: var(--glass-alpha-spotlight);
+    }
+
+    header {
+      @apply flex items-center gap-3 px-3 py-2.5 shrink-0;
+      border-bottom: 1px solid var(--glass-hairline);
+
+      h2 {
+        @apply flex-1 text-center text-[13px] font-semibold;
+      }
+    }
+
+    .ql-close {
+      @apply flex-center size-5 shrink-0 rounded-full bg-black/10 text-gray-700 cursor-pointer transition-colors hover:bg-black/20 dark:bg-white/15 dark:text-gray-200 dark:hover:bg-white/25;
+    }
+
+    .ql-open {
+      @apply flex items-center gap-1.5 shrink-0 rounded-md px-2 py-1 text-[11px] font-medium bg-black/[0.07] text-gray-700 cursor-pointer transition-colors hover:bg-black/15 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20;
+    }
+
+    .ql-body {
+      @apply flex-1 min-h-0 overflow-auto p-5;
+    }
+
+    .ql-image {
+      @apply w-full h-auto rounded-lg;
+    }
+
+    .ql-text {
+      @apply space-y-3 text-[13px] leading-relaxed;
+
+      h3 {
+        @apply text-base font-semibold;
+      }
+    }
+
+    /* The kinds with nothing to render: the icon, big, and the one fact worth
+       having — what is inside, or where it points */
+    .ql-folder,
+    .ql-link,
+    .ql-generic {
+      @apply flex flex-col items-center gap-2 text-center;
+    }
+
+    .ql-folder-icon img {
+      @apply size-20;
+    }
+
+    .ql-count {
+      @apply text-xs text-gray-500 dark:text-gray-400;
+    }
+
+    .ql-href {
+      @apply text-[13px] break-all text-accent-label;
+    }
+
+    .ql-folder ul {
+      @apply mt-2 w-full space-y-0.5 text-left text-[13px];
+
+      li {
+        @apply flex items-center gap-2 rounded-md px-2 py-1.5 bg-black/[0.04] dark:bg-white/[0.06];
+      }
+
+      img {
+        @apply size-4 object-contain;
+      }
     }
   }
 

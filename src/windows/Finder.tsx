@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from "react";
+import { useState, type CSSProperties, type KeyboardEvent } from "react";
 import { Columns3, LayoutGrid, List, Search } from "lucide-react";
 import clsx from "clsx";
 
@@ -8,6 +8,7 @@ import WindowWrapper from "#hoc/WindowWrapper";
 import { locations } from "#constants/index";
 import useLocationStore from "#store/location";
 import useWindowStore from "#store/window";
+import useQuickLookStore from "#store/quicklook";
 import type { FinderItem } from "#types";
 
 type ViewMode = "icon" | "list" | "column";
@@ -52,6 +53,28 @@ const Finder = () => {
     activeLocation?.type === "trash"
       ? trashItems
       : (activeLocation?.children ?? []);
+
+  /*
+   * Quick Look previews whatever is selected, and focus is what selection is
+   * here. macOS selects on a single click and opens on a double; this desktop
+   * opens on the first click, because a visitor clicking a project once should
+   * see the project. Rather than change that, the thing the keyboard is aimed
+   * at is treated as the thing that is selected — which every item already
+   * publishes, being a button or a focusable row.
+   */
+  const quickLook = (item: FinderItem) => useQuickLookStore.getState().toggle(item);
+
+  /**
+   * Space previews, as it does in the Finder. It has to be taken before the
+   * browser sees it: on a focused button Space is a click, so without this the
+   * item would open rather than be previewed — and on the list's rows it would
+   * scroll the pane out from under the selection.
+   */
+  const handleItemKeyDown = (e: KeyboardEvent, item: FinderItem) => {
+    if (e.key !== " ") return;
+    e.preventDefault();
+    quickLook(item);
+  };
 
   const openItem = (item: FinderItem) => {
     if (item.fileType === "pdf") return openWindow("resume");
@@ -157,7 +180,11 @@ const Finder = () => {
             <ul className="icon-view">
               {items.map((item) => (
                 <li key={item.id}>
-                  <button type="button" onClick={() => openItem(item)}>
+                  <button
+                    type="button"
+                    onClick={() => openItem(item)}
+                    onKeyDown={(e) => handleItemKeyDown(e, item)}
+                  >
                     <ItemIcon item={item} />
                     <p>{item.name}</p>
                   </button>
@@ -188,8 +215,11 @@ const Finder = () => {
                       tabIndex={0}
                       onClick={() => openItem(item)}
                       onKeyDown={(e) => {
-                        if (e.key !== "Enter" && e.key !== " ") return;
-                        // Space would scroll the list out from under the row
+                        // Enter opens and Space previews, which is the split
+                        // macOS makes. Both are taken from the browser: Space
+                        // would otherwise scroll the pane out from under the row.
+                        if (e.key === " ") return handleItemKeyDown(e, item);
+                        if (e.key !== "Enter") return;
                         e.preventDefault();
                         openItem(item);
                       }}
@@ -220,6 +250,7 @@ const Finder = () => {
                       type="button"
                       className={clsx(item.id === drilled?.id && "selected")}
                       onClick={() => selectInColumn(item)}
+                      onKeyDown={(e) => handleItemKeyDown(e, item)}
                       // A folder here opens the next column rather than
                       // navigating, which is exactly what expanded describes
                       aria-expanded={
@@ -244,7 +275,11 @@ const Finder = () => {
                 <ul>
                   {(drilled.children ?? []).map((item) => (
                     <li key={item.id}>
-                      <button type="button" onClick={() => openItem(item)}>
+                      <button
+                        type="button"
+                        onClick={() => openItem(item)}
+                        onKeyDown={(e) => handleItemKeyDown(e, item)}
+                      >
                         <ItemIcon item={item} />
                         <span className="truncate">{item.name}</span>
                       </button>

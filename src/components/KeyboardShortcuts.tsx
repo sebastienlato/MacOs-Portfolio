@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import type { MenuAction } from "#constants/menus";
 import useSystemStore from "#store/system";
 import useWindowStore from "#store/window";
+import useQuickLookStore from "#store/quicklook";
 import { runMenuAction } from "#utils/menuActions";
 
 interface Binding {
@@ -45,7 +46,11 @@ const KeyboardShortcuts = () => {
         const { spotlightOpen, setSpotlightOpen, controlCenterOpen, setControlCenterOpen } =
           useSystemStore.getState();
         const { missionControl, toggleMissionControl } = useWindowStore.getState();
-        if (spotlightOpen) setSpotlightOpen(false);
+        // Quick Look is tested first because it is drawn over the rest: the
+        // chain dismisses the topmost thing, and this is what that is
+        const quickLook = useQuickLookStore.getState();
+        if (quickLook.item) quickLook.close();
+        else if (spotlightOpen) setSpotlightOpen(false);
         else if (controlCenterOpen) setControlCenterOpen(false);
         else if (missionControl) toggleMissionControl();
         return;
