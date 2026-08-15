@@ -57,26 +57,57 @@ const Finder = () => {
       : (activeLocation?.children ?? []);
 
   /*
-   * Quick Look previews whatever is selected, and focus is what selection is
-   * here. macOS selects on a single click and opens on a double; this desktop
-   * opens on the first click, because a visitor clicking a project once should
-   * see the project. Rather than change that, the thing the keyboard is aimed
-   * at is treated as the thing that is selected — which every item already
-   * publishes, being a button or a focusable row.
+   * Selection, as the Finder has it: one click selects and two open.
+   *
+   * This used to open on the first click, and the trade is real — a visitor
+   * reaching a project now spends a click getting there. What buys it back is
+   * that selection is what Quick Look runs on, and spacebar preview is only
+   * worth having if a pointer can reach it: before this it was a keyboard
+   * gesture in a Finder nobody tabs through.
+   *
+   * Focus sets it too, so the keyboard and the pointer never disagree about
+   * what is selected — tabbing to an item selects it, exactly as arrowing onto
+   * one does in the real thing.
    */
+  const [selected, setSelected] = useState<FinderItem | null>(null);
+
+  // Moving to another folder invalidates the selection along with the column
+  if (drilledFrom !== activeLocation?.id && selected) setSelected(null);
+
   const quickLook = (item: FinderItem) => useQuickLookStore.getState().toggle(item);
 
   /**
-   * Space previews, as it does in the Finder. It has to be taken before the
-   * browser sees it: on a focused button Space is a click, so without this the
-   * item would open rather than be previewed — and on the list's rows it would
-   * scroll the pane out from under the selection.
+   * Space previews and Enter opens, which is the split macOS makes.
+   *
+   * Both have to be taken before the browser sees them. On a focused button
+   * Enter and Space are both a click, and a click now selects — so without
+   * this, Enter would re-select the thing it is meant to open and Space would
+   * scroll the pane out from under it.
    */
   const handleItemKeyDown = (e: KeyboardEvent, item: FinderItem) => {
-    if (e.key !== " ") return;
-    e.preventDefault();
-    quickLook(item);
+    if (e.key === " ") {
+      e.preventDefault();
+      quickLook(item);
+      return;
+    }
+
+    if (e.key === "Enter") {
+      e.preventDefault();
+      openItem(item);
+    }
   };
+
+  /** One click selects. The open is on the second — see `onDoubleClick`. */
+  const selectItem = (item: FinderItem) => setSelected(item);
+
+  /* Clicking the empty part of a view drops the selection, as the Finder does.
+     Guarded on the target being the container itself, or every click on an
+     item would bubble up and immediately clear what it just selected. */
+  const clearOnBackdrop = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) setSelected(null);
+  };
+
+  const isSelected = (item: FinderItem) => selected?.id === item.id;
 
   /*
    * The right-click menu, as macOS gives every Finder item. The desktop's own
@@ -122,10 +153,15 @@ const Finder = () => {
     if (item.fileType === "img") return openWindow("imgfile", item);
   };
 
-  /** In column view a folder expands the next column instead of navigating. */
+  /**
+   * In column view a folder expands the next column instead of navigating,
+   * which is the one place a single click still does something beyond
+   * selecting — that is what a column view is for. A file only selects; the
+   * double click opens it, as everywhere else.
+   */
   const selectInColumn = (item: FinderItem) => {
-    if (item.kind === "folder") return setDrilled(item);
-    openItem(item);
+    setSelected(item);
+    if (item.kind === "folder") setDrilled(item);
   };
 
   /**
@@ -218,12 +254,16 @@ const Finder = () => {
 
         <div className="content">
           {view === "icon" && (
-            <ul className="icon-view">
+            <ul className="icon-view" onClick={clearOnBackdrop}>
               {items.map((item) => (
                 <li key={item.id}>
                   <button
                     type="button"
-                    onClick={() => openItem(item)}
+                    className={clsx(isSelected(item) && "selected")}
+                    aria-pressed={isSelected(item)}
+                    onClick={() => selectItem(item)}
+                    onDoubleClick={() => openItem(item)}
+                    onFocus={() => selectItem(item)}
                     onKeyDown={(e) => handleItemKeyDown(e, item)}
                     onContextMenu={(e) => openMenu(e, item)}
                   >
@@ -255,17 +295,13 @@ const Finder = () => {
                     <tr
                       key={item.id}
                       tabIndex={0}
-                      onClick={() => openItem(item)}
+                      className={clsx(isSelected(item) && "selected")}
+                      aria-selected={isSelected(item)}
+                      onClick={() => selectItem(item)}
+                      onDoubleClick={() => openItem(item)}
+                      onFocus={() => selectItem(item)}
                       onContextMenu={(e) => openMenu(e, item)}
-                      onKeyDown={(e) => {
-                        // Enter opens and Space previews, which is the split
-                        // macOS makes. Both are taken from the browser: Space
-                        // would otherwise scroll the pane out from under the row.
-                        if (e.key === " ") return handleItemKeyDown(e, item);
-                        if (e.key !== "Enter") return;
-                        e.preventDefault();
-                        openItem(item);
-                      }}
+                      onKeyDown={(e) => handleItemKeyDown(e, item)}
                     >
                       {/* The flex box is inside the cell, not the cell itself:
                         display:flex on a <td> drops it out of the table
@@ -291,8 +327,13 @@ const Finder = () => {
                   <li key={item.id}>
                     <button
                       type="button"
-                      className={clsx(item.id === drilled?.id && "selected")}
+                      className={clsx(
+                        (item.id === drilled?.id || isSelected(item)) &&
+                          "selected"
+                      )}
                       onClick={() => selectInColumn(item)}
+                      onDoubleClick={() => openItem(item)}
+                      onFocus={() => selectItem(item)}
                       onKeyDown={(e) => handleItemKeyDown(e, item)}
                       onContextMenu={(e) => openMenu(e, item)}
                       // A folder here opens the next column rather than
@@ -321,8 +362,12 @@ const Finder = () => {
                     <li key={item.id}>
                       <button
                         type="button"
-                        onClick={() => openItem(item)}
+                        className={clsx(isSelected(item) && "selected")}
+                        onClick={() => selectItem(item)}
+                        onDoubleClick={() => openItem(item)}
+                        onFocus={() => selectItem(item)}
                         onKeyDown={(e) => handleItemKeyDown(e, item)}
+                        onContextMenu={(e) => openMenu(e, item)}
                       >
                         <ItemIcon item={item} />
                         <span className="truncate">{item.name}</span>

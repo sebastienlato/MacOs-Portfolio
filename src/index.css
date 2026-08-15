@@ -2317,7 +2317,21 @@ body {
         }
 
         p {
-          @apply text-[13px] text-center font-medium leading-tight dark:text-gray-200;
+          @apply text-[13px] text-center font-medium leading-tight rounded-md px-1.5 dark:text-gray-200;
+        }
+
+        /*
+         * The accent goes behind the name rather than behind the whole tile,
+         * which is what the Finder does and what keeps the artwork readable —
+         * a full-bleed fill turns every icon into a coloured square. The tile
+         * gets a wash so the target still reads as picked out.
+         */
+        &.selected {
+          @apply bg-black/[0.06] dark:bg-white/10;
+
+          p {
+            @apply bg-accent text-accent-on;
+          }
         }
       }
     }
@@ -2367,6 +2381,14 @@ body {
 
       tr:is(:hover, :focus-visible) .kind {
         @apply text-white/80;
+      }
+
+      tr.selected {
+        @apply bg-accent text-accent-on;
+
+        .kind {
+          @apply text-accent-on/80;
+        }
       }
     }
 
