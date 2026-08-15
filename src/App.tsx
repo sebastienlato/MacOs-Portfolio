@@ -26,6 +26,9 @@ const App = () => {
   const brightness = useSystemStore((state) => state.brightness);
   const accent = useSystemStore((state) => state.accent);
   const iconStyle = useSystemStore((state) => state.iconStyle);
+  const reducedTransparency = useSystemStore(
+    (state) => state.reducedTransparency
+  );
   const [lightMenuBar, setLightMenuBar] = useState(false);
   const isMobile = useIsMobile();
 
@@ -66,6 +69,21 @@ const App = () => {
     return () => media.removeEventListener("change", sync);
   }, []);
 
+  /**
+   * The same arrangement for transparency. Watched rather than read once,
+   * because this is the setting someone turns on *because* they are struggling
+   * with what is on screen — having to reload to be taken seriously would be a
+   * poor answer to that.
+   */
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-transparency: reduce)");
+    const sync = () => useSystemStore.getState().syncSystemTransparency();
+
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
+
   useEffect(() => {
     let active = true;
     wallpaperNeedsDarkText(wallpaper, wallpaperSrc).then((needsDark) => {
@@ -91,7 +109,8 @@ const App = () => {
         "desktop",
         `icons-${iconStyle}`,
         theme === "dark" && "dark",
-        lightMenuBar && "menu-bar-on-light"
+        lightMenuBar && "menu-bar-on-light",
+        reducedTransparency && "reduce-transparency"
       )}
     >
       {/*

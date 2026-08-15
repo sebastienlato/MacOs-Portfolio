@@ -86,6 +86,12 @@ export interface WindowState {
 export type Theme = "light" | "dark";
 
 /**
+ * Whether the glass is glass. "auto" defers to the system's
+ * prefers-reduced-transparency; "reduced" turns the material off outright.
+ */
+export type Transparency = "auto" | "reduced";
+
+/**
  * What the visitor picked in Settings. "auto" isn't a theme of its own — it
  * defers to the OS's prefers-color-scheme and re-resolves when that flips.
  */

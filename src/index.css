@@ -165,6 +165,77 @@ body {
       0 2px 10px rgb(0 0 0 / 0.45);
   }
 
+  /*
+   * Reduce transparency — the accessibility setting this whole material has
+   * been waiting for. `prefers-reduced-motion` is honoured throughout; this is
+   * its twin, and the one that matters for a design built on see-through.
+   *
+   * Applied by turning the tokens off rather than by overriding each surface.
+   * Almost nothing in this file carries the `glass` class in the DOM — the
+   * popovers `@apply` it, which inlines the declarations into their own rules —
+   * so a `.reduce-transparency .glass` selector would reach hardly any of them.
+   * The tokens inherit, and every one of those inlined declarations reads them.
+   *
+   * Placed after `.dark` on purpose: both land on the same element at the same
+   * specificity, so this only wins by coming later.
+   *
+   * The values are chosen to stay *valid* as well as flat. `--glass-backdrop`
+   * feeds a `backdrop-filter` alongside a blur, so it becomes a no-op filter
+   * rather than `none`, which cannot be mixed with functions. `--glass-inner-glow`
+   * feeds a `box-shadow` list, so it becomes a transparent shadow rather than
+   * `none`, which would invalidate the whole declaration.
+   */
+  .reduce-transparency {
+    /*
+     * A multiplier rather than zeroing the blur tokens themselves, because
+     * `glass-thick` and `glass-tight` re-declare those on the element that uses
+     * them — an `@apply` inlines them into that rule, and a declaration on the
+     * element beats one inherited from here. Spotlight and Control Center kept
+     * their 8px blur that way. Nothing re-declares the scale, so this reaches
+     * every one of them.
+     *
+     * Behind an opaque fill the blur was invisible, but it still cost a
+     * compositing layer and a real blur pass per frame — which is most of what
+     * someone turning this on is trying to get away from.
+     */
+    --glass-blur-scale: 0;
+    --glass-backdrop: saturate(1);
+    --glass-edge-filter: saturate(1);
+
+    --glass-alpha: 1;
+    --glass-alpha-thick: 1;
+    --glass-alpha-spotlight: 1;
+    --glass-chrome-alpha: 1;
+
+    /* The rim and the sheen are the material announcing itself, which is the
+       part being asked for less of */
+    --glass-specular: none;
+    --glass-inner-glow: 0 0 rgb(0 0 0 / 0);
+    --glass-edge: 0px;
+
+    /*
+     * The menu bar is the one surface with no background at all — it reads
+     * straight off the wallpaper and leans on a text shadow. That is precisely
+     * the arrangement this setting exists to undo, so it gets a real bar.
+     */
+    > nav {
+      background-color: rgb(var(--glass-tint) / 1);
+      color: rgb(0 0 0 / 0.85);
+      text-shadow: none;
+      border-bottom: 1px solid var(--glass-hairline);
+    }
+
+    &.dark > nav {
+      color: rgb(255 255 255 / 0.92);
+    }
+
+    /* Both of these paint their own glyphs and stop inverting on a light bar;
+       with a solid bar the light-wallpaper case no longer applies */
+    &.menu-bar-on-light > nav {
+      color: rgb(0 0 0 / 0.85);
+    }
+  }
+
   @media (width >= 1920px) {
     :root {
       --dock-inset: 116px;
@@ -198,7 +269,8 @@ body {
 @utility glass {
   background-color: rgb(var(--glass-tint) / var(--glass-fill, var(--glass-alpha)));
   box-shadow: var(--glass-inner-glow), var(--glass-shadow);
-  backdrop-filter: blur(var(--glass-blur)) var(--glass-backdrop);
+  backdrop-filter: blur(calc(var(--glass-blur) * var(--glass-blur-scale, 1)))
+    var(--glass-backdrop);
 
   &::before,
   &::after {
@@ -221,7 +293,8 @@ body {
   /* 2 — the lens */
   &::before {
     padding: var(--glass-edge);
-    backdrop-filter: blur(var(--glass-edge-blur)) var(--glass-edge-filter);
+    backdrop-filter: blur(calc(var(--glass-edge-blur) * var(--glass-blur-scale, 1)))
+      var(--glass-edge-filter);
   }
 
   /* 3 — the specular rim */
@@ -257,7 +330,8 @@ body {
  */
 @utility glass-chrome {
   background-color: rgb(var(--glass-tint) / var(--glass-chrome-alpha));
-  backdrop-filter: blur(var(--glass-chrome-blur)) var(--glass-backdrop);
+  backdrop-filter: blur(calc(var(--glass-chrome-blur) * var(--glass-blur-scale, 1)))
+    var(--glass-backdrop);
 }
 
 /*
@@ -2243,6 +2317,64 @@ body {
 
     h2 {
       @apply font-bold text-sm text-center w-full;
+    }
+  }
+
+  /*
+   * The four surfaces that mix their own translucency rather than reading the
+   * tokens — the terminal's two, and the phone's pill and search sheet. They
+   * have to be named individually, there being no token between them and the
+   * setting.
+   *
+   * And they have to live in this layer. The tokens above sit in `base`, which
+   * is right for them; these targets are declared in `components` — the phone's
+   * in mobile.css, the terminal's further up this file — and a cascade layer
+   * beats specificity and source order both, so a `base` rule aimed at them
+   * loses however it is written. That is exactly how it failed first time: the
+   * menu bar went solid and the terminal did not move at all.
+   */
+  .reduce-transparency {
+    /* Dropping the blur is not enough on its own — each of these carries its
+       own alpha as well, and a 75% background is still a see-through one */
+    #terminal #window-header {
+      @apply bg-[#38393b];
+
+      backdrop-filter: none;
+    }
+
+    #terminal .terminal-screen {
+      @apply bg-[#1d1e20];
+
+      backdrop-filter: none;
+    }
+
+    .search-pill {
+      background: rgb(28 28 30 / 1);
+      backdrop-filter: none;
+    }
+
+    .search-sheet {
+      background: rgb(18 18 20 / 1);
+      backdrop-filter: none;
+    }
+
+    /*
+     * The widget writes in white because it normally sits on a dark, blurred
+     * pane over the wallpaper. Turned opaque it becomes a white card, and white
+     * on white is nothing at all — the heading, the count and every project
+     * name disappeared. It takes the phone's own label colours instead, which
+     * already flip with the appearance.
+     */
+    .ios-widget {
+      color: var(--ios-label);
+
+      header p {
+        color: var(--ios-secondary);
+      }
+
+      button {
+        background: var(--ios-fill);
+      }
     }
   }
 
