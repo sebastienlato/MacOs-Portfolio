@@ -7,6 +7,7 @@ import type {
   Appearance,
   IconStyle,
   Theme,
+  Transparency,
   Wallpaper,
 } from "#types";
 
@@ -28,6 +29,19 @@ const prefersDark = () =>
 const resolveTheme = (appearance: Appearance): Theme =>
   appearance === "auto" ? (prefersDark() ? "dark" : "light") : appearance;
 
+const prefersReducedTransparency = () =>
+  window.matchMedia?.("(prefers-reduced-transparency: reduce)").matches ?? false;
+
+/*
+ * Two states rather than three, and deliberately so. "auto" follows the system,
+ * "reduced" forces it on — and there is no third that forces transparency back
+ * on, because an accessibility preference is not something an app gets to
+ * override upward. Someone whose OS asks for less transparency gets less of it
+ * whatever this says.
+ */
+const resolveTransparency = (pref: Transparency): boolean =>
+  pref === "reduced" || prefersReducedTransparency();
+
 interface SystemStore {
   wallpaper: Wallpaper;
   /** What the visitor chose. */
@@ -38,6 +52,10 @@ interface SystemStore {
   accent: Accent;
   /** How app icons are recoloured — macOS 26's Default/Dark/Clear/Tinted. */
   iconStyle: IconStyle;
+  /** What the visitor chose about transparency. */
+  transparency: Transparency;
+  /** What that currently resolves to, the system having a say as well. */
+  reducedTransparency: boolean;
   spotlightOpen: boolean;
   controlCenterOpen: boolean;
   notificationCenterOpen: boolean;
@@ -56,6 +74,9 @@ interface SystemStore {
   setAppearance: (appearance: Appearance) => void;
   setAccent: (accent: Accent) => void;
   setIconStyle: (iconStyle: IconStyle) => void;
+  setTransparency: (transparency: Transparency) => void;
+  /** Re-resolves against the system setting, as syncSystemTheme does. */
+  syncSystemTransparency: () => void;
   toggleTheme: () => void;
   /** Re-resolves "auto" after the OS flips between light and dark. */
   syncSystemTheme: () => void;
@@ -83,6 +104,8 @@ type PersistedSystem = Pick<
   | "theme"
   | "accent"
   | "iconStyle"
+  | "transparency"
+  | "reducedTransparency"
   | "wifiEnabled"
   | "bluetoothEnabled"
   | "airdrop"
@@ -100,6 +123,8 @@ const useSystemStore = create<SystemStore>()(
       theme: "light",
       accent: DEFAULT_ACCENT,
       iconStyle: "default",
+      transparency: "auto",
+      reducedTransparency: false,
       spotlightOpen: false,
       controlCenterOpen: false,
       notificationCenterOpen: false,
@@ -131,6 +156,14 @@ const useSystemStore = create<SystemStore>()(
       setAccent: (accent) => set({ accent }),
 
       setIconStyle: (iconStyle) => set({ iconStyle }),
+
+      setTransparency: (transparency) =>
+        set({ transparency, reducedTransparency: resolveTransparency(transparency) }),
+
+      syncSystemTransparency: () =>
+        set((state) => ({
+          reducedTransparency: resolveTransparency(state.transparency),
+        })),
 
       // Flipping the theme by hand is an explicit choice, so it drops "auto"
       toggleTheme: () =>
@@ -196,6 +229,8 @@ const useSystemStore = create<SystemStore>()(
         theme: state.theme,
         accent: state.accent,
         iconStyle: state.iconStyle,
+        transparency: state.transparency,
+        reducedTransparency: state.reducedTransparency,
         wifiEnabled: state.wifiEnabled,
         bluetoothEnabled: state.bluetoothEnabled,
         airdrop: state.airdrop,

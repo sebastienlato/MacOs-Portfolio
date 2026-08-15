@@ -27,8 +27,11 @@ const Settings = () => {
     theme,
     accent,
     iconStyle,
+    transparency,
+    reducedTransparency,
     setAccent,
     setIconStyle,
+    setTransparency,
     setWallpaper,
     setCustomWallpaper,
     resetWallpaper,
@@ -132,6 +135,44 @@ const Settings = () => {
             </button>
           ))}
         </div>
+
+        <div className="section-title">
+          <h3>Accessibility</h3>
+        </div>
+        <p className="hint">
+          Reduce transparency makes the glass surfaces opaque.
+        </p>
+
+        <div className="appearance">
+          {/*
+            Two options, not three. "Auto" follows the system's own Reduce
+            Transparency setting, and there is no third that forces the glass
+            back on — an accessibility preference is not one an app overrides
+            upward, so someone whose OS asks for less gets less either way.
+          */}
+          <button
+            type="button"
+            className={clsx(transparency === "auto" && "selected")}
+            onClick={() => setTransparency("auto")}
+            aria-pressed={transparency === "auto"}
+          >
+            Auto
+          </button>
+          <button
+            type="button"
+            className={clsx(transparency === "reduced" && "selected")}
+            onClick={() => setTransparency("reduced")}
+            aria-pressed={transparency === "reduced"}
+          >
+            Reduce
+          </button>
+        </div>
+
+        {/* Says so plainly when Auto has resolved to reduced, or the pair above
+            reads as "Auto" while the glass is visibly gone */}
+        {transparency === "auto" && reducedTransparency && (
+          <p className="hint">Your system is asking for reduced transparency.</p>
+        )}
 
         <div className="section-title">
           <h3>Wallpaper</h3>
