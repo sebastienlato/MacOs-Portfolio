@@ -1,12 +1,14 @@
 import { aboutSpecs, techStack } from "#constants/index";
 
 /**
- * The shell behind both terminals — the desktop window and the phone app.
+ * The shell behind the desktop's terminal window.
  *
  * Everything here is presentation-free: it turns a typed line into lines of
- * output, and asks the caller to perform anything with a side effect. The two
- * shells disagree about what "open safari" *means* (a window vs. a full-screen
- * app), so that one step is injected and the rest is shared.
+ * output, and asks the caller to perform anything with a side effect. That
+ * separation was built when the phone had a terminal too and the two disagreed
+ * about what "open safari" *means*; the phone has none now — iOS ships no
+ * terminal — but the injection is worth keeping, since it is what lets this be
+ * tested without a window to render into. See `terminal.test.ts`.
  */
 
 export type TerminalLineKind = "input" | "output" | "error";

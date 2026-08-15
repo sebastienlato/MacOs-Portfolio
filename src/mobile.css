@@ -73,10 +73,33 @@
       @apply flex items-center gap-1.5 -mr-2 p-2 cursor-pointer;
     }
 
+    /* Four ascending bars, the shape iOS has used since it stopped drawing
+       dots. Sized off the battery beside it so the cluster reads as one row. */
+    .signal {
+      @apply flex items-end gap-[2px] h-3 opacity-90;
+
+      i {
+        @apply block w-[3px] rounded-[1px] bg-current;
+
+        &:nth-child(1) {
+          @apply h-[5px];
+        }
+        &:nth-child(2) {
+          @apply h-[7px];
+        }
+        &:nth-child(3) {
+          @apply h-[9px];
+        }
+        &:nth-child(4) {
+          @apply h-[11px];
+        }
+      }
+    }
+
     .battery {
       @apply relative block w-6 h-3 rounded-[3px] border border-current opacity-90;
 
-      /* The terminal nub on the positive end */
+      /* The nub on the positive end */
       &::after {
         content: "";
         @apply absolute top-1/2 -right-[3px] w-[2px] h-1 -translate-y-1/2 rounded-r-sm bg-current;
@@ -113,21 +136,27 @@
     padding-bottom: var(--home-h);
 
     /*
-     * Sits in the gap the grid leaves above the dock, and takes all of it —
-     * which both centres the hero and pins the dock to the bottom. Pulled below
-     * the grid with `order`, since the markup leads with the heading.
+     * Directly under the icons, not centred in what is left below them.
+     *
+     * It used to take all the slack and centre itself in it, which on a tall
+     * phone parked it in the middle of an empty screen with nothing above or
+     * below — it read as something that had failed to load rather than as a
+     * title. A Home Screen fills from the top and leaves the wallpaper bare at
+     * the bottom; sitting the greeting where a widget would go puts the empty
+     * space where iOS actually keeps it. The slack moves to the search pill's
+     * `mt-auto`, which still pins the dock to the bottom.
      */
     .greeting {
-      @apply flex flex-1 select-none flex-col justify-center px-6 py-6 text-center text-white;
+      @apply flex shrink-0 select-none flex-col px-6 pt-8 text-center text-white;
 
       text-shadow: 0 1px 12px rgb(0 0 0 / 0.35);
 
       p {
-        @apply font-georama text-lg font-light text-balance;
+        @apply font-georama text-base font-light text-balance;
       }
 
       h1 {
-        @apply mt-1.5 font-georama text-[3.25rem] font-normal italic leading-none;
+        @apply mt-1 font-georama text-[2.75rem] font-normal italic leading-none;
       }
     }
 
@@ -135,61 +164,19 @@
       @apply order-first grid grid-cols-4 gap-x-3 gap-y-5 px-5;
     }
 
-    /* Pinned below the grid, and pushed to the bottom when the page is short */
+    /* Pinned below the grid, under the search pill that now takes the slack */
     .ios-dock {
-      @apply mt-auto px-4 pt-2;
+      @apply px-4;
 
       ul {
         @apply glass glass-tight relative flex items-center justify-around rounded-[26px] p-2.5;
       }
     }
 
-    /*
-     * A Home Screen widget. Translucent over the wallpaper the way iOS draws
-     * them, and sized to the same 4-column grid the icons use.
-     */
-    .ios-widget {
-      /*
-       * `order-first` alongside the grid, which carries it too. Both land on
-       * the same order value and settle by document position, so the widget
-       * follows the icons — and the greeting, which sets no order at all, is
-       * left with the stretch above the search pill rather than being wedged
-       * between the two. iOS lays widgets out in the icon flow, not after it.
-       */
-      @apply glass glass-tight relative order-first mx-5 mt-5 rounded-[22px] p-3 text-white;
-
-      header {
-        @apply mb-2 flex items-baseline justify-between gap-2 px-1;
-
-        h2 {
-          @apply text-sm font-semibold;
-        }
-
-        p {
-          @apply text-[11px] text-white/70;
-        }
-      }
-
-      ul {
-        @apply grid grid-cols-3 gap-2;
-      }
-
-      button {
-        @apply flex w-full cursor-pointer flex-col items-center gap-1.5 rounded-2xl bg-white/15 p-2.5 transition-transform duration-150 active:scale-95;
-
-        span {
-          @apply w-full text-center text-[11px] font-medium;
-        }
-      }
-
-      .item-icon img {
-        @apply size-8;
-      }
-    }
-
-    /* The pill iOS puts above the dock */
+    /* The pill iOS puts above the dock. `mt-auto` takes the slack the greeting
+       used to hold, which is what leaves the wallpaper bare above the dock. */
     .search-pill {
-      @apply mx-auto mt-4 flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-medium text-white transition-transform duration-150 active:scale-95;
+      @apply mx-auto mt-auto mb-4 flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-medium text-white transition-transform duration-150 active:scale-95;
 
       background: rgb(0 0 0 / 0.28);
       backdrop-filter: blur(12px) saturate(1.4);
@@ -202,9 +189,9 @@
     }
 
     /*
-     * A short screen — a phone on its side — gets the space back. The widget
-     * goes with the greeting: both are worth having only when there is room,
-     * and leaving them in pushed the dock off the bottom of a 400px window.
+     * A short screen — a phone on its side — gets the space back. The greeting
+     * is worth having only when there is room, and leaving it in pushed the
+     * dock off the bottom of a 400px window.
      *
      * Placed last on purpose. These override rules declared above at the same
      * specificity, so an earlier position loses on source order — which is
@@ -212,8 +199,7 @@
      * pill kept its full margin regardless.
      */
     @media (height < 560px) {
-      .greeting,
-      .ios-widget {
+      .greeting {
         @apply hidden;
       }
 
@@ -230,24 +216,84 @@
   .app-icon {
     @apply flex flex-col items-center gap-1.5;
 
+    /*
+     * Touching an icon dims it; it does not shrink. This was `active:scale-90`,
+     * a tenth of the tile, which is a web button's press and reads as one — iOS
+     * darkens an app icon under the finger and leaves its size alone, because
+     * the thing that moves is the app about to open, not the icon. The dim is
+     * on the tile rather than the button so the label underneath stays put.
+     *
+     * `--tile-shadow` carries the artwork's drop-shadow through the dim. A
+     * `filter` replaces whatever the element had rather than adding to it, so
+     * pressing an icon dropped its shadow for as long as the finger was down —
+     * the tile flattened onto the wallpaper at the moment it was being touched.
+     */
     button,
     a {
-      @apply block cursor-pointer transition-transform duration-150 active:scale-90;
+      @apply block cursor-pointer;
+
+      &:active .tile {
+        filter: brightness(0.82) var(--tile-shadow);
+      }
     }
 
     .tile {
       @apply flex-center size-[3.75rem] overflow-hidden;
 
-      filter: drop-shadow(0 4px 10px rgb(0 0 0 / 0.28));
+      --tile-shadow: drop-shadow(0 4px 10px rgb(0 0 0 / 0.28));
+      filter: var(--tile-shadow);
+      transition: filter 120ms ease-out;
 
       img {
         @apply size-full object-contain;
       }
 
+      /*
+       * Artwork tiles are macOS icons, and a macOS icon canvas carries its own
+       * padding so the system can hang a shadow off it. Measured on a canvas,
+       * the artwork square is 116px of a 141px file — 82.3% — which left Safari
+       * and Photos drawing at 49px inside a 60px tile while every glyph tile
+       * filled all 60. In the dock, side by side, they read as two different
+       * icon sizes. iOS icons have no such padding: the artwork *is* the tile.
+       *
+       * Scoped to the phone on purpose. `.app-icon-art` is shared with the
+       * desktop dock, where the padding is correct — a Mac icon should sit in
+       * its canvas the way macOS draws it.
+       */
+      &.app-icon-art {
+        img {
+          @apply scale-[1.215];
+        }
+
+        /* The Tinted appearance masks its colour overlay with the same
+           artwork, so the mask has to grow by the same amount or the colour
+           stops meeting the icon it is meant to be colouring */
+        &::after {
+          -webkit-mask-size: 121.5%;
+          mask-size: 121.5%;
+        }
+      }
+
       /* Apps with no icon art of their own get a tinted tile and a glyph */
       &.glyph {
-        @apply rounded-[1.35rem] text-white;
+        /*
+         * 22% rather than the 36% this was. iOS's icon mask is a squircle
+         * whose corner begins at ~22.4% of the icon's width, and the two PNGs
+         * here agree — measuring where their top edge turns opaque gives
+         * 21.55% and 22.41%. At 36% the glyph tiles were visibly rounder than
+         * the artwork sitting next to them in the dock.
+         *
+         * A percentage, not a length, so it holds if the tile is ever resized.
+         * Still a circular arc rather than a true superellipse — the corner is
+         * in the right place, the curve into it is a shade tighter than
+         * Apple's.
+         */
+        @apply rounded-[22%] text-white;
 
+        /* A glyph tile is an opaque rounded rect, so its shadow is a box-shadow
+           — a drop-shadow filter would trace the same rectangle at more cost.
+           Emptying the variable leaves the press with only its brightness. */
+        --tile-shadow: ;
         filter: none;
         box-shadow: 0 4px 10px rgb(0 0 0 / 0.28);
 
@@ -257,8 +303,11 @@
       }
     }
 
+    /* 11px, which is what iOS labels its icons at. This was 12px semibold and
+       read a size large against real artwork. The shadow does the work of
+       keeping it legible over a wallpaper, so the weight does not have to. */
     p {
-      @apply max-w-[4.5rem] truncate text-center text-xs font-medium text-white;
+      @apply max-w-[4.5rem] truncate text-center text-[11px] font-normal text-white;
 
       text-shadow: 0 1px 3px rgb(0 0 0 / 0.5);
     }
@@ -322,29 +371,6 @@
 
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
-  }
-
-  /*
-   * A dark app takes the dark palette outright rather than following the
-   * appearance setting. Overriding --glass-tint with it is what turns the
-   * navigation bar's glass dark too — it is the same material, re-tinted.
-   */
-  .mobile-app[data-variant="dark"] {
-    --ios-bg: #1d1e20;
-    --ios-card: #26272a;
-    --ios-label: #ffffff;
-    --ios-secondary: rgb(235 235 245 / 0.6);
-    --ios-separator: rgb(255 255 255 / 0.12);
-    --ios-fill: rgb(120 120 128 / 0.32);
-    --ios-tint: var(--color-accent-label);
-    --glass-tint: 8 8 12;
-    --glass-chrome-alpha: 0.62;
-    --glass-backdrop: saturate(1.5) brightness(0.85);
-
-    /* The terminal scrolls its own transcript, so the body must not scroll */
-    .app-body {
-      @apply flex flex-col gap-0 overflow-hidden p-0;
-    }
   }
 
   .home-bar-area {
@@ -596,57 +622,6 @@
 
     background: var(--ios-card);
     color: var(--ios-tint);
-  }
-
-  /* ---------------------------------------------------------------- terminal */
-
-  /*
-   * The desktop's terminal styling is nested inside `#terminal`, so none of it
-   * reaches here — the transcript is restated rather than shared. Only the
-   * type and colours, though; the shell itself is the same module.
-   */
-  .terminal-screen.mobile {
-    @apply min-h-0 flex-1 cursor-text overflow-y-auto px-4 py-3 font-roboto text-[13px] leading-relaxed text-gray-100;
-
-    p {
-      @apply break-words whitespace-pre-wrap;
-
-      &.input {
-        @apply text-gray-400;
-      }
-
-      &.error {
-        @apply text-red-400;
-      }
-    }
-
-    .prompt-line {
-      @apply flex items-center gap-2;
-
-      .prompt {
-        @apply shrink-0 font-semibold text-[#00A154];
-      }
-
-      input {
-        @apply min-w-0 flex-1 bg-transparent text-gray-100 caret-[#00A154] outline-none;
-        box-shadow: none;
-      }
-    }
-  }
-
-  .command-chips {
-    @apply flex shrink-0 gap-2 overflow-x-auto px-4 py-3;
-
-    border-top: 1px solid var(--ios-separator);
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      @apply hidden;
-    }
-
-    button {
-      @apply shrink-0 cursor-pointer rounded-full bg-white/10 px-3 py-1.5 font-roboto text-xs text-gray-200 transition-colors active:bg-white/20;
-    }
   }
 
   /* ------------------------------------------------------------------- about */
