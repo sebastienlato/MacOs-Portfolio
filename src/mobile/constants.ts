@@ -1,4 +1,4 @@
-import { FileText, Info, Settings } from "lucide-react";
+import { FileText, Folder, Info, Settings, UserRound } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { socials } from "#constants/index";
@@ -41,7 +41,15 @@ export const MOBILE_APPS: MobileApp[] = [
     id: "files",
     name: "Portfolio",
     title: "Portfolio",
-    icon: "/images/finder.png",
+    /*
+     * A folder rather than the Finder's face. Finder is a Mac application and
+     * has no counterpart on a phone — iOS puts this content in Files — so its
+     * artwork was the one icon here that read as belonging to another
+     * operating system. Safari and Photos keep theirs precisely because iOS
+     * ships icons that look the same.
+     */
+    Glyph: Folder,
+    tint: "linear-gradient(160deg, #5ab0ff 0%, #0a63d8 100%)",
     inDock: true,
   },
   {
@@ -55,7 +63,10 @@ export const MOBILE_APPS: MobileApp[] = [
     id: "contact",
     name: "Contact",
     title: "Contact",
-    icon: "/images/contact.png",
+    /* The macOS artwork is a brown leather address book, which dates the whole
+       dock. Warm enough to nod at it, without the texture. */
+    Glyph: UserRound,
+    tint: "linear-gradient(160deg, #ffc46b 0%, #ef8f28 100%)",
     inDock: true,
   },
   {
