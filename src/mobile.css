@@ -690,7 +690,14 @@
     }
 
     .name {
-      @apply text-[16px];
+      @apply flex-1 text-[16px];
+    }
+
+    /* Same trailing glyph, same colour, as the Files rows that leave */
+    .chevron {
+      @apply shrink-0;
+
+      color: var(--ios-secondary);
     }
   }
 
@@ -739,17 +746,24 @@
     }
   }
 
+  /*
+   * Label dark and value grey, which is the way round Settings ▸ General ▸
+   * About has it — the label is what you read down the column, the value is the
+   * answer. This had them inverted, with the label greyed and the value set in
+   * medium, so every row led with its quietest word and then shouted the
+   * answer. Both are regular weight on iOS; nothing in a spec row is emphasis.
+   */
   .spec-list li {
     @apply flex items-baseline justify-between gap-4 px-4 py-2.5 text-[15px];
 
     .label {
       @apply shrink-0;
-
-      color: var(--ios-secondary);
     }
 
     .value {
-      @apply text-right font-medium;
+      @apply text-right;
+
+      color: var(--ios-secondary);
     }
   }
 
