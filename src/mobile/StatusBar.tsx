@@ -25,6 +25,11 @@ const StatusBar = () => {
     <div className="status-bar">
       <span className="time">{now.format("h:mm")}</span>
 
+      {/* The Dynamic Island. Decoration, and the single strongest tell that
+          this is meant to be a current iPhone rather than a phone in general —
+          the status bar reads as a notch-less slab without it. */}
+      <span className="dynamic-island" aria-hidden="true" />
+
       {/* The whole right cluster is the Control Center handle, as on iOS */}
       <button
         type="button"

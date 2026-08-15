@@ -58,6 +58,17 @@
     padding-top: var(--sat);
     text-shadow: 0 0 3px rgb(0 0 0 / 0.28);
 
+    /*
+     * Centred on the bar rather than placed between the clock and the icons:
+     * it is a hole in the screen, not a member of the row, and a flex child
+     * would shift it every time the clock changed width.
+     */
+    .dynamic-island {
+      @apply absolute left-1/2 -translate-x-1/2 h-[26px] w-[86px] rounded-full bg-black;
+
+      top: calc(var(--sat) + 6px);
+    }
+
     .status-icons {
       @apply flex items-center gap-1.5 -mr-2 p-2 cursor-pointer;
     }
@@ -120,13 +131,6 @@
       }
     }
 
-    /* A short screen — a phone on its side — gets the space back */
-    @media (height < 560px) {
-      .greeting {
-        @apply hidden;
-      }
-    }
-
     .app-grid {
       @apply order-first grid grid-cols-4 gap-x-3 gap-y-5 px-5;
     }
@@ -140,10 +144,86 @@
       }
     }
 
+    /*
+     * A Home Screen widget. Translucent over the wallpaper the way iOS draws
+     * them, and sized to the same 4-column grid the icons use.
+     */
+    .ios-widget {
+      /*
+       * `order-first` alongside the grid, which carries it too. Both land on
+       * the same order value and settle by document position, so the widget
+       * follows the icons — and the greeting, which sets no order at all, is
+       * left with the stretch above the search pill rather than being wedged
+       * between the two. iOS lays widgets out in the icon flow, not after it.
+       */
+      @apply glass glass-tight relative order-first mx-5 mt-5 rounded-[22px] p-3 text-white;
+
+      header {
+        @apply mb-2 flex items-baseline justify-between gap-2 px-1;
+
+        h2 {
+          @apply text-sm font-semibold;
+        }
+
+        p {
+          @apply text-[11px] text-white/70;
+        }
+      }
+
+      ul {
+        @apply grid grid-cols-3 gap-2;
+      }
+
+      button {
+        @apply flex w-full cursor-pointer flex-col items-center gap-1.5 rounded-2xl bg-white/15 p-2.5 transition-transform duration-150 active:scale-95;
+
+        span {
+          @apply w-full text-center text-[11px] font-medium;
+        }
+      }
+
+      .item-icon img {
+        @apply size-8;
+      }
+    }
+
+    /* The pill iOS puts above the dock */
+    .search-pill {
+      @apply mx-auto mt-4 flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-medium text-white transition-transform duration-150 active:scale-95;
+
+      background: rgb(0 0 0 / 0.28);
+      backdrop-filter: blur(12px) saturate(1.4);
+    }
+
     /* The Home Screen's indicator is decoration — there is nowhere to go */
     &::after {
       content: "";
       @apply mx-auto mt-3 mb-1 h-[5px] w-32 shrink-0 rounded-full bg-white/70;
+    }
+
+    /*
+     * A short screen — a phone on its side — gets the space back. The widget
+     * goes with the greeting: both are worth having only when there is room,
+     * and leaving them in pushed the dock off the bottom of a 400px window.
+     *
+     * Placed last on purpose. These override rules declared above at the same
+     * specificity, so an earlier position loses on source order — which is
+     * exactly what happened when this block sat up beside the greeting and the
+     * pill kept its full margin regardless.
+     */
+    @media (height < 560px) {
+      .greeting,
+      .ios-widget {
+        @apply hidden;
+      }
+
+      .search-pill {
+        @apply mt-2;
+      }
+
+      &::after {
+        @apply mt-1.5 mb-0;
+      }
     }
   }
 
@@ -790,6 +870,75 @@
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+
+  /*
+   * Search, over the Home Screen. A full sheet rather than a dropdown: the
+   * keyboard takes half a phone, and anything anchored to the pill would be
+   * pushed off the top the moment it opened.
+   */
+  .search-sheet {
+    @apply fixed inset-0 z-[400] flex flex-col;
+
+    background: rgb(0 0 0 / 0.45);
+    backdrop-filter: blur(22px) saturate(1.5);
+    padding-top: calc(var(--status-h) + 0.5rem);
+    padding-bottom: var(--home-h);
+
+    .sheet-bar {
+      @apply flex shrink-0 items-center gap-2 px-4 py-2;
+
+      .field {
+        @apply flex flex-1 items-center gap-2 rounded-xl bg-white/15 px-3 py-2 text-white;
+      }
+
+      input {
+        @apply w-full bg-transparent text-[15px] text-white outline-none placeholder:text-white/55;
+
+        /* The sheet is the focus indicator here; see the note by :focus-visible */
+        box-shadow: none;
+      }
+
+      > button {
+        @apply flex-center size-9 shrink-0 cursor-pointer rounded-full text-white/80 transition-colors active:bg-white/15;
+      }
+    }
+
+    .sheet-results {
+      @apply flex-1 space-y-1 overflow-y-auto px-3 py-2;
+
+      button {
+        @apply flex w-full cursor-pointer items-center gap-3 rounded-xl px-2.5 py-2 text-left text-white transition-colors active:bg-white/15;
+      }
+
+      img,
+      .item-icon img {
+        @apply size-8 shrink-0 object-contain;
+      }
+
+      /* The apps with no artwork wear the same tinted tile they do on the
+         Home Screen, rather than an <img> with nothing to load */
+      .glyph-tile {
+        @apply flex-center size-8 shrink-0 rounded-[0.6rem] text-white;
+      }
+
+      .labels {
+        @apply flex min-w-0 flex-col;
+      }
+
+      .title {
+        @apply text-[15px] font-medium;
+      }
+
+      .cat {
+        @apply text-[11px] text-white/60;
+      }
+    }
+
+    .sheet-empty {
+      @apply px-6 py-10 text-center text-sm text-white/70;
     }
   }
 
