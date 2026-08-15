@@ -2,17 +2,23 @@ import { FileText, Folder, Info, Settings, UserRound } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { socials } from "#constants/index";
-import type { TerminalTarget } from "#utils/terminal";
 import type { WindowKey } from "#types";
 
-/** Every full-screen app the phone shell can open. */
+/**
+ * Every full-screen app the phone shell can open.
+ *
+ * No terminal. iOS has never shipped one, and a phone that offers a shell is
+ * the single loudest way this shell could announce it is not a phone — the
+ * command chips under the keyboard were a desktop affordance wearing an iOS
+ * coat. The desktop keeps its terminal; `#/terminal` simply has no counterpart
+ * to land on here, which `APP_FOR_WINDOW` says out loud.
+ */
 export type MobileAppId =
   | "files"
   | "articles"
   | "gallery"
   | "contact"
   | "resume"
-  | "terminal"
   | "settings"
   | "about";
 
@@ -28,12 +34,6 @@ export interface MobileApp {
   tint?: string;
   /** Dock apps are pinned to the bottom and left off the grid, as on iOS. */
   inDock?: boolean;
-  /**
-   * An app that is dark whatever the appearance setting says — the terminal is
-   * a terminal in both. It takes the dark palette, and the status bar above it
-   * has to follow, which is why this lives here rather than inside the app.
-   */
-  variant?: "dark";
 }
 
 export const MOBILE_APPS: MobileApp[] = [
@@ -80,14 +80,6 @@ export const MOBILE_APPS: MobileApp[] = [
     inDock: true,
   },
   {
-    id: "terminal",
-    name: "Terminal",
-    title: "Terminal",
-    icon: "/images/terminal.png",
-    inDock: true,
-    variant: "dark",
-  },
-  {
     id: "gallery",
     name: "Gallery",
     title: "Gallery",
@@ -121,9 +113,6 @@ export const MOBILE_APPS: MobileApp[] = [
 export const DOCK_APPS = MOBILE_APPS.filter((app) => app.inDock);
 export const GRID_APPS = MOBILE_APPS.filter((app) => !app.inDock);
 
-export const appById = (id: MobileAppId | null) =>
-  id ? MOBILE_APPS.find((app) => app.id === id) : undefined;
-
 /**
  * Web tiles, the way a Home Screen carries shortcuts alongside real apps. They
  * reuse the contact list rather than restating it, so a link only ever changes
@@ -150,8 +139,13 @@ export const HOME_LINKS: MobileLink[] = socials.map(
 /**
  * Which app a desktop window's URL opens on a phone, so one link works on both.
  * Files stands in for anything that is a folder or a file on the desktop.
+ *
+ * `null` where the phone has no such app. Only the terminal is one, and the
+ * honest thing for `#/terminal` to do here is land on the Home Screen rather
+ * than open something the link never asked for — a visitor following a shared
+ * terminal link would otherwise arrive in Settings wondering what happened.
  */
-export const APP_FOR_WINDOW: Record<WindowKey, MobileAppId> = {
+export const APP_FOR_WINDOW: Record<WindowKey, MobileAppId | null> = {
   finder: "files",
   txtfile: "files",
   imgfile: "files",
@@ -159,21 +153,7 @@ export const APP_FOR_WINDOW: Record<WindowKey, MobileAppId> = {
   photos: "gallery",
   contact: "contact",
   resume: "resume",
-  terminal: "terminal",
+  terminal: null,
   settings: "settings",
   about: "about",
-};
-
-/** Where the terminal's `open <app>` lands on a phone. */
-export const APP_FOR_TARGET: Record<TerminalTarget, MobileAppId> = {
-  finder: "files",
-  safari: "articles",
-  photos: "gallery",
-  contact: "contact",
-  resume: "resume",
-  terminal: "terminal",
-  settings: "settings",
-  about: "about",
-  // No Trash app on a phone — deleted things live inside Files, as on iOS
-  trash: "files",
 };

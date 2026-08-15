@@ -13,7 +13,7 @@ On a phone it becomes an iOS-style Home Screen instead: same content, same prefe
   />
   <img
     src="docs/screenshot-mobile.webp"
-    alt="The phone shell: an iOS-style Home Screen with app icons, a Projects widget, the portfolio hero, a search pill, and a dock."
+    alt="The phone shell: an iOS-style Home Screen with app icons, the portfolio hero, a search pill, and a dock."
     width="21%"
     align="top"
   />
@@ -44,10 +44,9 @@ On a phone it becomes an iOS-style Home Screen instead: same content, same prefe
 
 Below 768px – or on a touch device too short for a desktop, i.e. a phone held sideways – the desktop is not merely hidden, it never mounts. A Home Screen renders in its place.
 
-- **Home Screen** – App icons, a dock, a status bar with a Dynamic Island, and web shortcuts to your links. Tapping an icon zooms the app out of that icon's own box.
-- **Projects widget** – The work, on the Home Screen where iOS puts widgets. Each tile opens Files already drilled into that project, so it is a shortcut rather than a picture of one.
+- **Home Screen** – App icons, a dock, a status bar with a Dynamic Island and cellular bars, and web shortcuts to your links. Tapping an icon dims it and zooms the app out of that icon's own box, as iOS does — icons darken under a finger rather than shrinking away from it. Icon geometry follows the real thing: 60pt tiles on a 27pt pitch, labels at 11px, and corners at 22% of the tile, which is where the artwork's own corner begins when you measure it.
 - **Search** – The pill iOS puts above the dock, opening a sheet over the blurred wallpaper. It indexes what the desktop's Spotlight walks — apps, projects, the files inside them, articles, links — since someone on a phone is looking for the same things.
-- **Eight full-screen apps** – Portfolio (Files), Articles, Gallery, Contact, Resume, Terminal, Settings and About, each reading the same content and preferences as its desktop counterpart.
+- **Seven full-screen apps** – Portfolio (Files), Articles, Gallery, Contact, Resume, Settings and About, each reading the same content and preferences as its desktop counterpart. There is no terminal: iOS has never shipped one, and `#/terminal` opened on a phone lands on the Home Screen rather than somewhere the link never asked for.
 - **Control Center** – Pulled down from the status bar, sharing every control with the desktop panel: connectivity, Focus, appearance, brightness and volume.
 - **Back leaves the app, not the site** – Each app sits one history entry deep, so the phone's Back gesture steps out to the Home Screen.
 - **Honours `prefers-reduced-motion`** – The open and dismiss animations are skipped rather than shortened.
@@ -131,8 +130,8 @@ Most of the portfolio data lives in `src/constants/index.ts`, and both shells re
 
 Two files configure a shell rather than its content:
 
-- `src/mobile/constants.ts` – which apps appear on the Home Screen, which four sit in the dock, and the web shortcuts (derived from `socials`).
-- `src/utils/terminal.ts` – the terminal's commands, help text, and the phone's tappable command chips. Shared by both terminals, so they cannot drift apart.
+- `src/mobile/constants.ts` – which apps appear on the Home Screen, which sit in the dock, and the web shortcuts (derived from `socials`).
+- `src/utils/terminal.ts` – the terminal's commands and help text, kept apart from the window that renders them so they can be tested directly.
 
 Shared types (window keys, Finder items, wallpapers, …) are in `src/types.ts`.
 
@@ -155,7 +154,7 @@ src/
   components/     # Navbar, Dock, Spotlight, Quick Look, Get Info, Control Center, …
   windows/        # Finder, Safari, Terminal, Contact, Resume, Photos, Settings, About
   hoc/            # WindowWrapper HOC: animations, dragging, tiling, resizing
-  mobile/         # The phone shell: Home Screen, widget, search, and its eight apps
+  mobile/         # The phone shell: Home Screen, search, and its seven apps
   store/          # Zustand stores for window, layout, location, snap, system,
                   #   Quick Look, Get Info, folder looks and clipboard history
   constants/      # Portfolio content configuration

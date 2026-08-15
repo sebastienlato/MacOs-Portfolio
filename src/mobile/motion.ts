@@ -13,7 +13,7 @@ export const collapsedTo = (origin: OpenOrigin | null): gsap.TweenVars => {
   const w = window.innerWidth;
   const h = window.innerHeight;
 
-  // No icon to zoom from — the terminal's `open`, say. Fall back to a plain
+  // No icon to zoom from — a deep link opened cold, say. Fall back to a plain
   // rise, which is what iOS does when an app is opened from somewhere else.
   if (!origin) return { opacity: 0, scale: 0.94, x: 0, y: 0, borderRadius: 28 };
 

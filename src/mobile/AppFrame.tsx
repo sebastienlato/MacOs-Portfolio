@@ -3,7 +3,6 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ChevronLeft } from "lucide-react";
 
-import { appById } from "#mobile/constants";
 import { EXPANDED, collapsedTo } from "#mobile/motion";
 import useMobileStore from "#mobile/store";
 import { prefersReducedMotion } from "#utils/motion";
@@ -33,7 +32,6 @@ const AppFrame = ({
   action,
   children,
 }: AppFrameProps) => {
-  const variant = useMobileStore((state) => appById(state.activeApp)?.variant);
   const origin = useMobileStore((state) => state.origin);
   const closing = useMobileStore((state) => state.closing);
   const finishClose = useMobileStore((state) => state.finishClose);
@@ -96,7 +94,7 @@ const AppFrame = ({
   };
 
   return (
-    <section ref={ref} className="mobile-app" data-variant={variant}>
+    <section ref={ref} className="mobile-app">
       <header className="app-bar">
         {onBack ? (
           <button type="button" className="back" onClick={onBack}>

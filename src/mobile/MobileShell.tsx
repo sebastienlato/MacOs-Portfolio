@@ -6,7 +6,7 @@ import Springboard from "#mobile/Springboard";
 import StatusBar from "#mobile/StatusBar";
 import useMobileStore from "#mobile/store";
 import useMobileDeepLink from "#mobile/useMobileDeepLink";
-import { appById, type MobileAppId } from "#mobile/constants";
+import type { MobileAppId } from "#mobile/constants";
 
 import AboutApp from "#mobile/apps/AboutApp";
 import ArticlesApp from "#mobile/apps/ArticlesApp";
@@ -15,7 +15,6 @@ import FilesApp from "#mobile/apps/FilesApp";
 import GalleryApp from "#mobile/apps/GalleryApp";
 import ResumeApp from "#mobile/apps/ResumeApp";
 import SettingsApp from "#mobile/apps/SettingsApp";
-import TerminalApp from "#mobile/apps/TerminalApp";
 
 const APPS: Record<MobileAppId, ComponentType> = {
   files: FilesApp,
@@ -23,7 +22,6 @@ const APPS: Record<MobileAppId, ComponentType> = {
   gallery: GalleryApp,
   contact: ContactApp,
   resume: ResumeApp,
-  terminal: TerminalApp,
   settings: SettingsApp,
   about: AboutApp,
 };
@@ -31,9 +29,9 @@ const APPS: Record<MobileAppId, ComponentType> = {
 /**
  * The phone shell: a Home Screen with one app open over it at a time.
  *
- * Apps are keyed on the active id so switching between them (which the terminal
- * can do) remounts rather than reconciles — each app owns its own navigation
- * stack, and a stack carried over from the last app would be nonsense.
+ * Apps are keyed on the launch counter so opening the app that is already open
+ * remounts rather than reconciles — each app owns its own navigation stack, and
+ * one carried over from a previous launch would be nonsense.
  */
 const MobileShell = () => {
   const activeApp = useMobileStore((state) => state.activeApp);
@@ -56,15 +54,7 @@ const MobileShell = () => {
   const ActiveApp = activeApp ? APPS[activeApp] : null;
 
   return (
-    <div
-      className={clsx(
-        "mobile-shell",
-        activeApp && "app-open",
-        // The status bar sits above the app, so it has to know when the app
-        // below it is dark whatever the appearance setting says
-        appById(activeApp)?.variant === "dark" && "app-dark"
-      )}
-    >
+    <div className={clsx("mobile-shell", activeApp && "app-open")}>
       <StatusBar />
 
       <Springboard />

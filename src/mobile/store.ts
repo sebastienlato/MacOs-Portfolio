@@ -44,7 +44,7 @@ interface MobileStore {
    */
   closing: boolean;
   openApp: (id: MobileAppId, options?: OpenOptions) => void;
-  /** Leaving an app: the home bar, a swipe up, the terminal's `exit`. */
+  /** Leaving an app: the home bar, or a swipe up along it. */
   dismiss: () => void;
   /** Only for MobileShell's popstate listener. */
   handleBack: () => void;
@@ -60,7 +60,7 @@ const useMobileStore = create<MobileStore>()((set) => ({
 
   openApp: (id, options) => {
     // One entry covers the whole visit to the apps, so hopping straight from
-    // one app to another (the terminal's `open`) doesn't stack up presses
+    // one app to another — Search does it — doesn't stack up presses
     if (!pushedHistoryEntry) {
       window.history.pushState({ portfolioApp: true }, "");
       pushedHistoryEntry = true;

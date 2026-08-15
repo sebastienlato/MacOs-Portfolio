@@ -31,9 +31,13 @@ const useMobileDeepLink = (enabled: boolean) => {
       const route = parseRoute(window.location.hash);
       if (!route) return;
 
-      useMobileStore
-        .getState()
-        .openApp(APP_FOR_WINDOW[route.window], { path: pathFor(route) });
+      // A window with no app on this shell — the terminal. Staying put leaves
+      // the visitor on the Home Screen, and the effect below rewrites the
+      // address to match rather than leaving a URL that describes nothing here.
+      const app = APP_FOR_WINDOW[route.window];
+      if (!app) return;
+
+      useMobileStore.getState().openApp(app, { path: pathFor(route) });
     };
 
     apply();

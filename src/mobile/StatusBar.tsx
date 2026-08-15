@@ -38,6 +38,18 @@ const StatusBar = () => {
         aria-haspopup="dialog"
         aria-label="Control Center"
       >
+        {/* Cellular, drawn for the same reason the battery is: iOS never shows
+            a status bar without it, and its absence was the sort of gap that is
+            invisible until you hold a real phone up beside it. Four bars, all
+            full — there is no signal to report, and a phone that draws itself
+            with two bars looks broken rather than honest. */}
+        <span className="signal" aria-hidden="true">
+          <i />
+          <i />
+          <i />
+          <i />
+        </span>
+
         {wifiEnabled ? <Wifi size={15} /> : <WifiOff size={15} />}
         <span className="battery" aria-hidden="true">
           <span className="level" />
