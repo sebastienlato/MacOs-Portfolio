@@ -13,6 +13,35 @@ export type WindowKey =
 
 export type FileType = "txt" | "url" | "img" | "fig" | "pdf";
 
+/**
+ * macOS 26's folder customisation: a tint and a glyph on the folder's face.
+ *
+ * The tint is a hue rotation of the one piece of folder artwork rather than a
+ * second image per colour. Rotating keeps the shading — the highlight along the
+ * top edge, the darker body — where recolouring through a mask, the trick the
+ * sidebar glyphs use, would flatten it to a silhouette.
+ */
+export type FolderColor =
+  | "blue"
+  | "teal"
+  | "green"
+  | "yellow"
+  | "orange"
+  | "red"
+  | "pink"
+  | "purple"
+  | "graphite";
+
+/** The glyphs a folder can wear. Named, not imported, so the data stays data. */
+export type FolderBadge =
+  | "lock"
+  | "paw"
+  | "moon"
+  | "user"
+  | "briefcase"
+  | "code"
+  | "star";
+
 /** A file or folder shown in Finder / on the desktop. */
 export interface FinderItem {
   id: number;
@@ -28,6 +57,9 @@ export interface FinderItem {
   subtitle?: string;
   description?: string[];
   children?: FinderItem[];
+  /** Folders only, and optional — an untinted folder is still a folder. */
+  folderColor?: FolderColor;
+  folderBadge?: FolderBadge;
 }
 
 /**
