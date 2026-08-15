@@ -12,6 +12,7 @@ import {
   MissionControl,
   NotificationCenter,
   QuickLook,
+  GetInfo,
 } from "#components";
 import {
   Finder,
@@ -66,6 +67,7 @@ const DesktopShell = () => (
     <MissionControl />
     <NotificationCenter />
     <QuickLook />
+    <GetInfo />
   </>
 );
 

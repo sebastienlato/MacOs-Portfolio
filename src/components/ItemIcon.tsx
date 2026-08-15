@@ -1,6 +1,7 @@
 import { Briefcase, Code, Lock, Moon, PawPrint, Star, User } from "lucide-react";
 import clsx from "clsx";
 
+import useFolderStore, { badgeOf, keyOf } from "#store/folders";
 import type { FinderItem, FolderBadge } from "#types";
 
 /**
@@ -36,13 +37,25 @@ const ItemIcon = ({
   item: FinderItem;
   className?: string;
 }) => {
-  const Badge = item.folderBadge ? BADGES[item.folderBadge] : null;
+  /*
+   * Whatever the visitor set in Get Info wins over what `constants` authored,
+   * and only for folders — a file has no look to customise. Subscribed to the
+   * slice rather than the store so recolouring one folder does not re-render
+   * every icon on the screen.
+   */
+  const look = useFolderStore((state) =>
+    item.kind === "folder" ? state.looks[keyOf(item)] : undefined
+  );
+
+  const color = look?.color ?? item.folderColor;
+  const badgeName = badgeOf(look, item.folderBadge);
+  const Badge = badgeName ? BADGES[badgeName] : null;
 
   return (
     <span
       className={clsx("item-icon", className)}
       // Read by CSS, which owns the hue rotation for each colour
-      data-folder-color={item.folderColor}
+      data-folder-color={color}
     >
       <img src={item.icon} alt="" />
       {/* Decorative: the folder's name is already beside it, and "lock" adds

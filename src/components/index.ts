@@ -12,6 +12,7 @@ import MissionControl from "#components/MissionControl";
 import NotificationCenter from "#components/NotificationCenter";
 import KeyboardShortcuts from "#components/KeyboardShortcuts";
 import QuickLook from "#components/QuickLook";
+import GetInfo from "#components/GetInfo";
 
 export {
   Navbar,
@@ -28,4 +29,5 @@ export {
   NotificationCenter,
   KeyboardShortcuts,
   QuickLook,
+  GetInfo,
 };
