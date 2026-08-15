@@ -9,6 +9,8 @@ import { locations } from "#constants/index";
 import useLocationStore from "#store/location";
 import useWindowStore from "#store/window";
 import useQuickLookStore from "#store/quicklook";
+import useInfoStore from "#store/info";
+import ContextMenu, { type ContextMenuItem } from "#components/ContextMenu";
 import type { FinderItem } from "#types";
 
 type ViewMode = "icon" | "list" | "column";
@@ -76,6 +78,40 @@ const Finder = () => {
     quickLook(item);
   };
 
+  /*
+   * The right-click menu, as macOS gives every Finder item. The desktop's own
+   * handler already steps aside for anything inside a window, so this does not
+   * have to fight it — see the guard in DesktopMenu.
+   */
+  const [menu, setMenu] = useState<{
+    x: number;
+    y: number;
+    item: FinderItem;
+  } | null>(null);
+
+  const menuItems = (item: FinderItem): ContextMenuItem[] => [
+    { id: "open", label: "Open", onSelect: () => openItem(item) },
+    {
+      id: "quick-look",
+      label: `Quick Look "${item.name}"`,
+      onSelect: () => useQuickLookStore.getState().open(item),
+    },
+    { id: "d1", divider: true },
+    {
+      id: "info",
+      label: "Get Info",
+      // Only a folder has a colour and a badge to change
+      disabled: item.kind !== "folder",
+      onSelect: () => useInfoStore.getState().open(item),
+    },
+  ];
+
+  const openMenu = (e: React.MouseEvent, item: FinderItem) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setMenu({ x: e.clientX, y: e.clientY, item });
+  };
+
   const openItem = (item: FinderItem) => {
     if (item.fileType === "pdf") return openWindow("resume");
     if (item.kind === "folder") return setActiveLocation(item);
@@ -117,6 +153,11 @@ const Finder = () => {
             <button
               type="button"
               onClick={() => setActiveLocation(item)}
+              /* Only where a look could actually be seen. The Favorites rows
+                 are masked accent glyphs rather than folder art, so a colour
+                 and a badge have nowhere to land on them — offering Get Info
+                 there saves a change the row you right-clicked cannot show. */
+              onContextMenu={accented ? undefined : (e) => openMenu(e, item)}
               aria-current={item.id === activeLocation?.id ? "true" : undefined}
               className={clsx(
                 item.id === activeLocation?.id ? "active" : "not-active",
@@ -184,6 +225,7 @@ const Finder = () => {
                     type="button"
                     onClick={() => openItem(item)}
                     onKeyDown={(e) => handleItemKeyDown(e, item)}
+                    onContextMenu={(e) => openMenu(e, item)}
                   >
                     <ItemIcon item={item} />
                     <p>{item.name}</p>
@@ -214,6 +256,7 @@ const Finder = () => {
                       key={item.id}
                       tabIndex={0}
                       onClick={() => openItem(item)}
+                      onContextMenu={(e) => openMenu(e, item)}
                       onKeyDown={(e) => {
                         // Enter opens and Space previews, which is the split
                         // macOS makes. Both are taken from the browser: Space
@@ -251,6 +294,7 @@ const Finder = () => {
                       className={clsx(item.id === drilled?.id && "selected")}
                       onClick={() => selectInColumn(item)}
                       onKeyDown={(e) => handleItemKeyDown(e, item)}
+                      onContextMenu={(e) => openMenu(e, item)}
                       // A folder here opens the next column rather than
                       // navigating, which is exactly what expanded describes
                       aria-expanded={
@@ -311,6 +355,15 @@ const Finder = () => {
           </div>
         </div>
       </div>
+
+      {menu && (
+        <ContextMenu
+          x={menu.x}
+          y={menu.y}
+          items={menuItems(menu.item)}
+          onClose={() => setMenu(null)}
+        />
+      )}
     </>
   );
 };

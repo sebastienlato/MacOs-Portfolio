@@ -4,6 +4,7 @@ import type { MenuAction } from "#constants/menus";
 import useSystemStore from "#store/system";
 import useWindowStore from "#store/window";
 import useQuickLookStore from "#store/quicklook";
+import useInfoStore from "#store/info";
 import { runMenuAction } from "#utils/menuActions";
 
 interface Binding {
@@ -49,7 +50,9 @@ const KeyboardShortcuts = () => {
         // Quick Look is tested first because it is drawn over the rest: the
         // chain dismisses the topmost thing, and this is what that is
         const quickLook = useQuickLookStore.getState();
-        if (quickLook.item) quickLook.close();
+        const info = useInfoStore.getState();
+        if (info.item) info.close();
+        else if (quickLook.item) quickLook.close();
         else if (spotlightOpen) setSpotlightOpen(false);
         else if (controlCenterOpen) setControlCenterOpen(false);
         else if (missionControl) toggleMissionControl();

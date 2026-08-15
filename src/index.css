@@ -1486,6 +1486,103 @@ body {
     }
   }
 
+  /* Get Info, alongside Quick Look and drawn on the same footing */
+  #get-info {
+    @apply fixed inset-0 z-[17500] flex-center bg-black/25;
+
+    .panel {
+      @apply glass glass-thick relative flex flex-col w-[20rem] max-w-[90vw] max-h-[80vh] overflow-hidden rounded-[20px] text-gray-900 dark:text-gray-100;
+
+      --glass-fill: var(--glass-alpha-spotlight);
+    }
+
+    header {
+      @apply flex items-center gap-2 px-3 py-2.5 shrink-0;
+      border-bottom: 1px solid var(--glass-hairline);
+
+      h2 {
+        @apply flex-1 text-center text-[13px] font-semibold;
+      }
+    }
+
+    .gi-close {
+      @apply flex-center size-5 shrink-0 rounded-full bg-black/10 text-gray-700 cursor-pointer transition-colors hover:bg-black/20 dark:bg-white/15 dark:text-gray-200 dark:hover:bg-white/25;
+    }
+
+    .gi-body {
+      @apply flex-1 min-h-0 overflow-auto p-4 space-y-2;
+
+      h3 {
+        @apply pt-1 text-[11px] font-semibold text-gray-500 dark:text-gray-400;
+      }
+    }
+
+    .gi-preview {
+      @apply flex flex-col items-center gap-1 pb-2 text-center;
+    }
+
+    .gi-icon img {
+      @apply size-16;
+    }
+
+    .gi-name {
+      @apply w-full text-[13px] font-semibold;
+    }
+
+    .gi-kind {
+      @apply text-[11px] text-gray-500 dark:text-gray-400;
+    }
+
+    .gi-colors {
+      @apply grid grid-cols-9 gap-1.5;
+
+      /* The swatch is the folder art itself, tinted by the same rule the icons
+         use — so what is being chosen is what will be drawn, not an
+         approximation of it in flat colour */
+      .swatch {
+        @apply block aspect-square w-full cursor-pointer rounded-md bg-cover transition-transform hover:scale-110;
+
+        background-image: url("/images/folder.png");
+        background-position: center;
+        background-repeat: no-repeat;
+        filter: hue-rotate(var(--folder-hue, 0deg)) saturate(1.15);
+
+        &.selected {
+          @apply ring-2 ring-accent ring-offset-1;
+        }
+      }
+
+      /* Graphite is the one that is not a rotation; see the icons */
+      .swatch[data-folder-color="graphite"] {
+        filter: saturate(0.12) brightness(0.96);
+      }
+    }
+
+    .gi-badges {
+      @apply grid grid-cols-7 gap-1.5;
+
+      button {
+        @apply flex-center aspect-square w-full cursor-pointer rounded-lg bg-black/[0.07] text-gray-700 transition-colors hover:bg-black/15 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20;
+
+        &.selected {
+          @apply bg-accent text-accent-on hover:bg-accent;
+        }
+      }
+    }
+
+    .gi-reset {
+      @apply mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs text-gray-700 transition-colors dark:text-gray-300;
+
+      &:not(:disabled) {
+        @apply cursor-pointer hover:bg-black/10 dark:hover:bg-white/10;
+      }
+
+      &:disabled {
+        @apply opacity-40;
+      }
+    }
+  }
+
   .boot-screen {
     @apply fixed inset-0 z-[99999] col-center gap-16 bg-black;
 
