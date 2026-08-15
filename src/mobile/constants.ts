@@ -84,6 +84,18 @@ export const MOBILE_APPS: MobileApp[] = [
     name: "Gallery",
     title: "Gallery",
     icon: "/images/photos.png",
+    /*
+     * The fourth, filling the place the terminal left. Three icons spread
+     * across a full-width dock sit far enough apart to read as three things
+     * rather than a set — and of everything on this Home Screen, Photos is the
+     * one an actual iPhone is most likely to have down there.
+     *
+     * It costs the grid its two clean rows: seven tiles wrap to four and three,
+     * which puts a link on the end of the app row. That is what an iPhone looks
+     * like — a grid fills in order and the last row is however long it is —
+     * whereas a dock left short reads as a dock missing something.
+     */
+    inDock: true,
   },
   {
     id: "resume",

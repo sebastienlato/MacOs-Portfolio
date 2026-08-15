@@ -131,7 +131,7 @@ Most of the portfolio data lives in `src/constants/index.ts`, and both shells re
 
 Two files configure a shell rather than its content:
 
-- `src/mobile/constants.ts` – which apps appear on the Home Screen, which sit in the dock, and the web shortcuts (derived from `socials`).
+- `src/mobile/constants.ts` – which apps appear on the Home Screen, which four sit in the dock, and the web shortcuts (derived from `socials`).
 - `src/utils/terminal.ts` – the terminal's commands and help text, kept apart from the window that renders them so they can be tested directly.
 
 Shared types (window keys, Finder items, wallpapers, …) are in `src/types.ts`.
