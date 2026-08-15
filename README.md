@@ -7,13 +7,13 @@ On a phone it becomes an iOS-style Home Screen instead: same content, same prefe
 <p align="center">
   <img
     src="docs/screenshot.webp"
-    alt="The desktop shell: a macOS-style menu bar, project folders on the desktop, the portfolio hero, and a magnifying dock."
+    alt="The desktop shell: a macOS-style menu bar, the portfolio hero, a Finder window showing three colour-coded project folders, and a magnifying dock."
     width="67%"
     align="top"
   />
   <img
     src="docs/screenshot-mobile.webp"
-    alt="The phone shell: an iOS-style Home Screen with app icons, the portfolio hero, and a dock."
+    alt="The phone shell: an iOS-style Home Screen with app icons, a Projects widget, the portfolio hero, a search pill, and a dock."
     width="21%"
     align="top"
   />
@@ -27,11 +27,15 @@ On a phone it becomes an iOS-style Home Screen instead: same content, same prefe
 - **Menu bar** – A working Apple menu, per-app menus that swap when you focus a different window (File, Edit, View, Go, Window, Help), a live clock, and a menu bar that tints its own glyphs dark when the wallpaper behind it is bright.
 - **Window management** – Windows open, focus, minimize, zoom, drag by their title bar and resize from the corner. Position and size persist. Drag a window to a screen edge to tile it left, right or full, or use the menu behind the green button.
 - **Mission Control** – F3, ⌃↑ or the Window menu scales every open window into a grid to pick from.
-- **Spotlight** – ⌘K or ⌘Space opens a searchable launcher for every app and Finder location.
-- **Control Center & Notification Center** – Wi-Fi, appearance, brightness and volume from the menu bar; notifications and widgets behind the clock.
-- **Finder** – Icon, list and column views over a configurable folder tree, with a sidebar, path bar and working Trash.
-- **Desktop** – Icons with click, ⌘/⇧ multi-select, rubber-band selection and drag, plus right-click menus on the desktop and the dock.
-- **Appearance** – Light, Dark or Auto (follows the OS and re-resolves when it flips), alongside macOS-style wallpapers and custom image upload. Persisted in `localStorage`.
+- **Spotlight** – ⌘K or ⌘Space opens it. Searches apps, projects, files, posts and links, and — as macOS 26 does — it can be browsed rather than only searched: ⌘1–⌘4 switch between Apps, Files, Actions and Clipboard History.
+- **Spotlight Actions** – The half of Spotlight that does something rather than opening something. Email, copy the address, download the CV, copy a link to the current view, flip the appearance, change the wallpaper, Mission Control, empty the Trash. Each has a two-letter Quick Key (`em`, `ce`, `dr`, …) that outranks a title starting the same way, and the keys are printed in the row rather than left to be guessed at.
+- **Quick Look** – Space previews whatever is selected without opening it: an image shows the image, a text file its write-up, a folder what is inside it. Escape or Space again puts it away.
+- **Control Center** – Wi-Fi, Bluetooth and AirDrop as one grouped tile, Focus, appearance, display and sound. Focus and Sound drill into their own panes, and a Focus is not decorative — turning one on silences Notification Center.
+- **Notification Center** – Notifications and widgets behind the clock, drawn from the real content so they cannot drift from what the site says.
+- **Finder** – Icon, list and column views over a configurable folder tree, with a sidebar, path bar and working Trash. One click selects and two open, as the Finder does, which is what makes spacebar preview reachable from a pointer.
+- **Folder colours and badges** – macOS 26's folder customisation. Right-click a folder → Get Info to give it any of nine tints and a badge; the swatches are the folder artwork under the same hue rotation the icons use, so what you pick is what gets drawn. Overrides only, so Reset returns a folder to whatever the content authored.
+- **Desktop** – Right-click menus on the desktop and the dock.
+- **Appearance** – Light, Dark or Auto (follows the OS and re-resolves when it flips), alongside macOS-style wallpapers — Tahoe through Big Sur — and custom image upload. Persisted in `localStorage`.
 - **Accent colour** – Eight colours, running through every selection, highlight, sidebar glyph and focus ring in both shells. One CSS variable on `<main>`; nothing is hardcoded blue any more.
 - **Icon styles** – macOS 26's Default, Dark, Clear and Tinted. Worked out of flat artwork rather than layered icons: Dark and Clear are filters, and Tinted is a masked overlay in `mix-blend-mode: color`, which takes hue from the accent and leaves each icon's own light and shade underneath — so a tinted icon keeps its modelling instead of flattening to a silhouette.
 - **Interactive terminal** – A zsh-style terminal with command history. Try `help`, `ls`, `open safari`, `stack`, `neofetch`, or `sudo`.
@@ -40,9 +44,11 @@ On a phone it becomes an iOS-style Home Screen instead: same content, same prefe
 
 Below 768px – or on a touch device too short for a desktop, i.e. a phone held sideways – the desktop is not merely hidden, it never mounts. A Home Screen renders in its place.
 
-- **Home Screen** – App icons, a dock, a live status bar, and web shortcuts to your links. Tapping an icon zooms the app out of that icon's own box.
+- **Home Screen** – App icons, a dock, a status bar with a Dynamic Island, and web shortcuts to your links. Tapping an icon zooms the app out of that icon's own box.
+- **Projects widget** – The work, on the Home Screen where iOS puts widgets. Each tile opens Files already drilled into that project, so it is a shortcut rather than a picture of one.
+- **Search** – The pill iOS puts above the dock, opening a sheet over the blurred wallpaper. It indexes what the desktop's Spotlight walks — apps, projects, the files inside them, articles, links — since someone on a phone is looking for the same things.
 - **Eight full-screen apps** – Portfolio (Files), Articles, Gallery, Contact, Resume, Terminal, Settings and About, each reading the same content and preferences as its desktop counterpart.
-- **Control Center** – Pulled down from the status bar, sharing Wi-Fi, appearance, brightness and volume with the desktop panel.
+- **Control Center** – Pulled down from the status bar, sharing every control with the desktop panel: connectivity, Focus, appearance, brightness and volume.
 - **Back leaves the app, not the site** – Each app sits one history entry deep, so the phone's Back gesture steps out to the Home Screen.
 - **Honours `prefers-reduced-motion`** – The open and dismiss animations are skipped rather than shortened.
 
@@ -67,7 +73,8 @@ Segments are slugs of the names in `src/constants/index.ts`, so renaming a folde
 ### Accessibility
 
 - **Reduced motion** – `prefers-reduced-motion` is honoured in both shells. The boot sequence is skipped, windows open and minimise without travelling, the dock stops magnifying, the hero's letters stop thickening, and every CSS transition and keyframe is collapsed. GSAP opts out through `src/utils/motion.ts`; the CSS side is one rule in `src/index.css`.
-- **Keyboard** – The menu bar takes ↑/↓ within a menu and ←/→ along the bar, with Escape handing focus back to the title. The Apple menu and the right-click menus share the same arrow-key handling. Desktop icons are real buttons: Tab reaches them, Enter opens them. Spotlight is a combobox driving a listbox, so each result is announced as it is highlighted.
+- **Reduced transparency** – `prefers-reduced-transparency` is honoured too, which for a design built on Liquid Glass is the setting that matters most. Every surface goes opaque and every blur is dropped, including the menu bar, which normally has no material of its own. System Settings → Accessibility can also force it on, with no option to force it back off: an app does not get to override an accessibility preference upward.
+- **Keyboard** – The menu bar takes ↑/↓ within a menu and ←/→ along the bar, with Escape handing focus back to the title. The Apple menu and the right-click menus share the same arrow-key handling. Every menu bar control is a real button, so Spotlight and Notification Center are reachable without a pointer. In the Finder, Tab moves the selection, Enter opens and Space previews. Spotlight is a combobox driving a listbox, so each result is announced as it is highlighted.
 - **Focus** – A visible ring on every control, `:focus-visible` so it appears for the keyboard and stays out of a mouse user's way, with a halo that keeps it legible over any wallpaper.
 
 ## Tech Stack
@@ -117,7 +124,9 @@ Most of the portfolio data lives in `src/constants/index.ts`, and both shells re
 
 - `navLinks`, `dockApps` – the menu and dock labels/icons.
 - `wallpapers` – the wallpaper presets offered in System Settings.
-- `locations` – powers the Finder-like explorer, including folders, files, descriptions, and external links.
+- `locations` – powers the Finder-like explorer, including folders, files, descriptions, and external links. A folder can also carry a `folderColor` and a `folderBadge`, which is the look it ships with before anyone changes it in Get Info.
+- `contactEmail` – the address the Contact window prints and Spotlight's copy actions write to the clipboard. One copy, so the two cannot disagree.
+- `focusModes`, `soundOutputs` – what Control Center's Focus and Sound panes list.
 - `blogPosts`, `techStack`, `socials`, `gallery`, `aboutSpecs` – drive the Safari, Terminal, Contact, Photos, and About This Mac windows.
 
 Two files configure a shell rather than its content:
@@ -143,13 +152,14 @@ Each file is only rewritten when something visibly moved. The clock is pinned to
 
 ```
 src/
-  components/     # Navbar, Dock, Spotlight, Mission Control, Control Center, …
+  components/     # Navbar, Dock, Spotlight, Quick Look, Get Info, Control Center, …
   windows/        # Finder, Safari, Terminal, Contact, Resume, Photos, Settings, About
   hoc/            # WindowWrapper HOC: animations, dragging, tiling, resizing
-  mobile/         # The phone shell: Home Screen, app frame, and its eight apps
-  store/          # Zustand stores for window, layout, location, snap and system state
+  mobile/         # The phone shell: Home Screen, widget, search, and its eight apps
+  store/          # Zustand stores for window, layout, location, snap, system,
+                  #   Quick Look, Get Info, folder looks and clipboard history
   constants/      # Portfolio content configuration
-  utils/          # Terminal engine, menu actions, wallpaper luminance sampling
+  utils/          # Terminal engine, menu actions, clipboard, wallpaper luminance
   test/           # Vitest setup; the specs themselves sit beside what they test
   index.css       # Desktop styles, Liquid Glass utilities, design tokens
   mobile.css      # Phone styles (imported by index.css)
