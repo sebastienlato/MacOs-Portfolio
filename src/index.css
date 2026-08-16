@@ -1588,24 +1588,14 @@ body {
     }
   }
 
-  .boot-screen {
-    @apply fixed inset-0 z-[99999] col-center gap-16 bg-black;
-
-    /* Visible from the first paint, not faded in: this markup is in the
-       document precisely so it is on screen before any script runs, and
-       opacity-0 would have hidden it from that paint entirely */
-    img {
-      @apply w-20 invert;
-    }
-
-    .progress {
-      @apply w-52 h-1.5 rounded-full bg-gray-800 overflow-hidden;
-
-      .bar {
-        @apply h-full w-0 rounded-full bg-gray-100;
-      }
-    }
-  }
+  /*
+   * The boot screen is styled in `index.html`, not here.
+   *
+   * It is the one thing on the site that has to paint before this file has
+   * finished downloading — it exists to cover the wait for it — so styling it
+   * from here made it wait for the thing it was covering. Left as a signpost
+   * rather than deleted silently, because this is where anyone would look.
+   */
 
   #settings {
     /* Accent and icon style pushed this past the bottom of a laptop screen, so

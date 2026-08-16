@@ -55,6 +55,90 @@
       name="twitter:image:alt"
       content="The portfolio shown twice: a macOS desktop with a Finder window open, and the same site as an iOS Home Screen on a phone."
     />
+
+    <!--
+      The boot screen's styles, inline, and its animation with them.
+
+      Both halves are here for the same reason the markup below is. Moving the
+      markup out of React got it painting before the bundle; the styles stayed
+      in the stylesheet, so it still could not paint until 183KB of CSS had
+      landed, and first paint went back to 2.4s as that file grew. Fifteen rules
+      inline paint with the document.
+
+      The animation matters more. It used to be a GSAP timeline, which cannot
+      start until the bundle has downloaded, parsed and mounted React — so the
+      2.2s of "booting" ran *after* the network instead of during it, and the
+      Home Screen appeared 2.2s later than it needed to. Measured under
+      Lighthouse's mobile throttling that was a Speed Index of 6.9s against a
+      Largest Contentful Paint of 2.6s: four seconds where the screen was still
+      changing after the content had arrived. As CSS it starts at first paint
+      and runs while the bundle is still in flight.
+
+      React's only remaining job is to take the node away; see BootScreen.tsx.
+      Keep these durations and the ones there in step — 1.6 + 0.15 + 0.45.
+      Colours are the resolved Tailwind values the stylesheet was producing,
+      copied so the two cannot drift apart visually.
+    -->
+    <style>
+      .boot-screen {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 64px;
+        background: #000;
+        animation: boot-fade 0.45s ease 1.75s forwards;
+      }
+
+      .boot-screen img {
+        width: 80px;
+        filter: invert(1);
+      }
+
+      .boot-screen .progress {
+        width: 208px;
+        height: 6px;
+        overflow: hidden;
+        border-radius: 9999px;
+        background: oklch(0.278 0.033 256.848);
+      }
+
+      .boot-screen .bar {
+        height: 100%;
+        width: 0;
+        border-radius: 9999px;
+        background: oklch(0.967 0.003 264.542);
+        /* power1.inOut, which is what the GSAP tween used */
+        animation: boot-bar 1.6s cubic-bezier(0.45, 0, 0.55, 1) forwards;
+      }
+
+      @keyframes boot-bar {
+        to {
+          width: 100%;
+        }
+      }
+
+      /* `visibility` as well as opacity: the node is removed by React a moment
+         later, and until then a transparent full-screen layer would still be
+         swallowing every tap meant for the Home Screen underneath. */
+      @keyframes boot-fade {
+        to {
+          opacity: 0;
+          visibility: hidden;
+        }
+      }
+
+      /* Asking for less motion skips the sequence outright rather than making
+         it instant — and does so before any script has run to be asked. */
+      @media (prefers-reduced-motion: reduce) {
+        .boot-screen {
+          display: none;
+        }
+      }
+    </style>
   </head>
   <body>
     <!--
