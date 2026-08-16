@@ -3,7 +3,18 @@ import clsx from "clsx";
 
 import { wallpaperNeedsDarkText } from "#utils/wallpaperLuminance";
 
-import { BootScreen } from "#components";
+/*
+ * Straight at the file, not `#components`. That barrel imports all fifteen
+ * desktop components to re-export them, and with no `sideEffects` field to
+ * promise otherwise, Rollup has to assume each one might do something on the
+ * way in — so naming one of them dragged the Dock, Spotlight, Mission Control,
+ * Quick Look and Welcome into the entry chunk, GSAP behind them, on a path
+ * where the only thing wanted was a boot screen that no longer animates.
+ *
+ * It made the lazy shells below almost pointless: the phone was downloading
+ * the desktop's components anyway, just spelled differently.
+ */
+import BootScreen from "#components/BootScreen";
 import useIsMobile from "#mobile/useIsMobile";
 import useDeepLink from "#hooks/useDeepLink";
 import useSystemStore from "#store/system";
