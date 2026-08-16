@@ -81,12 +81,12 @@ interface SpotlightItem {
 
 const APPS: { title: string; key: WindowKey; icon: string; extra?: string }[] =
   [
-    { title: "Portfolio", key: "finder", icon: "/images/finder.png", extra: "finder projects work" },
-    { title: "Articles", key: "safari", icon: "/images/safari.png", extra: "safari blog browser" },
-    { title: "Gallery", key: "photos", icon: "/images/photos.png", extra: "photos pictures" },
-    { title: "Contact", key: "contact", icon: "/images/contact.png", extra: "email socials" },
-    { title: "Terminal", key: "terminal", icon: "/images/terminal.png", extra: "shell zsh commands" },
-    { title: "Resume", key: "resume", icon: "/images/pdf.png", extra: "cv pdf" },
+    { title: "Portfolio", key: "finder", icon: "/images/finder.webp", extra: "finder projects work" },
+    { title: "Articles", key: "safari", icon: "/images/safari.webp", extra: "safari blog browser" },
+    { title: "Gallery", key: "photos", icon: "/images/photos.webp", extra: "photos pictures" },
+    { title: "Contact", key: "contact", icon: "/images/contact.webp", extra: "email socials" },
+    { title: "Terminal", key: "terminal", icon: "/images/terminal.webp", extra: "shell zsh commands" },
+    { title: "Resume", key: "resume", icon: "/images/pdf.webp", extra: "cv pdf" },
     { title: "System Settings", key: "settings", icon: "/images/wallpaper.webp", extra: "wallpaper preferences" },
     { title: "About This Mac", key: "about", icon: "/macbook.png", extra: "specs info" },
   ];
@@ -329,7 +329,7 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
         title: post.title,
         category: "Blog Post",
         kind: "link",
-        icon: "/images/safari.png",
+        icon: "/images/safari.webp",
         haystack: post.title.toLowerCase(),
         action: () => window.open(post.link, "_blank"),
       });

@@ -1547,7 +1547,7 @@ body {
       .swatch {
         @apply block aspect-square w-full cursor-pointer rounded-md bg-cover transition-transform hover:scale-110;
 
-        background-image: url("/images/folder.png");
+        background-image: url("/images/folder.webp");
         background-position: center;
         background-repeat: no-repeat;
         filter: hue-rotate(var(--folder-hue, 0deg)) saturate(1.15);

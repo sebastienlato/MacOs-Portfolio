@@ -162,31 +162,31 @@ const dockApps: DockApp[] = [
   {
     id: "finder",
     name: "Portfolio",
-    icon: "finder.png",
+    icon: "finder.webp",
     canOpen: true,
   },
   {
     id: "safari",
     name: "Articles",
-    icon: "safari.png",
+    icon: "safari.webp",
     canOpen: true,
   },
   {
     id: "photos",
     name: "Gallery",
-    icon: "photos.png",
+    icon: "photos.webp",
     canOpen: true,
   },
   {
     id: "contact",
     name: "Contact",
-    icon: "contact.png",
+    icon: "contact.webp",
     canOpen: true,
   },
   {
     id: "terminal",
     name: "Terminal",
-    icon: "terminal.png",
+    icon: "terminal.webp",
     canOpen: true,
   },
   {
@@ -389,7 +389,7 @@ const WORK_LOCATION: FinderItem = {
     {
       id: 5,
       name: "SecureVault",
-      icon: "/images/folder.png",
+      icon: "/images/folder.webp",
       kind: "folder",
       folderColor: "graphite",
       folderBadge: "lock",
@@ -397,7 +397,7 @@ const WORK_LOCATION: FinderItem = {
         {
           id: 1,
           name: "SecureVault Project.txt",
-          icon: "/images/txt.png",
+          icon: "/images/txt.webp",
           kind: "file",
           fileType: "txt",
           description: [
@@ -409,7 +409,7 @@ const WORK_LOCATION: FinderItem = {
         {
           id: 2,
           name: "securevault.com",
-          icon: "/images/safari.png",
+          icon: "/images/safari.webp",
           kind: "file",
           fileType: "url",
           href: "https://github.com/sebastienlato/SecureVault",
@@ -417,7 +417,7 @@ const WORK_LOCATION: FinderItem = {
         {
           id: 4,
           name: "securevault.png",
-          icon: "/images/image.png",
+          icon: "/images/image.webp",
           kind: "file",
           fileType: "img",
           imageUrl: "/images/project-1.webp",
@@ -429,7 +429,7 @@ const WORK_LOCATION: FinderItem = {
     {
       id: 6,
       name: "PetSitterQR",
-      icon: "/images/folder.png",
+      icon: "/images/folder.webp",
       kind: "folder",
       folderColor: "orange",
       folderBadge: "paw",
@@ -437,7 +437,7 @@ const WORK_LOCATION: FinderItem = {
         {
           id: 1,
           name: "PetSitterQR Project.txt",
-          icon: "/images/txt.png",
+          icon: "/images/txt.webp",
           kind: "file",
           fileType: "txt",
           description: [
@@ -451,7 +451,7 @@ const WORK_LOCATION: FinderItem = {
         {
           id: 2,
           name: "petsitterqr.com",
-          icon: "/images/safari.png",
+          icon: "/images/safari.webp",
           kind: "file",
           fileType: "url",
           href: "https://github.com/sebastienlato/PetSitterQR",
@@ -459,7 +459,7 @@ const WORK_LOCATION: FinderItem = {
         {
           id: 4,
           name: "petsitterqr.png",
-          icon: "/images/image.png",
+          icon: "/images/image.webp",
           kind: "file",
           fileType: "img",
           imageUrl: "/images/project-2.webp",
@@ -471,7 +471,7 @@ const WORK_LOCATION: FinderItem = {
     {
       id: 7,
       name: "SleepSoundsApp",
-      icon: "/images/folder.png",
+      icon: "/images/folder.webp",
       kind: "folder",
       folderColor: "purple",
       folderBadge: "moon",
@@ -479,7 +479,7 @@ const WORK_LOCATION: FinderItem = {
         {
           id: 1,
           name: "Sleep Sounds App Project.txt",
-          icon: "/images/txt.png",
+          icon: "/images/txt.webp",
           kind: "file",
           fileType: "txt",
           description: [
@@ -493,7 +493,7 @@ const WORK_LOCATION: FinderItem = {
         {
           id: 2,
           name: "sleepsoundsapp.com",
-          icon: "/images/safari.png",
+          icon: "/images/safari.webp",
           kind: "file",
           fileType: "url",
           href: "https://github.com/sebastienlato/SleepSoundsApp",
@@ -501,7 +501,7 @@ const WORK_LOCATION: FinderItem = {
         {
           id: 4,
           name: "sleepsoundsapp.png",
-          icon: "/images/image.png",
+          icon: "/images/image.webp",
           kind: "file",
           fileType: "img",
           imageUrl: "/images/project-3.webp",
@@ -521,7 +521,7 @@ const ABOUT_LOCATION: FinderItem = {
     {
       id: 1,
       name: "me.png",
-      icon: "/images/image.png",
+      icon: "/images/image.webp",
       kind: "file",
       fileType: "img",
       imageUrl: "/images/sebastien.webp",
@@ -529,7 +529,7 @@ const ABOUT_LOCATION: FinderItem = {
     {
       id: 2,
       name: "casual-me.png",
-      icon: "/images/image.png",
+      icon: "/images/image.webp",
       kind: "file",
       fileType: "img",
       imageUrl: "/images/sebastien-2.webp",
@@ -537,7 +537,7 @@ const ABOUT_LOCATION: FinderItem = {
     {
       id: 3,
       name: "conference-me.png",
-      icon: "/images/image.png",
+      icon: "/images/image.webp",
       kind: "file",
       fileType: "img",
       imageUrl: "/images/sebastien-3.webp",
@@ -545,7 +545,7 @@ const ABOUT_LOCATION: FinderItem = {
     {
       id: 4,
       name: "about-me.txt",
-      icon: "/images/txt.png",
+      icon: "/images/txt.webp",
       kind: "file",
       fileType: "txt",
       subtitle: "Meet the Developer Behind the Code",
@@ -570,7 +570,7 @@ const RESUME_LOCATION: FinderItem = {
     {
       id: 1,
       name: "Resume.pdf",
-      icon: "/images/pdf.png",
+      icon: "/images/pdf.webp",
       kind: "file",
       fileType: "pdf",
     },
@@ -587,7 +587,7 @@ const TRASH_LOCATION: FinderItem = {
     {
       id: 1,
       name: "trash1.png",
-      icon: "/images/image.png",
+      icon: "/images/image.webp",
       kind: "file",
       fileType: "img",
       imageUrl: "/images/trash-1.webp",
@@ -595,7 +595,7 @@ const TRASH_LOCATION: FinderItem = {
     {
       id: 2,
       name: "trash2.png",
-      icon: "/images/image.png",
+      icon: "/images/image.webp",
       kind: "file",
       fileType: "img",
       imageUrl: "/images/trash-2.webp",

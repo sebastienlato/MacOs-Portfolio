@@ -22,7 +22,7 @@ const useNotifications = () => {
     {
       id: "post",
       app: "Articles",
-      icon: "/images/safari.png",
+      icon: "/images/safari.webp",
       title: latest.title,
       body: "New post on the blog",
       time: latest.date,
@@ -31,7 +31,7 @@ const useNotifications = () => {
     {
       id: "work",
       app: "Portfolio",
-      icon: "/images/finder.png",
+      icon: "/images/finder.webp",
       title: `${projectCount} projects in Work`,
       body: "Open the Finder to look through them",
       time: "Now",
@@ -40,7 +40,7 @@ const useNotifications = () => {
     {
       id: "hire",
       app: "Contact",
-      icon: "/images/contact.png",
+      icon: "/images/contact.webp",
       title: "Open to new projects",
       body: "Mobile and web — get in touch",
       time: "Now",
