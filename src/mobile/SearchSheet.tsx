@@ -89,7 +89,7 @@ const SearchSheet = ({ close }: { close: () => void }) => {
         id: `post-${post.id}`,
         title: post.title,
         category: "Article",
-        icon: "/images/safari.png",
+        icon: "/images/safari.webp",
         haystack: post.title.toLowerCase(),
         run: () => {
           close();

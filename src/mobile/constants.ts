@@ -66,7 +66,7 @@ export const MOBILE_APPS: MobileApp[] = [
     id: "articles",
     name: "Articles",
     title: "Articles",
-    icon: "/images/safari.png",
+    icon: "/images/safari.webp",
     inDock: true,
   },
   {
@@ -83,7 +83,7 @@ export const MOBILE_APPS: MobileApp[] = [
     id: "gallery",
     name: "Gallery",
     title: "Gallery",
-    icon: "/images/photos.png",
+    icon: "/images/photos.webp",
     /*
      * The fourth, filling the place the terminal left. Three icons spread
      * across a full-width dock sit far enough apart to read as three things
