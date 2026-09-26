@@ -233,6 +233,14 @@ const iconStyles: { id: IconStyle; name: string }[] = [
   { id: "tinted", name: "Tinted" },
 ];
 
+/*
+ * The icons are this Mac's own, rendered from macOS 27 itself — NSWorkspace's
+ * icon for each app bundle and AppKit's two Trash images, drawn under the
+ * Light appearance at 512px and saved as 256px WebP. Rendered rather than
+ * collected, every one sits on the same grid: the artwork square is 85.9% of
+ * the canvas for all five apps, where the older set varied file to file and
+ * read as different sizes side by side in the dock.
+ */
 const dockApps: DockApp[] = [
   {
     id: "finder",
