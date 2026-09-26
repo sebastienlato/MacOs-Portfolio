@@ -190,6 +190,7 @@ const ControlCenter = () => {
   const activeOutput =
     soundOutputs.find((device) => device.id === output) ?? soundOutputs[0];
 
+  /* Both the wallpaper module and "Focus Settings…" lead to Settings */
   const openWallpaperSettings = () => {
     setControlCenterOpen(false);
     openWindow("settings");
@@ -378,6 +379,8 @@ const ControlCenter = () => {
                 <h3>Focus</h3>
               </header>
 
+              <hr className="cc-divider" />
+
               <ul className="cc-list">
                 {focusModes.map((mode) => {
                   const Icon = FOCUS_ICONS[mode.icon];
@@ -399,11 +402,16 @@ const ControlCenter = () => {
                 })}
               </ul>
 
-              <p className="cc-note">
-                {activeFocus
-                  ? `Notifications are silenced while ${activeFocus.name} is on.`
-                  : "Choose a Focus to silence notifications."}
-              </p>
+              <hr className="cc-divider" />
+
+              {/* Where the real list ends: a way into the settings */}
+              <button
+                type="button"
+                className="cc-footer"
+                onClick={openWallpaperSettings}
+              >
+                Focus Settings…
+              </button>
             </div>
           )}
 

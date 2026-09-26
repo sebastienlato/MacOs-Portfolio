@@ -785,7 +785,9 @@ body {
       }
     }
 
-    ul {
+    /* The bar's own lists only. A bare `ul` also caught the lists inside
+       Control Center's Focus and Sound panes and ran them off the side. */
+    > div > ul {
       @apply flex items-center gap-5 max-sm:hidden;
 
       p {
@@ -1214,7 +1216,7 @@ body {
       @apply flex items-center gap-1.5;
 
       h3 {
-        @apply text-[13px] font-semibold;
+        @apply text-[15px] font-semibold;
       }
     }
 
@@ -1238,8 +1240,13 @@ body {
       }
     }
 
-    .cc-note {
-      @apply px-1 text-[11px] leading-snug opacity-70;
+    /* The hairlines the real Focus pane draws above and below its list */
+    .cc-divider {
+      @apply mx-1 border-t border-black/10 dark:border-white/15;
+    }
+
+    .cc-footer {
+      @apply w-full rounded-lg px-2 py-1 text-left text-[13px] font-medium cursor-default transition-colors hover:bg-white/30 dark:hover:bg-white/10;
     }
   }
 
@@ -1637,55 +1644,62 @@ body {
   }
 
   #spotlight {
-    /* Clear glass shows whatever is behind it, and the hero type is huge and
-       high-contrast. Dimming the desktop keeps the panel see-through while
-       giving the result list something calm to sit on. */
-    @apply fixed inset-0 z-[20000] bg-black/25;
+    /* No dimming: macOS 27 floats the field straight over the desktop. The
+       overlay is still here, clear, so a click anywhere else closes it. */
+    @apply fixed inset-0 z-[20000];
 
     .panel {
-      @apply glass glass-thick relative mx-auto mt-[18vh] w-xl max-w-[90vw] rounded-[22px] overflow-hidden text-gray-900 dark:text-gray-100;
+      @apply relative mx-auto mt-[20vh] w-[640px] max-w-[92vw] text-gray-900 dark:text-gray-100;
+    }
 
-      /* Overrides the fill `glass-thick` just set, and nothing else it sets —
-         the blur stays where the shared material puts it */
-      --glass-fill: var(--glass-alpha-spotlight);
+    /* The field and its modes, each its own piece of glass on one line */
+    .bar {
+      @apply flex items-center gap-2;
     }
 
     .search-row {
-      @apply flex items-center gap-3 px-4 py-3 text-gray-500 dark:text-gray-400;
+      /* The popover weight of glass, not Spotlight's near-opaque one: the
+         field holds one line of large type, and the Mac lets the wallpaper
+         through it. The dense fill is kept for the results, which are small. */
+      @apply glass glass-thick relative flex flex-1 min-w-0 items-center gap-3 h-[52px] rounded-full px-5 text-gray-600 dark:text-gray-300;
 
       input {
-        @apply flex-1 bg-transparent outline-none text-xl text-gray-900 placeholder:text-gray-400 dark:text-gray-100;
-        /* The panel is the focus indicator; see the note by :focus-visible */
+        @apply flex-1 min-w-0 bg-transparent outline-none text-[22px] text-gray-900 placeholder:text-gray-500 dark:text-gray-100 dark:placeholder:text-gray-300;
+        /* The field is the focus indicator; see the note by :focus-visible */
         box-shadow: none;
-      }
-
-      kbd {
-        @apply text-xs text-gray-500 border rounded px-1.5 py-0.5 border-black/15 dark:border-white/20 dark:text-gray-400;
       }
     }
 
-    /* The browse modes, sitting between the field and the list the way 26
-       puts them under the search row */
+    /* The mode that is on, named inside the field as the Mac shows it */
+    .mode-token {
+      @apply shrink-0 rounded-full bg-accent-soft px-2.5 py-0.5 text-[13px] font-semibold text-accent-label;
+    }
+
     .modes {
-      @apply flex items-center gap-1 border-t px-2.5 py-1.5 border-black/10 dark:border-white/10;
+      @apply flex shrink-0 items-center gap-2;
 
       button {
-        @apply flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium cursor-default text-gray-600 transition-colors hover:bg-black/[0.06] dark:text-gray-400 dark:hover:bg-white/10;
+        @apply glass glass-thick glass-tight relative flex-center size-[52px] shrink-0 rounded-full cursor-default text-gray-700 transition-colors dark:text-gray-200;
+
+        &:hover {
+          --glass-fill: calc(var(--glass-alpha-thick) + 0.1);
+        }
 
         &.selected {
-          @apply bg-accent-soft text-accent-label;
-        }
-
-        /* The shortcut is a hint, not a second label — it steps back until the
-           mode it belongs to is the one being pointed at */
-        kbd {
-          @apply text-[10px] opacity-55;
+          @apply bg-accent text-accent-on;
         }
       }
+    }
+
+    /* Results open as a panel of their own beneath the field */
+    .results-panel {
+      @apply glass glass-thick relative mt-2 overflow-hidden rounded-[22px];
+
+      --glass-fill: var(--glass-alpha-spotlight);
     }
 
     .results {
-      @apply border-t py-1.5 max-h-96 overflow-y-auto border-black/10 dark:border-white/10;
+      @apply py-1.5 max-h-96 overflow-y-auto;
 
       li {
         @apply flex items-center gap-3 mx-1.5 px-2.5 py-2 rounded-lg cursor-default text-sm text-gray-800 dark:text-gray-200;
@@ -1730,7 +1744,7 @@ body {
     }
 
     .empty {
-      @apply border-t px-4 py-6 text-center text-sm text-gray-500 border-black/10 dark:border-white/10 dark:text-gray-400;
+      @apply px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400;
     }
   }
 
