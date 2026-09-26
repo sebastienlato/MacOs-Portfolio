@@ -17,7 +17,7 @@ const Resume = () => {
         <a
           href="files/resume.pdf"
           download
-          className="cursor-pointer"
+          className="cursor-default"
           title="Download resume"
         >
           <Download className="icon" />

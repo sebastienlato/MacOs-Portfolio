@@ -369,6 +369,10 @@ const WindowWrapper = <P extends object>(
 
       const [instance] = Draggable.create(el, {
         trigger: header ?? el,
+        // macOS drags a window by its title bar under the ordinary arrow —
+        // Draggable's default is an open hand, and a closed one mid-drag
+        cursor: "default",
+        activeCursor: "default",
         onPress: () => focusWindow(windowKey),
         // Held against an edge, the window tiles there on release
         onDrag: () =>
