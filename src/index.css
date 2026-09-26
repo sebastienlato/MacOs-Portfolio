@@ -152,6 +152,21 @@ body {
     --window-shadow-front: 0 30px 72px -14px rgb(0 0 0 / 0.5),
       0 3px 10px rgb(0 0 0 / 0.18);
 
+    /*
+     * Menus — the Apple menu, the app menus, right-click menus. Their own
+     * material, measured off a real macOS 27 menu rather than shared with the
+     * popovers: Apple's slider does not reach menus, and the menu is not a
+     * tinted pane. It mixes the blurred backdrop about a third of the way to
+     * one neutral grey, so it *lightens* what is dark behind it and darkens
+     * what is light — solved from the same menu sampled over sky and over a
+     * dark toolbar. The edge is a hairline, not a rim: no lens band, no ring.
+     */
+    --menu-tint: 246 246 246;
+    --menu-alpha: 0.7;
+    --menu-blur: 24px;
+    --menu-edge: rgb(0 0 0 / 0.12);
+    --menu-inner-edge: rgb(255 255 255 / 0.5);
+
     /* Toolbar buttons: capsules of brighter glass sitting on the chrome */
     --glass-control: rgb(255 255 255 / 0.6);
   }
@@ -200,6 +215,15 @@ body {
       0 1px 3px rgb(0 0 0 / 0.3);
     --window-shadow-front: 0 32px 80px -14px rgb(0 0 0 / 0.85),
       0 3px 12px rgb(0 0 0 / 0.5);
+
+    /* 35% of mid-grey (128) over the backdrop — solved per channel from a
+       real dark-mode menu: 0.32–0.39 alpha, 123–136 tint */
+    --menu-tint: 128 128 128;
+    --menu-alpha: 0.35;
+    /* Sampled across the top edge: one dark pixel at half strength, then one
+       a touch lighter than the fill */
+    --menu-edge: rgb(0 0 0 / 0.5);
+    --menu-inner-edge: rgb(255 255 255 / 0.1);
 
     --glass-control: rgb(255 255 255 / 0.12);
   }
@@ -296,6 +320,8 @@ body {
     --glass-alpha-thick: 1;
     --glass-alpha-spotlight: 1;
     --glass-chrome-alpha: 1;
+    --glass-dark-edge: rgb(0 0 0 / 0);
+    --menu-alpha: 1;
 
     /* The rim and the sheen are the material announcing itself, which is the
        part being asked for less of */
@@ -317,6 +343,11 @@ body {
 
     &.dark > nav {
       color: rgb(255 255 255 / 0.92);
+    }
+
+    /* Mid-grey is right as a third of a mix and wrong as a solid */
+    &.dark {
+      --menu-tint: 44 44 46;
     }
 
     /* Both of these paint their own glyphs and stop inverting on a light bar;
@@ -494,6 +525,22 @@ body {
   }
 }
 
+/*
+ * A menu's material. Blur, a neutral mix, a hairline and a soft drop — and
+ * none of the lens and specular rings the floating glass carries: a real
+ * macOS 27 menu goes from backdrop to fill in a single pixel.
+ */
+@utility menu-glass {
+  background-color: rgb(var(--menu-tint) / var(--menu-alpha));
+  backdrop-filter: blur(calc(var(--menu-blur) * min(var(--glass-blur-scale, 1), 1)));
+  box-shadow:
+    inset 0 0 0 1px var(--menu-inner-edge),
+    0 0 0 1px var(--menu-edge),
+    0 12px 32px -10px rgb(0 0 0 / 0.35);
+  /* Fitted to the corner of a real one: a 13px circle */
+  border-radius: 13px;
+}
+
 /* A run of toolbar buttons sharing one capsule, as 27 groups them */
 @utility toolbar-group {
   @apply glass-control flex shrink-0 items-center gap-0.5 p-1 text-gray-600 dark:text-gray-300;
@@ -548,6 +595,12 @@ body {
   [role="menuitem"]:focus-visible {
     outline: none;
     box-shadow: none;
+  }
+
+  /* A menu that holds focus itself, so the arrows work before anything is
+     highlighted. It is not a control, and wears no ring */
+  [role="menu"]:focus {
+    outline: none;
   }
 
   /*
@@ -867,14 +920,18 @@ body {
 
     > button {
       /* The bar is transparent now, so the hover chip lifts rather than darkens */
-      @apply flex items-center cursor-pointer rounded-md px-1.5 py-0.5 hover:bg-white/20 transition-colors;
+      @apply flex items-center cursor-pointer rounded-full px-2.5 py-px hover:bg-white/10 transition-colors;
+
+      &[aria-expanded="true"] {
+        @apply bg-white/15;
+      }
     }
 
     .dropdown {
-      @apply glass glass-thick absolute top-8 left-0 !flex flex-col items-stretch gap-0 min-w-52 rounded-[var(--radius-panel)] p-1.5 z-[10000] text-gray-900 dark:text-gray-100;
+      @apply menu-glass absolute top-[27px] left-0 !flex flex-col items-stretch gap-0 min-w-52 p-[5px] z-[10000] text-gray-900 dark:text-white/90;
 
       li {
-        @apply text-sm px-3 py-1.5 rounded-lg cursor-pointer transition-colors;
+        @apply text-[13px] leading-4 px-3 py-1 rounded-md cursor-pointer transition-colors;
 
         &:not(.divider):is(:hover, :focus-visible) {
           @apply bg-accent text-accent-on;
@@ -882,7 +939,7 @@ body {
       }
 
       .divider {
-        @apply h-px my-1 p-0 mx-3 cursor-default bg-black/10 hover:bg-black/10 dark:bg-white/15 dark:hover:bg-white/15;
+        @apply h-px my-[5px] p-0 mx-3 cursor-default bg-black/10 hover:bg-black/10 dark:bg-white/15 dark:hover:bg-white/15;
       }
     }
   }
@@ -893,24 +950,26 @@ body {
       @apply relative;
     }
 
+    /* A capsule, as 27 highlights a menu title — not a rounded rectangle */
     > .menu > button {
-      @apply text-sm cursor-pointer rounded-md px-2.5 py-0.5 transition-colors hover:bg-white/20;
+      @apply text-sm cursor-pointer rounded-full px-2.5 py-px transition-colors hover:bg-white/10;
 
       &.app-name {
         @apply font-bold;
       }
 
       /* An open menu keeps its title highlighted, as macOS does */
+      /* Measured off the real bar: white at about 15% over the wallpaper */
       &.open {
-        @apply bg-white/25;
+        @apply bg-white/15;
       }
     }
 
     .dropdown {
-      @apply glass glass-thick absolute top-7 left-0 min-w-56 rounded-[var(--radius-panel)] p-1.5 z-[10000] text-gray-900 dark:text-gray-100;
+      @apply menu-glass absolute top-[27px] left-0 min-w-56 p-[5px] z-[10000] text-gray-900 dark:text-white/90;
 
       li {
-        @apply flex items-center gap-8 text-sm px-3 py-1.5 rounded-lg cursor-pointer transition-colors;
+        @apply flex items-center gap-8 text-[13px] leading-4 px-3 py-1 rounded-md cursor-pointer transition-colors;
 
         /* Arrowing onto an item highlights it exactly as hovering does */
         &:not(.disabled):not(.divider):is(:hover, :focus-visible) {
@@ -922,13 +981,14 @@ body {
           @apply opacity-40 cursor-default;
         }
 
+        /* The same size as the label, dimmed — not a smaller caption */
         .shortcut {
-          @apply ml-auto text-xs opacity-60 shrink-0;
+          @apply ml-auto opacity-45 shrink-0;
         }
       }
 
       .divider {
-        @apply h-px my-1 mx-3 p-0 cursor-default bg-black/10 dark:bg-white/15;
+        @apply h-px my-[5px] mx-3 p-0 cursor-default bg-black/10 dark:bg-white/15;
       }
     }
   }
@@ -1136,10 +1196,10 @@ body {
 
   /* Right-click menus, wherever they're raised from — desktop or dock */
   .context-menu {
-    @apply glass glass-thick fixed min-w-52 rounded-[var(--radius-panel)] p-1.5 z-[15000] select-none text-gray-900 dark:text-gray-100;
+    @apply menu-glass fixed min-w-52 p-[5px] z-[15000] select-none text-gray-900 dark:text-white/90;
 
     li {
-      @apply text-sm px-3 py-1.5 rounded-lg cursor-pointer transition-colors;
+      @apply text-[13px] leading-4 px-3 py-1 rounded-md cursor-pointer transition-colors;
 
       &:not(.disabled):is(:hover, :focus-visible) {
         @apply bg-accent text-accent-on;
@@ -1151,7 +1211,7 @@ body {
     }
 
     .divider {
-      @apply h-px my-1 mx-2 p-0 cursor-default bg-black/10 hover:bg-black/10 dark:bg-white/15 dark:hover:bg-white/15;
+      @apply h-px my-[5px] mx-3 p-0 cursor-default bg-black/10 hover:bg-black/10 dark:bg-white/15 dark:hover:bg-white/15;
     }
   }
 
