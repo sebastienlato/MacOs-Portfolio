@@ -7,6 +7,7 @@ import { WindowControls } from "#components";
 import { accents, iconStyles, wallpapers } from "#constants/index";
 import useSystemStore from "#store/system";
 import type { Appearance, Wallpaper } from "#types";
+import { wallpaperBackground } from "#utils/wallpaperSource";
 
 const MAX_UPLOAD_BYTES = 4 * 1024 * 1024; // localStorage-friendly cap
 
@@ -57,10 +58,12 @@ const Settings = () => {
     e.target.value = "";
   };
 
-  const thumbStyle = (wp: Wallpaper) =>
-    wp.type === "gradient"
-      ? { backgroundImage: wp.value }
-      : { backgroundImage: `url(${wp.value})` };
+  /* The phone-sized copy is still far more than a thumbnail needs, and a
+     fraction of the 2880px one. A dynamic wallpaper shows the picture for the
+     appearance in force, as the real picker does. */
+  const thumbStyle = (wp: Wallpaper) => ({
+    backgroundImage: wallpaperBackground(wp, { mobile: true, theme }),
+  });
 
   return (
     <>

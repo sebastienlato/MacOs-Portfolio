@@ -77,6 +77,44 @@ const navIcons: NavIcon[] = [
 ];
 
 const wallpapers: Wallpaper[] = [
+  /*
+   * macOS 27's own set, from Apple's release images. The default is the
+   * abstract one — the same artwork iOS 27 ships — and it is dynamic: a
+   * light picture and a dark one, following the appearance. The two bridge
+   * photographs are the optional pair Apple added in beta 3.
+   *
+   * Desktop copies are 2880 wide. The phone copies are sized by *height*
+   * (1100px), not width like Sequoia's: these are wider than 16:10, and a
+   * portrait screen crops the sides off, so a width-sized copy would be
+   * upscaled to fill the height. Made with:
+   *   sharp(src).resize({ width: 2880 }).webp({ quality: 82 })
+   *   sharp(src).resize({ height: 1100 }).webp({ quality: 78 })
+   */
+  {
+    id: "golden-gate",
+    name: "Golden Gate",
+    type: "image",
+    value: "/images/golden-gate-light.webp",
+    mobileValue: "/images/golden-gate-light-mobile.webp",
+    dark: {
+      value: "/images/golden-gate-dark.webp",
+      mobileValue: "/images/golden-gate-dark-mobile.webp",
+    },
+  },
+  {
+    id: "golden-gate-sunset",
+    name: "Golden Gate Sunset",
+    type: "image",
+    value: "/images/golden-gate-sunset.webp",
+    mobileValue: "/images/golden-gate-sunset-mobile.webp",
+  },
+  {
+    id: "golden-gate-night",
+    name: "Golden Gate Night",
+    type: "image",
+    value: "/images/golden-gate-night.webp",
+    mobileValue: "/images/golden-gate-night-mobile.webp",
+  },
   {
     /*
      * Lake at dusk, which is what 26 ships: deep water at the top of the
@@ -101,29 +139,66 @@ const wallpapers: Wallpaper[] = [
        with: sharp(value).resize({ width: 1440 }).webp({ quality: 82 }) */
     mobileValue: "/images/wallpaper-mobile.webp",
   },
+  /*
+   * The four before Sequoia, each Apple's own default and each dynamic — a
+   * light picture and a dark one, as they shipped. From Stephen Hackett's
+   * archive of the originals (512pixels.net), which are 6016px squares that
+   * macOS centre-crops to the screen; the desktop copies are that crop at
+   * 16:10, the phone copies keep the whole square so a portrait screen still
+   * has picture top to bottom. Made with:
+   *   sharp(src)
+   *     .resize({ width: 2880, height: 1800, fit: "cover" })
+   *     .webp({ quality: 82 })
+   *   sharp(src).resize({ width: 1100, height: 1100 }).webp({ quality: 78 })
+   * Big Sur is a photograph with far more detail than the abstracts, and takes
+   * quality 72 to come in under 1MB; at 2x it is indistinguishable.
+   *
+   * The ids are the ones the gradients that stood in for these had, so a
+   * visitor who picked one keeps it.
+   */
   {
     id: "sonoma",
     name: "Sonoma",
-    type: "gradient",
-    value: "linear-gradient(160deg, #f8b500 0%, #e96443 45%, #904e95 100%)",
+    type: "image",
+    value: "/images/sonoma-light.webp",
+    mobileValue: "/images/sonoma-light-mobile.webp",
+    dark: {
+      value: "/images/sonoma-dark.webp",
+      mobileValue: "/images/sonoma-dark-mobile.webp",
+    },
   },
   {
     id: "ventura",
     name: "Ventura",
-    type: "gradient",
-    value: "linear-gradient(140deg, #ff512f 0%, #dd2476 55%, #5f2c82 100%)",
+    type: "image",
+    value: "/images/ventura-light.webp",
+    mobileValue: "/images/ventura-light-mobile.webp",
+    dark: {
+      value: "/images/ventura-dark.webp",
+      mobileValue: "/images/ventura-dark-mobile.webp",
+    },
   },
   {
     id: "monterey",
     name: "Monterey",
-    type: "gradient",
-    value: "linear-gradient(135deg, #12c2e9 0%, #c471ed 50%, #f64f59 100%)",
+    type: "image",
+    value: "/images/monterey-light.webp",
+    mobileValue: "/images/monterey-light-mobile.webp",
+    dark: {
+      value: "/images/monterey-dark.webp",
+      mobileValue: "/images/monterey-dark-mobile.webp",
+    },
   },
   {
     id: "bigsur",
     name: "Big Sur",
-    type: "gradient",
-    value: "linear-gradient(170deg, #0f2027 0%, #203a43 45%, #2c5364 100%)",
+    type: "image",
+    value: "/images/big-sur-light.webp",
+    mobileValue: "/images/big-sur-light-mobile.webp",
+    dark: {
+      value: "/images/big-sur-dark.webp",
+      mobileValue: "/images/big-sur-dark-mobile.webp",
+    },
   },
   {
     id: "midnight",
