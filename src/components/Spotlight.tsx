@@ -9,7 +9,10 @@ import {
   ClipboardList,
   Copy,
   Download,
+  Files,
+  Folder,
   Image as ImageIcon,
+  Layers2,
   LayoutGrid,
   Link2,
   Mail,
@@ -50,12 +53,31 @@ type Kind = "app" | "file" | "action" | "link" | "clip";
  */
 type Mode = "all" | Kind;
 
-const MODES: { id: Mode; label: string; key?: string }[] = [
-  { id: "all", label: "All" },
-  { id: "app", label: "Apps", key: "1" },
-  { id: "file", label: "Files", key: "2" },
-  { id: "action", label: "Actions", key: "3" },
-  { id: "clip", label: "Clipboard", key: "4" },
+/** The App Store's "A" of crossed sticks, which lucide has no glyph for */
+const AppsGlyph = () => (
+  <svg
+    viewBox="0 0 24 24"
+    width={20}
+    height={20}
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    aria-hidden="true"
+  >
+    <path d="M9.5 4.5 17 17.5M14.5 4.5 7 17.5M4 14h16" />
+  </svg>
+);
+
+/*
+ * macOS 27 draws each mode as a round glass button beside the field, in this
+ * order, rather than as a row of tabs under it.
+ */
+const MODES: { id: Exclude<Mode, "all">; label: string; key: string; icon: ReactNode }[] = [
+  { id: "app", label: "Apps", key: "1", icon: <AppsGlyph /> },
+  { id: "file", label: "Files", key: "2", icon: <Folder size={20} /> },
+  { id: "action", label: "Actions", key: "3", icon: <Layers2 size={20} /> },
+  { id: "clip", label: "Clipboard", key: "4", icon: <Files size={20} /> },
 ];
 
 interface SpotlightItem {
@@ -389,17 +411,10 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
 
     /*
      * With nothing typed, a mode lists everything it holds — that is what makes
-     * it a browse rather than a filter waiting on a query. "All" is the
-     * exception and shows what you can open and what you can do, which is the
-     * whole point of putting actions in: nobody discovers a verb they have to
-     * guess the name of first.
+     * it a browse rather than a filter waiting on a query. "All" shows nothing
+     * until you type, as macOS 27 does: the field and its modes, and no list.
      */
-    if (!q) {
-      if (mode !== "all") return pool;
-      return pool.filter(
-        (item) => item.category === "Application" || item.category === ACTION
-      );
-    }
+    if (!q) return mode === "all" ? [] : pool;
 
     return pool
       .map((item) => {
@@ -429,13 +444,16 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
     );
   }, []);
 
+  const activeMode = MODES.find((m) => m.id === mode);
+
   const run = (item: SpotlightItem) => {
     close();
     item.action();
   };
 
+  // Picking the mode that is already on turns it back off, to everything
   const pickMode = (next: Mode) => {
-    setMode(next);
+    setMode((current) => (current === next ? "all" : next));
     setSelected(0);
   };
 
@@ -451,6 +469,12 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
         e.preventDefault();
         pickMode(picked.id);
       }
+      return;
+    }
+
+    // Deleting past the start of the field takes the mode off, as on the Mac
+    if (e.key === "Backspace" && !query && mode !== "all") {
+      pickMode("all");
       return;
     }
 
@@ -478,92 +502,102 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
         className="panel"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="search-row">
-          <Search size={22} aria-hidden="true" />
+        <div className="bar">
+          <div className="search-row">
+            <Search size={22} aria-hidden="true" />
+            {activeMode && <span className="mode-token">{activeMode.label}</span>}
+            {/*
+              A combobox driving a listbox: the arrow keys move `selected`, which
+              is published through aria-activedescendant so a screen reader reads
+              each result as it is highlighted. Focus itself never leaves the
+              input, which is what keeps typing and choosing in one place.
+            */}
+            <input
+              autoFocus
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setSelected(0);
+              }}
+              onKeyDown={handleInputKeyDown}
+              placeholder="Spotlight Search"
+              spellCheck={false}
+              autoComplete="off"
+              aria-label="Spotlight search"
+              role="combobox"
+              aria-expanded={results.length > 0}
+              aria-controls="spotlight-results"
+              aria-autocomplete="list"
+              aria-activedescendant={results[selected]?.id}
+            />
+          </div>
+
           {/*
-            A combobox driving a listbox: the arrow keys move `selected`, which
-            is published through aria-activedescendant so a screen reader reads
-            each result as it is highlighted. Focus itself never leaves the
-            input, which is what keeps typing and choosing in one place.
+            The modes, which is what turns Spotlight from a search box into
+            something you can browse. Their shortcuts, ⌘1–⌘4, are in each
+            button's tooltip, where the Mac puts them too.
           */}
-          <input
-            autoFocus
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setSelected(0);
-            }}
-            onKeyDown={handleInputKeyDown}
-            placeholder="Spotlight Search"
-            spellCheck={false}
-            autoComplete="off"
-            aria-label="Spotlight search"
-            role="combobox"
-            aria-expanded={results.length > 0}
-            aria-controls="spotlight-results"
-            aria-autocomplete="list"
-            aria-activedescendant={results[selected]?.id}
-          />
-          <kbd>⌘K</kbd>
-        </div>
-
-        {/*
-          The modes, which is what turns Spotlight from a search box into
-          something you can browse. Named as well as keyed: ⌘1–⌘4 are worth
-          having and worth nobody having to guess at.
-        */}
-        <div className="modes" role="tablist" aria-label="Spotlight modes">
-          {MODES.map((m) => (
-            <button
-              key={m.id}
-              type="button"
-              role="tab"
-              aria-selected={mode === m.id}
-              className={clsx(mode === m.id && "selected")}
-              onClick={() => pickMode(m.id)}
-            >
-              {m.label}
-              {m.key && <kbd>⌘{m.key}</kbd>}
-            </button>
-          ))}
-        </div>
-
-        {results.length > 0 ? (
-          <ul className="results" id="spotlight-results" role="listbox">
-            {results.map((item, i) => (
-              <li
-                key={item.id}
-                id={item.id}
-                role="option"
-                aria-selected={i === selected}
-                className={clsx(i === selected && "selected")}
-                onMouseEnter={() => setSelected(i)}
-                onClick={() => run(item)}
+          <div className="modes" role="tablist" aria-label="Spotlight modes">
+            {MODES.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                role="tab"
+                aria-selected={mode === m.id}
+                aria-label={m.label}
+                title={`${m.label} (⌘${m.key})`}
+                className={clsx(mode === m.id && "selected")}
+                onClick={() => pickMode(m.id)}
               >
-                {typeof item.icon === "string" ? (
-                  <img src={item.icon} alt="" />
-                ) : (
-                  <span className="action-icon" aria-hidden="true">
-                    {item.icon}
-                  </span>
-                )}
-                <p>{item.title}</p>
-                <span className="category">{item.category}</span>
-                {/* Printed rather than hidden, because a shortcut nobody has
-                    been shown is a shortcut nobody uses */}
-                {item.quickKey && <kbd className="quick-key">{item.quickKey}</kbd>}
-              </li>
+                {m.icon}
+              </button>
             ))}
-          </ul>
-        ) : (
-          /* Announced, since the only sign of it is text appearing */
-          <p className="empty" role="status">
-            {query
-              ? `No results for “${query}”`
-              : mode === "clip"
-                ? "Nothing copied yet. The two copy actions land here."
-                : "Nothing here yet."}
-          </p>
+          </div>
+        </div>
+
+        {/* Nothing below the field until there is something to show */}
+        {(query.trim() || mode !== "all") && (
+          <div className="results-panel">
+            {results.length > 0 ? (
+              <ul className="results" id="spotlight-results" role="listbox">
+                {results.map((item, i) => (
+                  <li
+                    key={item.id}
+                    id={item.id}
+                    role="option"
+                    aria-selected={i === selected}
+                    className={clsx(i === selected && "selected")}
+                    onMouseEnter={() => setSelected(i)}
+                    onClick={() => run(item)}
+                  >
+                    {typeof item.icon === "string" ? (
+                      <img src={item.icon} alt="" />
+                    ) : (
+                      <span className="action-icon" aria-hidden="true">
+                        {item.icon}
+                      </span>
+                    )}
+                    <p>{item.title}</p>
+                    <span className="category">{item.category}</span>
+                    {/* Printed rather than hidden, because a shortcut nobody has
+                        been shown is a shortcut nobody uses */}
+                    {item.quickKey && (
+                      <kbd className="quick-key">{item.quickKey}</kbd>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              /* Announced, since the only sign of it is text appearing */
+              <p className="empty" role="status">
+                {query
+                  ? `No results for “${query}”`
+                  : mode === "clip"
+                    ? "Nothing copied yet. The two copy actions land here."
+                    : "Nothing here yet."}
+              </p>
+            )}
+          </div>
         )}
       </div>
     </div>
