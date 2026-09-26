@@ -251,10 +251,11 @@
       /*
        * Artwork tiles are macOS icons, and a macOS icon canvas carries its own
        * padding so the system can hang a shadow off it. Measured on a canvas,
-       * the artwork square is 116px of a 141px file — 82.3% — which left Safari
-       * and Photos drawing at 49px inside a 60px tile while every glyph tile
-       * filled all 60. In the dock, side by side, they read as two different
-       * icon sizes. iOS icons have no such padding: the artwork *is* the tile.
+       * the artwork square is 440px of the 512px macOS 27 renders — 85.9% —
+       * which left Safari and Photos drawing smaller than a 60px tile while
+       * every glyph tile filled all 60. In the dock, side by side, they read
+       * as two different icon sizes. iOS icons have no such padding: the
+       * artwork *is* the tile. (The older set was 82.3%, and took 1.215.)
        *
        * Scoped to the phone on purpose. `.app-icon-art` is shared with the
        * desktop dock, where the padding is correct — a Mac icon should sit in
@@ -262,15 +263,15 @@
        */
       &.app-icon-art {
         img {
-          @apply scale-[1.215];
+          @apply scale-[1.164];
         }
 
         /* The Tinted appearance masks its colour overlay with the same
            artwork, so the mask has to grow by the same amount or the colour
            stops meeting the icon it is meant to be colouring */
         &::after {
-          -webkit-mask-size: 121.5%;
-          mask-size: 121.5%;
+          -webkit-mask-size: 116.4%;
+          mask-size: 116.4%;
         }
       }
 

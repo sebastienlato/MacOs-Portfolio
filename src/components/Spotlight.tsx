@@ -153,7 +153,11 @@ const SpotlightPanel = ({ close }: { close: () => void }) => {
       title: "Trash",
       category: "Application",
       kind: "app",
-      icon: "/images/trash.webp",
+      // Empty or full, as the dock draws it
+      icon:
+        trashItems.length > 0
+          ? "/images/trash.webp"
+          : "/images/trash-empty.webp",
       haystack: "trash bin archive",
       action: () => {
         setActiveLocation(locations.trash);

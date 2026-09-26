@@ -167,7 +167,13 @@ const Dock = () => {
     <section id="dock">
       <div ref={dockRef} className="dock-container">
         {dockApps.map((app) => {
-          const { id, name, icon, canOpen, separatorBefore } = app;
+          const { id, name, canOpen, separatorBefore } = app;
+          /* The Trash is drawn full while it holds something and empty once
+             it does not, as the real one is — Apple ships both pictures */
+          const icon =
+            id === "trash" && trashItems.length === 0
+              ? "trash-empty.webp"
+              : app.icon;
 
           return (
             <Fragment key={id}>
