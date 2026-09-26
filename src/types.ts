@@ -108,6 +108,12 @@ export interface Wallpaper {
    * being the largest thing between the visitor and a usable page.
    */
   mobileValue?: string;
+  /**
+   * The picture for Dark appearance, for a dynamic wallpaper — macOS 27's
+   * default follows the appearance rather than sitting still. Resolve through
+   * `wallpaperSource` rather than reading these directly.
+   */
+  dark?: { value: string; mobileValue?: string };
 }
 
 /** The colour macOS runs through selections, highlights and the focus ring. */

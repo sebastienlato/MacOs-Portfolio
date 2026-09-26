@@ -1679,8 +1679,10 @@ body {
         li {
           @apply flex flex-col items-center gap-1.5;
 
+          /* "Golden Gate Sunset" does not fit a quarter of the window on one
+             line, and a wrapped name should wrap about its thumbnail */
           p {
-            @apply text-xs text-gray-600 dark:text-gray-300;
+            @apply text-xs text-center text-gray-600 dark:text-gray-300;
           }
         }
 

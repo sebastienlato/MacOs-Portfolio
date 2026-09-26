@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState, type CSSProperties } from "react";
 import clsx from "clsx";
 
 import { wallpaperNeedsDarkText } from "#utils/wallpaperLuminance";
+import { wallpaperBackground, wallpaperSource } from "#utils/wallpaperSource";
 
 /*
  * Straight at the file, not `#components`. That barrel imports all fifteen
@@ -48,14 +49,14 @@ const App = () => {
 
   /* The phone takes the smaller copy where there is one: same picture, a fifth
      of the bytes, arriving while the bundle is still loading rather than after
-     it. Named once, because the luminance sampler has to read the same file —
-     pointing the two at different copies fetched both. */
-  const wallpaperSrc = (isMobile && wallpaper.mobileValue) || wallpaper.value;
-
-  const backgroundImage =
-    wallpaper.type === "gradient"
-      ? wallpaper.value
-      : `url(${wallpaperSrc})`;
+     it. A dynamic wallpaper also swaps pictures with the appearance. Named
+     once, because the luminance sampler has to read the same file — pointing
+     the two at different copies fetched both. */
+  const wallpaperSrc = wallpaperSource(wallpaper, { mobile: isMobile, theme });
+  const backgroundImage = wallpaperBackground(wallpaper, {
+    mobile: isMobile,
+    theme,
+  });
 
   // Dim the whole screen like a real display when brightness drops below max
   const dimOpacity = Math.max(0, (100 - brightness) / 100) * 0.7;
@@ -63,8 +64,8 @@ const App = () => {
   /**
    * The menu bar has no background of its own, so its tint comes from the
    * wallpaper underneath rather than from the appearance setting — the same
-   * thing macOS does. Without this, white text lands on the yellow top of the
-   * Sonoma gradient and disappears.
+   * thing macOS does. Without this, white text lands on the bright sky of the
+   * Golden Gate Sunset photograph and disappears.
    */
   /**
    * Appearance "Auto" follows the OS. The stored theme already carries what it

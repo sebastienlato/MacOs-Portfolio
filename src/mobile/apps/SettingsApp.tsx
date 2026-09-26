@@ -5,7 +5,8 @@ import clsx from "clsx";
 import AppFrame from "#mobile/AppFrame";
 import { accents, iconStyles, wallpapers } from "#constants/index";
 import useSystemStore from "#store/system";
-import type { Appearance, Wallpaper } from "#types";
+import type { Appearance, Theme, Wallpaper } from "#types";
+import { wallpaperBackground } from "#utils/wallpaperSource";
 
 const MAX_UPLOAD_BYTES = 4 * 1024 * 1024; // localStorage-friendly cap
 
@@ -16,10 +17,11 @@ const APPEARANCE_OPTIONS: { id: Appearance; label: string; Icon: typeof Sun }[] 
     { id: "auto", label: "Auto", Icon: SunMoon },
   ];
 
-const thumbStyle = (wp: Wallpaper) =>
-  wp.type === "gradient"
-    ? { backgroundImage: wp.value }
-    : { backgroundImage: `url(${wp.value})` };
+/* The phone copy, and for a dynamic wallpaper the picture for the appearance
+   in force — the same file the Home Screen behind this is painted with */
+const thumbStyle = (wp: Wallpaper, theme: Theme) => ({
+  backgroundImage: wallpaperBackground(wp, { mobile: true, theme }),
+});
 
 /**
  * The same settings the desktop window offers, laid out as iOS grouped rows.
@@ -150,7 +152,7 @@ const SettingsApp = () => {
                 <button
                   type="button"
                   className={clsx("thumb", wallpaper.id === wp.id && "selected")}
-                  style={thumbStyle(wp)}
+                  style={thumbStyle(wp, theme)}
                   onClick={() => setWallpaper(wp)}
                   aria-label={`Use ${wp.name} wallpaper`}
                 />

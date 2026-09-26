@@ -15,11 +15,13 @@ import type {
  * Resolved by id rather than taken from the head of the list. The list is
  * ordered newest-first, so its first entry moves every time a release is added
  * — and what a visitor lands on, and what Reset goes back to, should not change
- * as a side effect of that ordering. Sequoia is also the only photograph in the
- * set, which is the better first impression than any of the gradients.
+ * as a side effect of that ordering. macOS 27's own default, the dynamic
+ * abstract, because the desktop is macOS 27 and this is the first thing that
+ * says so.
  */
 const DEFAULT_WALLPAPER =
-  wallpapers.find((wallpaper) => wallpaper.id === "sequoia") ?? wallpapers[0];
+  wallpapers.find((wallpaper) => wallpaper.id === "golden-gate") ??
+  wallpapers[0];
 const DEFAULT_ACCENT = accents[0];
 
 const prefersDark = () =>
