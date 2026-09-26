@@ -151,12 +151,8 @@
 
       text-shadow: 0 1px 12px rgb(0 0 0 / 0.35);
 
-      p {
-        @apply font-georama text-base font-light text-balance;
-      }
-
       h1 {
-        @apply mt-1 font-georama text-[2.75rem] font-normal italic leading-none;
+        @apply font-georama text-[2.75rem] font-normal italic leading-none;
       }
     }
 

@@ -20,7 +20,6 @@ const Springboard = () => {
   return (
     <div className="springboard">
       <header className="greeting">
-        <p>Hey, I&apos;m Sebastien! Welcome to my</p>
         <h1>portfolio</h1>
       </header>
 
