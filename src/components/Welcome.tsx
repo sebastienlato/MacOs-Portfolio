@@ -4,15 +4,8 @@ import { useGSAP } from "@gsap/react";
 
 import { prefersReducedMotion } from "#utils/motion";
 
-type TextType = "title" | "subtitle";
-
-const FONT_WEIGHTS: Record<
-  TextType,
-  { min: number; max: number; default: number }
-> = {
-  subtitle: { min: 100, max: 400, default: 100 },
-  title: { min: 400, max: 900, default: 400 },
-};
+// Letters thicken toward the pointer and settle back to the resting weight
+const FONT_WEIGHT = { min: 400, max: 900, default: 400 };
 
 const renderText = (text: string, className: string, baseWeight = 400) => {
   return [...text].map((char, i) => (
@@ -26,12 +19,12 @@ const renderText = (text: string, className: string, baseWeight = 400) => {
   ));
 };
 
-const setupTextHover = (container: HTMLElement | null, type: TextType) => {
+const setupTextHover = (container: HTMLElement | null) => {
   // Letters thickening under the pointer is the definition of decorative motion
   if (!container || prefersReducedMotion()) return () => {};
 
   const letters = container.querySelectorAll("span");
-  const { min, max, default: base } = FONT_WEIGHTS[type];
+  const { min, max, default: base } = FONT_WEIGHT;
 
   const animateLetter = (
     letter: HTMLElement,
@@ -71,28 +64,12 @@ const setupTextHover = (container: HTMLElement | null, type: TextType) => {
 
 const Welcome = () => {
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const subtitleRef = useRef<HTMLParagraphElement>(null);
 
-  useGSAP(() => {
-    const titleCleanup = setupTextHover(titleRef.current, "title");
-    const subtitleCleanup = setupTextHover(subtitleRef.current, "subtitle");
-
-    return () => {
-      subtitleCleanup();
-      titleCleanup();
-    };
-  }, []);
+  useGSAP(() => setupTextHover(titleRef.current), []);
 
   return (
     <section id="welcome">
-      <p ref={subtitleRef}>
-        {renderText(
-          "Hey, I'm Sebastien! Welcome to my",
-          "text-3xl font-georama",
-          100
-        )}
-      </p>
-      <h1 ref={titleRef} className="mt-7">
+      <h1 ref={titleRef}>
         {renderText("portfolio", "text-9xl italic font-georama")}
       </h1>
     </section>
