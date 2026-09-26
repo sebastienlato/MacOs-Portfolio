@@ -625,6 +625,23 @@ body {
     box-shadow: none;
   }
 
+  /*
+   * The arrow everywhere, as macOS keeps it. The pointing hand is a web
+   * convention — a Mac shows the arrow over buttons, menu items, the dock and
+   * links alike — so nothing in this file sets it, and this takes back the
+   * hand the browser gives links and labels by default. The I-beam in text
+   * fields and the resize arrows at a window's edges stay: macOS shows those.
+   */
+  a,
+  button,
+  label,
+  summary,
+  select,
+  [role="button"],
+  [role="menuitem"] {
+    cursor: default;
+  }
+
   /* A menu that holds focus itself, so the arrows work before anything is
      highlighted. It is not a control, and wears no ring */
   [role="menu"]:focus {
@@ -772,7 +789,7 @@ body {
       @apply flex items-center gap-5 max-sm:hidden;
 
       p {
-        @apply text-sm cursor-pointer hover:underline transition-all;
+        @apply text-sm cursor-default hover:underline transition-all;
       }
     }
 
@@ -790,7 +807,7 @@ body {
        wrapper contributes no box of its own — the icon's own hover state is
        still the whole of the feedback. */
     ul > li > button {
-      @apply flex items-center cursor-pointer;
+      @apply flex items-center cursor-default;
     }
 
     /* The clock, which is the button that opens Notification Center. Styled by
@@ -799,7 +816,7 @@ body {
     /* A capsule like every other bar item, held highlighted while
        Notification Center is open */
     .clock {
-      @apply text-sm font-medium cursor-pointer rounded-full px-2.5 py-px transition-colors hover:bg-white/10;
+      @apply text-sm font-medium cursor-default rounded-full px-2.5 py-px transition-colors hover:bg-white/10;
 
       &[aria-expanded="true"] {
         @apply bg-white/15;
@@ -849,7 +866,7 @@ body {
   }
 
   .icon-hover {
-    @apply cursor-pointer transition-opacity hover:opacity-70;
+    @apply cursor-default transition-opacity hover:opacity-70;
   }
 
   /*
@@ -954,7 +971,7 @@ body {
 
     > button {
       /* The bar is transparent now, so the hover chip lifts rather than darkens */
-      @apply flex items-center cursor-pointer rounded-full px-2.5 py-px hover:bg-white/10 transition-colors;
+      @apply flex items-center cursor-default rounded-full px-2.5 py-px hover:bg-white/10 transition-colors;
 
       &[aria-expanded="true"] {
         @apply bg-white/15;
@@ -965,7 +982,7 @@ body {
       @apply menu-glass absolute top-[27px] left-0 !flex flex-col items-stretch gap-0 min-w-52 p-[5px] z-[10000] text-gray-900 dark:text-white/90;
 
       li {
-        @apply text-[13px] leading-4 px-3 py-1 rounded-md cursor-pointer transition-colors;
+        @apply text-[13px] leading-4 px-3 py-1 rounded-md cursor-default transition-colors;
 
         &:not(.divider):is(:hover, :focus-visible) {
           @apply bg-accent text-accent-on;
@@ -986,7 +1003,7 @@ body {
 
     /* A capsule, as 27 highlights a menu title — not a rounded rectangle */
     > .menu > button {
-      @apply text-sm cursor-pointer rounded-full px-2.5 py-px transition-colors hover:bg-white/10;
+      @apply text-sm cursor-default rounded-full px-2.5 py-px transition-colors hover:bg-white/10;
 
       &.app-name {
         @apply font-bold;
@@ -1003,7 +1020,7 @@ body {
       @apply menu-glass absolute top-[27px] left-0 min-w-56 p-[5px] z-[10000] text-gray-900 dark:text-white/90;
 
       li {
-        @apply flex items-center gap-8 text-[13px] leading-4 px-3 py-1 rounded-md cursor-pointer transition-colors;
+        @apply flex items-center gap-8 text-[13px] leading-4 px-3 py-1 rounded-md cursor-default transition-colors;
 
         /* Arrowing onto an item highlights it exactly as hovering does */
         &:not(.disabled):not(.divider):is(:hover, :focus-visible) {
@@ -1047,7 +1064,7 @@ body {
     @apply relative flex items-center;
 
     > button {
-      @apply flex items-center cursor-pointer rounded-full px-2 py-1 hover:bg-white/10 transition-colors;
+      @apply flex items-center cursor-default rounded-full px-2 py-1 hover:bg-white/10 transition-colors;
 
       /* Held highlighted while open, like a menu title */
       &[aria-expanded="true"] {
@@ -1080,11 +1097,11 @@ body {
 
     .capsule {
       /* Label 56pt in from the edge, as measured: 14 inset + 36 disc + 6 */
-      @apply col-span-2 flex items-center gap-1.5 rounded-full p-[14px] pr-2 text-left cursor-pointer transition-colors;
+      @apply col-span-2 flex items-center gap-1.5 rounded-full p-[14px] pr-2 text-left cursor-default transition-colors;
     }
 
     .round {
-      @apply flex-center rounded-full cursor-pointer transition-colors;
+      @apply flex-center rounded-full cursor-default transition-colors;
 
       /* On, a round module is a white disc with a dark glyph */
       &.on {
@@ -1098,7 +1115,7 @@ body {
 
     /* The icon disc inside a capsule: white with an accent glyph when on */
     .tile-icon {
-      @apply flex-center size-9 shrink-0 rounded-full bg-white/20 text-current transition-colors cursor-pointer;
+      @apply flex-center size-9 shrink-0 rounded-full bg-white/20 text-current transition-colors cursor-default;
 
       &.on {
         @apply bg-white text-accent;
@@ -1122,7 +1139,7 @@ body {
       @apply cursor-default;
 
       .cc-label {
-        @apply flex-1 self-stretch flex flex-col justify-center cursor-pointer;
+        @apply flex-1 self-stretch flex flex-col justify-center cursor-default;
       }
     }
 
@@ -1164,7 +1181,7 @@ body {
       }
 
       input[type="range"] {
-        @apply h-5 flex-1 appearance-none bg-transparent cursor-pointer;
+        @apply h-5 flex-1 appearance-none bg-transparent cursor-default;
         background: linear-gradient(
             to right,
             var(--cc-slider-fill) 0 var(--value),
@@ -1183,7 +1200,7 @@ body {
       }
 
       .airplay {
-        @apply flex-center size-6 shrink-0 rounded-full bg-white/20 cursor-pointer transition-colors hover:bg-white/30;
+        @apply flex-center size-6 shrink-0 rounded-full bg-white/20 cursor-default transition-colors hover:bg-white/30;
       }
     }
 
@@ -1202,7 +1219,7 @@ body {
     }
 
     .cc-back {
-      @apply flex-center size-6 shrink-0 rounded-full cursor-pointer transition-colors hover:bg-black/10 dark:hover:bg-white/15;
+      @apply flex-center size-6 shrink-0 rounded-full cursor-default transition-colors hover:bg-black/10 dark:hover:bg-white/15;
     }
 
     .cc-subhead {
@@ -1213,7 +1230,7 @@ body {
       @apply space-y-1;
 
       button {
-        @apply w-full flex items-center gap-2.5 rounded-full p-1.5 text-left text-[13px] font-medium cursor-pointer transition-colors hover:bg-white/30 dark:hover:bg-white/10;
+        @apply w-full flex items-center gap-2.5 rounded-full p-1.5 text-left text-[13px] font-medium cursor-default transition-colors hover:bg-white/30 dark:hover:bg-white/10;
       }
 
       .tile-icon {
@@ -1231,7 +1248,7 @@ body {
     @apply menu-glass fixed min-w-52 p-[5px] z-[15000] select-none text-gray-900 dark:text-white/90;
 
     li {
-      @apply text-[13px] leading-4 px-3 py-1 rounded-md cursor-pointer transition-colors;
+      @apply text-[13px] leading-4 px-3 py-1 rounded-md cursor-default transition-colors;
 
       &:not(.disabled):is(:hover, :focus-visible) {
         @apply bg-accent text-accent-on;
@@ -1365,7 +1382,7 @@ body {
     }
 
     .nc-close {
-      @apply glass-module flex-center size-[18px] rounded-full cursor-pointer text-white;
+      @apply glass-module flex-center size-[18px] rounded-full cursor-default text-white;
     }
 
     .notifications {
@@ -1393,7 +1410,7 @@ body {
      * rather than cut off.
      */
     .notification {
-      @apply glass-module w-full flex items-center gap-[11px] rounded-[20px] py-3.5 pl-3 pr-3.5 text-left cursor-pointer;
+      @apply glass-module w-full flex items-center gap-[11px] rounded-[20px] py-3.5 pl-3 pr-3.5 text-left cursor-default;
 
       &:hover {
         --glass-fill: calc(var(--cc-alpha) + 0.1);
@@ -1472,7 +1489,7 @@ body {
 
     /* Medium: the width of two smalls */
     .resume {
-      @apply col-span-2 cursor-pointer;
+      @apply col-span-2 cursor-default;
 
       &:hover {
         --glass-fill: calc(var(--cc-alpha) + 0.1);
@@ -1520,7 +1537,7 @@ body {
    * where onMouseDown focuses it and drops out of the overview.
    */
   main:has(> .mission-control) > section[id] {
-    @apply cursor-pointer;
+    @apply cursor-default;
 
     * {
       @apply pointer-events-none;
@@ -1653,7 +1670,7 @@ body {
       @apply flex items-center gap-1 border-t px-2.5 py-1.5 border-black/10 dark:border-white/10;
 
       button {
-        @apply flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium cursor-pointer text-gray-600 transition-colors hover:bg-black/[0.06] dark:text-gray-400 dark:hover:bg-white/10;
+        @apply flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium cursor-default text-gray-600 transition-colors hover:bg-black/[0.06] dark:text-gray-400 dark:hover:bg-white/10;
 
         &.selected {
           @apply bg-accent-soft text-accent-label;
@@ -1671,7 +1688,7 @@ body {
       @apply border-t py-1.5 max-h-96 overflow-y-auto border-black/10 dark:border-white/10;
 
       li {
-        @apply flex items-center gap-3 mx-1.5 px-2.5 py-2 rounded-lg cursor-pointer text-sm text-gray-800 dark:text-gray-200;
+        @apply flex items-center gap-3 mx-1.5 px-2.5 py-2 rounded-lg cursor-default text-sm text-gray-800 dark:text-gray-200;
 
         img {
           @apply size-6 object-contain;
@@ -1742,11 +1759,11 @@ body {
     }
 
     .ql-close {
-      @apply flex-center size-5 shrink-0 rounded-full bg-black/10 text-gray-700 cursor-pointer transition-colors hover:bg-black/20 dark:bg-white/15 dark:text-gray-200 dark:hover:bg-white/25;
+      @apply flex-center size-5 shrink-0 rounded-full bg-black/10 text-gray-700 cursor-default transition-colors hover:bg-black/20 dark:bg-white/15 dark:text-gray-200 dark:hover:bg-white/25;
     }
 
     .ql-open {
-      @apply flex items-center gap-1.5 shrink-0 rounded-md px-2 py-1 text-[11px] font-medium bg-black/[0.07] text-gray-700 cursor-pointer transition-colors hover:bg-black/15 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20;
+      @apply flex items-center gap-1.5 shrink-0 rounded-md px-2 py-1 text-[11px] font-medium bg-black/[0.07] text-gray-700 cursor-default transition-colors hover:bg-black/15 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20;
     }
 
     .ql-body {
@@ -1818,7 +1835,7 @@ body {
     }
 
     .gi-close {
-      @apply flex-center size-5 shrink-0 rounded-full bg-black/10 text-gray-700 cursor-pointer transition-colors hover:bg-black/20 dark:bg-white/15 dark:text-gray-200 dark:hover:bg-white/25;
+      @apply flex-center size-5 shrink-0 rounded-full bg-black/10 text-gray-700 cursor-default transition-colors hover:bg-black/20 dark:bg-white/15 dark:text-gray-200 dark:hover:bg-white/25;
     }
 
     .gi-body {
@@ -1852,7 +1869,7 @@ body {
          use — so what is being chosen is what will be drawn, not an
          approximation of it in flat colour */
       .swatch {
-        @apply block aspect-square w-full cursor-pointer rounded-md bg-cover transition-transform hover:scale-110;
+        @apply block aspect-square w-full cursor-default rounded-md bg-cover transition-transform hover:scale-110;
 
         background-image: url("/images/folder.webp");
         background-position: center;
@@ -1874,7 +1891,7 @@ body {
       @apply grid grid-cols-7 gap-1.5;
 
       button {
-        @apply flex-center aspect-square w-full cursor-pointer rounded-lg bg-black/[0.07] text-gray-700 transition-colors hover:bg-black/15 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20;
+        @apply flex-center aspect-square w-full cursor-default rounded-lg bg-black/[0.07] text-gray-700 transition-colors hover:bg-black/15 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20;
 
         &.selected {
           @apply bg-accent text-accent-on hover:bg-accent;
@@ -1886,7 +1903,7 @@ body {
       @apply mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs text-gray-700 transition-colors dark:text-gray-300;
 
       &:not(:disabled) {
-        @apply cursor-pointer hover:bg-black/10 dark:hover:bg-white/10;
+        @apply cursor-default hover:bg-black/10 dark:hover:bg-white/10;
       }
 
       &:disabled {
@@ -1928,7 +1945,7 @@ body {
         }
 
         button {
-          @apply flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-800 cursor-pointer transition-colors dark:hover:text-gray-200;
+          @apply flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-800 cursor-default transition-colors dark:hover:text-gray-200;
         }
       }
 
@@ -1940,7 +1957,7 @@ body {
         @apply flex gap-3 mb-7;
 
         button {
-          @apply flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-700 cursor-pointer transition-colors hover:bg-gray-100 dark:border-neutral-600 dark:text-gray-200 dark:hover:bg-neutral-800;
+          @apply flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-700 cursor-default transition-colors hover:bg-gray-100 dark:border-neutral-600 dark:text-gray-200 dark:hover:bg-neutral-800;
 
           &.selected {
             @apply border-accent ring-1 ring-accent text-accent-label;
@@ -1954,7 +1971,7 @@ body {
         @apply flex items-center gap-3 mb-7;
 
         input {
-          @apply flex-1 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40;
+          @apply flex-1 cursor-default disabled:cursor-default disabled:opacity-40;
           accent-color: var(--color-accent);
         }
 
@@ -1983,7 +2000,7 @@ body {
         @apply flex flex-wrap gap-2.5 mb-7;
 
         button {
-          @apply size-6 rounded-full cursor-pointer transition-transform hover:scale-110;
+          @apply size-6 rounded-full cursor-default transition-transform hover:scale-110;
 
           border: 1px solid rgb(0 0 0 / 0.12);
 
@@ -2008,7 +2025,7 @@ body {
         }
 
         .wallpaper-thumb {
-          @apply w-full aspect-video rounded-lg bg-cover bg-center cursor-pointer border border-gray-200 hover:scale-105 transition-transform dark:border-neutral-600;
+          @apply w-full aspect-video rounded-lg bg-cover bg-center cursor-default border border-gray-200 hover:scale-105 transition-transform dark:border-neutral-600;
 
           &.selected {
             @apply ring-2 ring-accent ring-offset-2 dark:ring-offset-neutral-900;
@@ -2061,7 +2078,7 @@ body {
       }
 
       button {
-        @apply text-sm bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md px-4 py-1 cursor-pointer transition-colors dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:border-neutral-600;
+        @apply text-sm bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md px-4 py-1 cursor-default transition-colors dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:border-neutral-600;
       }
     }
   }
@@ -2146,7 +2163,7 @@ body {
     }
 
     .dock-icon {
-      @apply size-14 3xl:size-20 cursor-pointer;
+      @apply size-14 3xl:size-20 cursor-default;
 
       img {
         @apply object-cover object-center;
@@ -2163,7 +2180,7 @@ body {
      * below it — the same letterboxing the real dock has.
      */
     .dock-slot {
-      @apply size-14 3xl:size-20 shrink-0 cursor-pointer rounded-lg bg-black/10 dark:bg-white/10;
+      @apply size-14 3xl:size-20 shrink-0 cursor-default rounded-lg bg-black/10 dark:bg-white/10;
     }
 
     /* Full-height hairline separating the apps from Trash, as in macOS */
@@ -2191,7 +2208,7 @@ body {
      *   - a hairline rim and a faint inner shade to give the dome its depth
      */
     button {
-      @apply relative size-3.5 rounded-full cursor-pointer;
+      @apply relative size-3.5 rounded-full cursor-default;
       /* Grey by default; colour arrives from :focused or :hover below */
       @apply bg-black/20 dark:bg-white/25;
 
@@ -2541,7 +2558,7 @@ body {
 
       ul {
         li {
-          @apply flex space-y-1 items-center gap-2 px-3 py-2 rounded-md cursor-pointer transition-colors;
+          @apply flex space-y-1 items-center gap-2 px-3 py-2 rounded-md cursor-default transition-colors;
 
           &:first-child {
             @apply bg-black/[0.07] dark:bg-white/10;
@@ -2580,7 +2597,7 @@ body {
         grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
 
         li > button {
-          @apply block w-full cursor-pointer overflow-hidden rounded-lg;
+          @apply block w-full cursor-default overflow-hidden rounded-lg;
 
           img {
             @apply size-full aspect-square object-cover;
@@ -2642,7 +2659,7 @@ body {
         /* The <li> is a bare wrapper; the button is the whole row, so the
            hover fill and the focus ring cover the same box the pointer does */
         li > button {
-          @apply w-full flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer transition-colors;
+          @apply w-full flex items-center gap-2 px-3 py-2 rounded-md cursor-default transition-colors;
         }
 
         /* The projects list draws its folders through ItemIcon, which carries
@@ -2660,7 +2677,7 @@ body {
       @apply toolbar-group;
 
       button {
-        @apply flex-center rounded-full px-2.5 py-1 text-gray-500 cursor-pointer transition-colors hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100;
+        @apply flex-center rounded-full px-2.5 py-1 text-gray-500 cursor-default transition-colors hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100;
 
         &.selected {
           @apply bg-black/[0.08] text-gray-900 dark:bg-white/15 dark:text-white;
@@ -2682,7 +2699,7 @@ body {
       grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
 
       li > button {
-        @apply w-full flex flex-col items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors hover:bg-black/5 dark:hover:bg-white/10;
+        @apply w-full flex flex-col items-center gap-2 p-2 rounded-lg cursor-default transition-colors hover:bg-black/5 dark:hover:bg-white/10;
 
         img {
           @apply size-16 object-contain object-center;
@@ -2726,7 +2743,7 @@ body {
          gets the same highlight the pointer does instead of a ring around a
          single cell */
       tbody tr {
-        @apply cursor-pointer transition-colors;
+        @apply cursor-default transition-colors;
 
         &:is(:hover, :focus-visible) {
           @apply bg-accent text-accent-on;
@@ -2775,7 +2792,7 @@ body {
         }
 
         li > button {
-          @apply w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[13px] cursor-pointer transition-colors hover:bg-black/5 dark:text-gray-200 dark:hover:bg-white/10;
+          @apply w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[13px] cursor-default transition-colors hover:bg-black/5 dark:text-gray-200 dark:hover:bg-white/10;
 
           &.selected {
             @apply bg-accent text-accent-on hover:bg-accent;

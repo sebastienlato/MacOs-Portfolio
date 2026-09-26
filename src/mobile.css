@@ -70,7 +70,7 @@
     }
 
     .status-icons {
-      @apply flex items-center gap-1.5 -mr-2 p-2 cursor-pointer;
+      @apply flex items-center gap-1.5 -mr-2 p-2 cursor-default;
     }
 
     /* Four ascending bars, the shape iOS has used since it stopped drawing
@@ -176,7 +176,7 @@
     /* The pill iOS puts above the dock. `mt-auto` takes the slack the greeting
        used to hold, which is what leaves the wallpaper bare above the dock. */
     .search-pill {
-      @apply mx-auto mt-auto mb-4 flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-medium text-white transition-transform duration-150 active:scale-95;
+      @apply mx-auto mt-auto mb-4 flex shrink-0 cursor-default items-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-medium text-white transition-transform duration-150 active:scale-95;
 
       background: rgb(0 0 0 / 0.28);
       backdrop-filter: blur(12px) saturate(1.4);
@@ -230,7 +230,7 @@
      */
     button,
     a {
-      @apply block cursor-pointer;
+      @apply block cursor-default;
 
       &:active .tile {
         filter: brightness(0.82) var(--tile-shadow);
@@ -408,7 +408,7 @@
 
     /* Capped so a deep folder name doesn't squeeze the title out of the bar */
     .back {
-      @apply cursor-pointer -ml-1 max-w-[6.5rem] truncate;
+      @apply cursor-default -ml-1 max-w-[6.5rem] truncate;
 
       span {
         @apply truncate;
@@ -419,7 +419,7 @@
       @apply justify-end pr-2;
 
       a {
-        @apply cursor-pointer p-1;
+        @apply cursor-default p-1;
       }
     }
 
@@ -462,7 +462,7 @@
     padding-bottom: var(--sab);
 
     .home-bar {
-      @apply h-[5px] w-32 cursor-pointer rounded-full;
+      @apply h-[5px] w-32 cursor-default rounded-full;
 
       background: var(--ios-label);
       opacity: 0.35;
@@ -493,7 +493,7 @@
 
   .files-list li {
     button {
-      @apply flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left transition-colors active:bg-black/[0.06];
+      @apply flex w-full cursor-default items-center gap-3 px-4 py-3 text-left transition-colors active:bg-black/[0.06];
     }
 
     img {
@@ -551,7 +551,7 @@
   }
 
   .wide-button {
-    @apply mt-4 w-full cursor-pointer rounded-xl py-3 text-center text-[16px] font-medium;
+    @apply mt-4 w-full cursor-default rounded-xl py-3 text-center text-[16px] font-medium;
 
     background: var(--ios-card);
     color: var(--ios-tint);
@@ -603,7 +603,7 @@
     @apply grid grid-cols-2 gap-2;
 
     button {
-      @apply block w-full cursor-pointer overflow-hidden rounded-xl;
+      @apply block w-full cursor-default overflow-hidden rounded-xl;
     }
 
     img {
@@ -790,7 +790,7 @@
 
   /* An action belonging to the group above it, as the last row of its card */
   .settings-action {
-    @apply flex w-full cursor-pointer items-center gap-2 px-4 py-3 text-[16px] transition-colors active:bg-black/[0.06];
+    @apply flex w-full cursor-default items-center gap-2 px-4 py-3 text-[16px] transition-colors active:bg-black/[0.06];
 
     border-top: 1px solid var(--ios-separator);
     color: var(--ios-tint);
@@ -811,7 +811,7 @@
     @apply flex flex-wrap justify-between gap-y-3 p-4;
 
     button {
-      @apply size-8 cursor-pointer rounded-full transition-transform active:scale-90;
+      @apply size-8 cursor-default rounded-full transition-transform active:scale-90;
 
       border: 1px solid rgb(0 0 0 / 0.12);
 
@@ -830,7 +830,7 @@
     background: var(--ios-fill);
 
     button {
-      @apply flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg py-1.5 text-[14px] font-medium transition-colors;
+      @apply flex flex-1 cursor-default items-center justify-center gap-1.5 rounded-lg py-1.5 text-[14px] font-medium transition-colors;
 
       &.selected {
         background: var(--ios-card);
@@ -853,7 +853,7 @@
     }
 
     .thumb {
-      @apply aspect-[3/4] w-full cursor-pointer rounded-xl bg-cover bg-center transition-transform active:scale-95;
+      @apply aspect-[3/4] w-full cursor-default rounded-xl bg-cover bg-center transition-transform active:scale-95;
 
       border: 1px solid var(--ios-separator);
 
@@ -889,7 +889,7 @@
     }
 
     .cc-tile {
-      @apply flex cursor-pointer items-center gap-3 rounded-2xl bg-white/40 p-3 text-left transition-colors active:bg-white/60;
+      @apply flex cursor-default items-center gap-3 rounded-2xl bg-white/40 p-3 text-left transition-colors active:bg-white/60;
 
       .glyph {
         @apply flex-center size-9 shrink-0 rounded-full bg-black/10 transition-colors;
@@ -919,7 +919,7 @@
       }
 
       input[type="range"] {
-        @apply h-12 w-full cursor-pointer appearance-none rounded-2xl border border-black/10 bg-black/15;
+        @apply h-12 w-full cursor-default appearance-none rounded-2xl border border-black/10 bg-black/15;
 
         background-image: linear-gradient(
           to right,
@@ -938,7 +938,7 @@
     }
 
     .cc-footer {
-      @apply flex w-full cursor-pointer items-center gap-2 rounded-xl px-3 py-2.5 text-[13px] transition-colors active:bg-black/10;
+      @apply flex w-full cursor-default items-center gap-2 rounded-xl px-3 py-2.5 text-[13px] transition-colors active:bg-black/10;
     }
   }
 
@@ -1004,7 +1004,7 @@
       }
 
       > button {
-        @apply flex-center size-9 shrink-0 cursor-pointer rounded-full text-white/80 transition-colors active:bg-white/15;
+        @apply flex-center size-9 shrink-0 cursor-default rounded-full text-white/80 transition-colors active:bg-white/15;
       }
     }
 
@@ -1012,7 +1012,7 @@
       @apply flex-1 space-y-1 overflow-y-auto px-3 py-2;
 
       button {
-        @apply flex w-full cursor-pointer items-center gap-3 rounded-xl px-2.5 py-2 text-left text-white transition-colors active:bg-white/15;
+        @apply flex w-full cursor-default items-center gap-3 rounded-xl px-2.5 py-2 text-left text-white transition-colors active:bg-white/15;
       }
 
       img,
