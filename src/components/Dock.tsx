@@ -193,7 +193,9 @@ const Dock = () => {
                   ))}
                 </>
               )}
-              <div className="relative flex justify-center">
+              {/* Above the slab's specular rim, which otherwise paints across
+                  a magnified icon and makes it look see-through */}
+              <div className="relative z-[1] flex justify-center">
                 <button
                   type="button"
                   className="dock-icon app-icon-art"
