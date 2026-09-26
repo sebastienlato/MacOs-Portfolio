@@ -82,6 +82,26 @@ const flightTo = (el: HTMLElement, slot: HTMLElement) => {
   };
 };
 
+/*
+ * Bracketing a window's fade with `will-change`, so Chrome is told when it
+ * ends.
+ *
+ * While a window is below full opacity it is a backdrop root: the blur in its
+ * title bar and sidebar can only see what is inside the window. Chrome kept
+ * treating it as one after GSAP landed on `opacity: 1` — and went on doing so
+ * until the stacking order next changed — so a window behind showed straight
+ * through the sidebar, sharp, as if the glass were only tinted. Clearing the
+ * opacity afterwards did not shake it loose; withdrawing the `will-change` is
+ * a change of compositing reason, which Chrome does re-evaluate.
+ */
+const fadeStarted = (el: HTMLElement) => {
+  el.style.willChange = "opacity, transform";
+};
+
+const fadeEnded = (el: HTMLElement) => {
+  el.style.removeProperty("will-change");
+};
+
 const WindowWrapper = <P extends object>(
   Component: ComponentType<P>,
   windowKey: WindowKey
@@ -179,7 +199,15 @@ const WindowWrapper = <P extends object>(
       gsap.fromTo(
         el,
         { scale: 0.8, opacity: 0, x, y: y + 40 },
-        { scale: 1, opacity: 1, y, duration: seconds(0.4), ease: "power3.out" }
+        {
+          scale: 1,
+          opacity: 1,
+          y,
+          duration: seconds(0.4),
+          ease: "power3.out",
+          onStart: () => fadeStarted(el),
+          onComplete: () => fadeEnded(el),
+        }
       );
     }, [isOpen]);
 
@@ -285,9 +313,13 @@ const WindowWrapper = <P extends object>(
         y: tile ? 0 : (layout?.y ?? 0),
         duration: seconds(0.35),
         ease: "power2.out",
+        onStart: () => fadeStarted(el),
         // Stays above the dock for the whole trip out, or it would appear from
         // behind the slab it was just sitting on top of
-        onComplete: () => setElevated(false),
+        onComplete: () => {
+          fadeEnded(el);
+          setElevated(false);
+        },
       });
       // `tile` is read, not depended on: re-running this on a tile change
       // would fly an un-minimized window across the screen for no reason
