@@ -2868,25 +2868,6 @@ body {
       background: rgb(18 18 20 / 1);
       backdrop-filter: none;
     }
-
-    /*
-     * The widget writes in white because it normally sits on a dark, blurred
-     * pane over the wallpaper. Turned opaque it becomes a white card, and white
-     * on white is nothing at all — the heading, the count and every project
-     * name disappeared. It takes the phone's own label colours instead, which
-     * already flip with the appearance.
-     */
-    .ios-widget {
-      color: var(--ios-label);
-
-      header p {
-        color: var(--ios-secondary);
-      }
-
-      button {
-        background: var(--ios-fill);
-      }
-    }
   }
 
 }
