@@ -19,11 +19,18 @@ interface Options {
   onClose?: () => void;
   /** Take focus as soon as the menu appears — right for a menu you opened. */
   autoFocus?: boolean;
+  /**
+   * What takes it. "first" is the first item, for a menu raised from the
+   * keyboard. "menu" is the menu itself, for one raised by a click: macOS
+   * shows nothing highlighted until you move, yet the arrows still have to
+   * work from there, and they can only if focus is already inside.
+   */
+  focusTarget?: "first" | "menu";
 }
 
 const useMenuKeyboard = (
   ref: RefObject<HTMLElement | null>,
-  { onClose, autoFocus = false }: Options = {}
+  { onClose, autoFocus = false, focusTarget = "first" }: Options = {}
 ) => {
   useEffect(() => {
     const menu = ref.current;
@@ -37,7 +44,10 @@ const useMenuKeyboard = (
       all[((index % all.length) + all.length) % all.length]?.focus();
     };
 
-    if (autoFocus) focusAt(0);
+    if (autoFocus) {
+      if (focusTarget === "menu") menu.focus();
+      else focusAt(0);
+    }
 
     const onKeyDown = (e: KeyboardEvent) => {
       const all = items();
@@ -50,7 +60,9 @@ const useMenuKeyboard = (
           break;
         case "ArrowUp":
           e.preventDefault();
-          focusAt(current - 1);
+          // From the menu itself (-1), up is the last item, not the one
+          // before it
+          focusAt(current < 0 ? -1 : current - 1);
           break;
         case "Home":
           e.preventDefault();
@@ -76,7 +88,7 @@ const useMenuKeyboard = (
 
     menu.addEventListener("keydown", onKeyDown);
     return () => menu.removeEventListener("keydown", onKeyDown);
-  }, [ref, onClose, autoFocus]);
+  }, [ref, onClose, autoFocus, focusTarget]);
 };
 
 export default useMenuKeyboard;

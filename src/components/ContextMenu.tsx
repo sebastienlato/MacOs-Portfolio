@@ -4,6 +4,18 @@ import clsx from "clsx";
 
 import useMenuKeyboard from "#hooks/useMenuKeyboard";
 
+/*
+ * Which kind of input came last. A right-click and Shift+F10 both arrive as the
+ * same `contextmenu` event, but they want different menus: from the keyboard
+ * the first item should be ready to arrow from; from the mouse nothing should
+ * be highlighted, as on a real Mac. The press just before tells them apart.
+ */
+let lastInput: "pointer" | "keyboard" = "pointer";
+if (typeof window !== "undefined") {
+  window.addEventListener("pointerdown", () => (lastInput = "pointer"), true);
+  window.addEventListener("keydown", () => (lastInput = "keyboard"), true);
+}
+
 export interface ContextMenuItem {
   id: string;
   divider?: boolean;
@@ -43,6 +55,7 @@ const ContextMenu = ({
   align = "start",
 }: ContextMenuProps) => {
   const menuRef = useRef<HTMLUListElement>(null);
+  const [openedByKeyboard] = useState(() => lastInput === "keyboard");
   const [position, setPosition] = useState<{
     left: number;
     top: number;
@@ -87,7 +100,11 @@ const ContextMenu = ({
 
   // Shift+F10 raises this menu from the keyboard, so it has to be operable from
   // there too. Focus lands on the first item as soon as it is positioned.
-  useMenuKeyboard(menuRef, { onClose, autoFocus: Boolean(position) });
+  useMenuKeyboard(menuRef, {
+    onClose,
+    autoFocus: Boolean(position),
+    focusTarget: openedByKeyboard ? "first" : "menu",
+  });
 
   const select = (item: ContextMenuItem) => {
     if (item.disabled) return;
@@ -100,6 +117,7 @@ const ContextMenu = ({
       ref={menuRef}
       className="context-menu"
       role="menu"
+      tabIndex={-1}
       style={{
         left: position?.left ?? x,
         top: position?.top ?? y,
@@ -125,7 +143,14 @@ const ContextMenu = ({
         )
       )}
     </ul>,
-    document.body
+    /*
+     * Into <main>, not <body>. The portal is here to get out from under the
+     * windows' transforms, and <main> has none — but it is where the
+     * appearance, the accent and Reduce Transparency are set. Mounted on
+     * <body> the menu saw none of them: white in Dark mode, the default blue
+     * whatever accent was picked, and glass under Reduce Transparency.
+     */
+    document.querySelector("main") ?? document.body
   );
 };
 
