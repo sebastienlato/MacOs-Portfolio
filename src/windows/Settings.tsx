@@ -30,9 +30,11 @@ const Settings = () => {
     iconStyle,
     transparency,
     reducedTransparency,
+    glassTint,
     setAccent,
     setIconStyle,
     setTransparency,
+    setGlassTint,
     setWallpaper,
     setCustomWallpaper,
     resetWallpaper,
@@ -94,6 +96,52 @@ const Settings = () => {
               {label}
             </button>
           ))}
+        </div>
+
+        <div className="section-title">
+          <h3>Liquid Glass</h3>
+        </div>
+        <p className="hint">
+          {reducedTransparency
+            ? "Reduce Transparency is on, so the glass stays opaque."
+            : "From ultraclear to fully tinted. The middle notch is default."}
+        </p>
+
+        {/*
+          macOS 27's slider: a clear swatch at one end, a tinted one at the
+          other, and a notch at each of Apple's three stops — which the
+          datalist is, so Chromium draws the ticks and the thumb snaps to them.
+          Disabled rather than hidden under Reduce Transparency, so the visitor
+          can see why moving it would do nothing.
+        */}
+        <div className="glass-slider">
+          <span className="swatch clear" aria-hidden="true" />
+          <input
+            type="range"
+            min={0}
+            max={100}
+            step={1}
+            list="glass-stops"
+            value={glassTint}
+            disabled={reducedTransparency}
+            onChange={(e) => setGlassTint(Number(e.target.value))}
+            aria-label="Liquid Glass"
+            aria-valuetext={
+              glassTint === 0
+                ? "Ultraclear"
+                : glassTint === 50
+                  ? "Default"
+                  : glassTint === 100
+                    ? "Fully tinted"
+                    : `${glassTint}% tinted`
+            }
+          />
+          <datalist id="glass-stops">
+            <option value={0} />
+            <option value={50} />
+            <option value={100} />
+          </datalist>
+          <span className="swatch tinted" aria-hidden="true" />
         </div>
 
         <div className="section-title">

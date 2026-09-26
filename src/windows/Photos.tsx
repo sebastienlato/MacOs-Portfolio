@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { Mail, Search } from "lucide-react";
 
 import WindowWrapper from "#hoc/WindowWrapper";
@@ -13,9 +14,11 @@ const Photos = () => {
       <div id="window-header">
         <WindowControls target="photos" />
 
-        <div className="w-full flex justify-end items-center gap-3 text-gray-500">
-          <Mail className="icon" />
-          <Search className="icon" />
+        <div className="w-full flex justify-end">
+          <div className="toolbar-group">
+            <Mail className="icon" />
+            <Search className="icon" />
+          </div>
         </div>
       </div>
 
@@ -26,7 +29,14 @@ const Photos = () => {
           <ul>
             {photosLinks.map(({ id, icon, title }) => (
               <li key={id}>
-                <img src={icon} alt={title} />
+                {/* Painted in the accent, as the Finder's sidebar is. The name
+                    is in the <p> beside it, so the image stays unannounced */}
+                <img
+                  src={icon}
+                  className="accent-glyph"
+                  style={{ "--icon": `url(${icon})` } as CSSProperties}
+                  alt=""
+                />
                 <p>{title}</p>
               </li>
             ))}

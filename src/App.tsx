@@ -41,6 +41,7 @@ const App = () => {
   const reducedTransparency = useSystemStore(
     (state) => state.reducedTransparency
   );
+  const glassTint = useSystemStore((state) => state.glassTint);
   const [lightMenuBar, setLightMenuBar] = useState(false);
   const isMobile = useIsMobile();
 
@@ -115,6 +116,11 @@ const App = () => {
           backgroundImage,
           "--color-accent": accent.value,
           "--color-accent-on": accent.on,
+          /* The Liquid Glass slider, as 0–1 (0.5 is 27's default). Set here
+             rather than on :root for the reason the accent is: the glass
+             tokens that read it are redeclared on <main>, and must resolve
+             against it there */
+          "--glass-level": glassTint / 100,
         } as CSSProperties
       }
       className={clsx(
