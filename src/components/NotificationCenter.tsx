@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import dayjs from "dayjs";
 
-import { BellOff } from "lucide-react";
+import { BellOff, X } from "lucide-react";
 
 import { blogPosts, focusModes, locations, socials } from "#constants/index";
 import useSystemStore from "#store/system";
@@ -86,6 +86,19 @@ const NotificationCenter = () => {
         ref={panelRef}
         aria-label="Notification Center"
       >
+        {/* 27 titles the column and gives it its own way out */}
+        <header className="nc-head">
+          <h3>Notification Center</h3>
+          <button
+            type="button"
+            className="nc-close"
+            onClick={dismiss}
+            aria-label="Close Notification Center"
+          >
+            <X size={11} strokeWidth={2.75} />
+          </button>
+        </header>
+
         {/*
           A Focus silences notifications, which is the whole of what turning one
           on means. Without this the switch in Control Center would light up and
@@ -107,13 +120,14 @@ const NotificationCenter = () => {
                 className="notification"
                 onClick={() => run(n.onClick)}
               >
-                <img src={n.icon} alt="" />
+                {/* The icon is the only mark of which app this is, so it is
+                    named for a screen reader rather than left decorative */}
+                <img src={n.icon} alt={n.app} />
                 <div className="body">
-                  <div className="meta">
-                    <span className="app">{n.app}</span>
+                  <div className="head">
+                    <h4>{n.title}</h4>
                     <span className="time">{n.time}</span>
                   </div>
-                  <h4>{n.title}</h4>
                   <p>{n.body}</p>
                 </div>
               </button>
@@ -127,16 +141,6 @@ const NotificationCenter = () => {
             <span className="day">{now.format("D")}</span>
             <span className="month">{now.format("MMMM YYYY")}</span>
           </div>
-
-          <button
-            type="button"
-            className="widget resume"
-            onClick={() => run(() => openWindow("resume"))}
-          >
-            <h4>Resume</h4>
-            <p>Swift, SwiftUI, React, TypeScript</p>
-            <span className="cta">Open PDF</span>
-          </button>
 
           <div className="widget links">
             <h4>Elsewhere</h4>
@@ -156,6 +160,16 @@ const NotificationCenter = () => {
               ))}
             </ul>
           </div>
+
+          <button
+            type="button"
+            className="widget resume"
+            onClick={() => run(() => openWindow("resume"))}
+          >
+            <h4>Resume</h4>
+            <p>Swift, SwiftUI, React, TypeScript</p>
+            <span className="cta">Open PDF</span>
+          </button>
         </section>
       </aside>
     </>

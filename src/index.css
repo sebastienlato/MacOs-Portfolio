@@ -796,8 +796,14 @@ body {
     /* The clock, which is the button that opens Notification Center. Styled by
        class rather than by element: the <time> it wraps is the text, not the
        control, and giving the padding to both would double it. */
+    /* A capsule like every other bar item, held highlighted while
+       Notification Center is open */
     .clock {
-      @apply text-sm font-medium cursor-pointer rounded-md px-1.5 py-0.5 transition-colors hover:bg-white/20;
+      @apply text-sm font-medium cursor-pointer rounded-full px-2.5 py-px transition-colors hover:bg-white/10;
+
+      &[aria-expanded="true"] {
+        @apply bg-white/15;
+      }
     }
 
     /* Popovers are children of <nav>, so they must opt out of its bar text */
@@ -1341,13 +1347,26 @@ body {
    * tall as what is in it; it scrolls if that is ever taller than the screen.
    */
   #notification-center {
-    @apply glass glass-thick fixed right-2 top-11 z-[16000] w-[22rem] max-w-[92vw] overflow-y-auto rounded-[22px] p-3 space-y-3 text-gray-900 dark:text-gray-100;
-
-    /* Stops above the dock rather than running under it, the same reservation
-       a zoomed window makes — otherwise the panel clips the dock's right end */
-    bottom: var(--dock-inset);
+    @apply fixed right-3 top-[38px] z-[16000] w-[344px] max-w-[calc(100vw-24px)] overflow-y-auto space-y-3 text-gray-900 dark:text-white;
+    max-height: calc(100dvh - 38px - var(--dock-inset));
+    /* Room for the cards' drop shadows, which the scroll box would clip */
+    padding: 2px 2px 12px;
 
     animation: notification-in 260ms cubic-bezier(0.32, 0.72, 0, 1);
+
+    /* The column's title and its close button, as 27 heads it */
+    .nc-head {
+      @apply flex items-center justify-between px-1 pt-0.5 text-white;
+      text-shadow: 0 1px 3px rgb(0 0 0 / 0.35);
+
+      h3 {
+        @apply text-[17px] font-semibold;
+      }
+    }
+
+    .nc-close {
+      @apply glass-module flex-center size-[18px] rounded-full cursor-pointer text-white;
+    }
 
     .notifications {
       @apply space-y-2;
@@ -1355,101 +1374,120 @@ body {
 
     /* What stands in for the notifications while a Focus is on */
     .notifications.silenced {
-      @apply flex flex-col items-center gap-1 rounded-2xl p-6 text-center bg-white/40 text-gray-600 dark:bg-white/10 dark:text-gray-300;
-
-      h4 {
-        @apply text-[13px] font-semibold text-gray-800 dark:text-gray-100;
-      }
-
-      p {
-        @apply text-xs;
-      }
-    }
-
-    /* Each notification is a button: they all go somewhere */
-    .notification {
-      @apply w-full flex items-start gap-3 rounded-2xl p-3 text-left transition-colors bg-white/40 hover:bg-white/70 dark:bg-white/10 dark:hover:bg-white/[0.18];
-
-      > img {
-        @apply size-9 shrink-0 object-contain;
-      }
-
-      .body {
-        @apply min-w-0 flex-1;
-      }
-
-      .meta {
-        @apply flex items-baseline justify-between gap-2 text-[11px] text-gray-500 dark:text-gray-400;
-      }
-
-      .app {
-        @apply font-semibold uppercase tracking-wide;
-      }
-
-      h4 {
-        @apply text-[13px] font-semibold leading-snug mt-0.5;
-      }
-
-      p {
-        @apply text-xs text-gray-600 leading-snug dark:text-gray-400;
-      }
-    }
-
-    .widgets {
-      @apply space-y-3;
-    }
-
-    .widget {
-      @apply w-full rounded-2xl p-3 text-left bg-white/40 dark:bg-white/10;
-    }
-
-    .calendar {
-      @apply flex flex-col items-center py-4;
-
-      .weekday {
-        @apply text-xs font-semibold uppercase tracking-wide text-red-500;
-      }
-
-      .day {
-        @apply text-4xl font-bold leading-tight;
-      }
-
-      .month {
-        @apply text-xs text-gray-600 dark:text-gray-400;
-      }
-    }
-
-    .resume {
-      @apply transition-colors hover:bg-white/70 dark:hover:bg-white/[0.18];
+      @apply glass-module flex flex-col items-center gap-1 rounded-[22px] p-5 text-center;
 
       h4 {
         @apply text-[13px] font-semibold;
       }
 
       p {
-        @apply text-xs text-gray-600 mt-0.5 dark:text-gray-400;
+        @apply text-xs opacity-70;
+      }
+    }
+
+    /*
+     * A notification: app icon, bold title, body, and the time on the
+     * right. No app-name caption over it — the icon says which app, as the
+     * real banners let it. Measured off a real one: 34px icon 12px in, text
+     * starting 57px from the edge, 13px type on 16px lines, the body wrapping
+     * rather than cut off.
+     */
+    .notification {
+      @apply glass-module w-full flex items-center gap-[11px] rounded-[20px] py-3.5 pl-3 pr-3.5 text-left cursor-pointer;
+
+      &:hover {
+        --glass-fill: calc(var(--cc-alpha) + 0.1);
       }
 
-      .cta {
-        @apply mt-2 inline-block text-xs font-medium text-accent-label;
+      > img {
+        @apply size-[34px] shrink-0 object-contain;
+      }
+
+      .body {
+        @apply min-w-0 flex-1;
+      }
+
+      .head {
+        @apply flex items-baseline justify-between gap-2;
+      }
+
+      h4 {
+        @apply text-[13px] font-semibold leading-4 line-clamp-2;
+      }
+
+      .time {
+        @apply shrink-0 text-[11px] opacity-60;
+      }
+
+      p {
+        @apply text-[13px] leading-4 opacity-90 line-clamp-3;
+      }
+    }
+
+    .widgets {
+      @apply grid grid-cols-2 gap-3;
+    }
+
+    .widget {
+      @apply glass-module rounded-[22px] p-3.5 text-left;
+    }
+
+    /* Small: a square on the widget grid */
+    .calendar {
+      @apply aspect-square flex flex-col;
+
+      .weekday {
+        @apply text-[11px] font-semibold uppercase tracking-wide text-red-500;
+      }
+
+      .day {
+        @apply text-[40px] font-light leading-none mt-0.5;
+      }
+
+      .month {
+        @apply mt-auto text-xs opacity-70;
       }
     }
 
     .links {
+      @apply aspect-square flex flex-col;
+
       h4 {
-        @apply text-[13px] font-semibold mb-2;
+        @apply text-[13px] font-semibold;
       }
 
+      /* Fixed tiles, so the widget stays the square it sits beside */
       ul {
-        @apply flex gap-2;
+        @apply mt-auto grid grid-cols-[repeat(2,48px)] gap-2;
       }
 
       a {
-        @apply flex-center size-9 rounded-xl transition-transform hover:scale-110;
+        @apply flex-center size-12 rounded-xl transition-transform hover:scale-105;
       }
 
       img {
-        @apply size-4;
+        @apply size-5;
+      }
+    }
+
+    /* Medium: the width of two smalls */
+    .resume {
+      @apply col-span-2 cursor-pointer;
+
+      &:hover {
+        --glass-fill: calc(var(--cc-alpha) + 0.1);
+      }
+
+      h4 {
+        @apply text-[13px] font-semibold;
+      }
+
+      p {
+        @apply text-xs opacity-70 mt-0.5;
+      }
+
+      .cta {
+        @apply mt-2 inline-block text-xs font-medium text-accent-label;
       }
     }
   }
