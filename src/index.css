@@ -514,6 +514,22 @@ body {
 
     text-shadow: 0 0 3px rgb(0 0 0 / 0.28);
 
+    /*
+     * The bar's glyphs ship as black SVGs and are inverted to white for the
+     * dark wallpaper this bar usually sits over.
+     *
+     * Declared here rather than as an `invert` utility in the JSX, which is
+     * where it was: `.menu-bar-on-light` below has to turn the inversion back
+     * off, and a utility class lives in Tailwind's `utilities` layer. A layer
+     * beats specificity outright, so nothing this file writes in `base` can
+     * reach it — the override was losing silently and every icon in the bar,
+     * the Apple logo included, stayed white on a bright wallpaper.
+     */
+    > div > .apple-menu > button > img,
+    > div > ul img.icon-hover,
+    #control-center > button > img {
+      filter: invert(1);
+    }
     /* Direct children only, so popover internals (Control Center) aren't forced into a row */
     > div {
       @apply flex items-center max-sm:w-full max-sm:justify-center gap-5;

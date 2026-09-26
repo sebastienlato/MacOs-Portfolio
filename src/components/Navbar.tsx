@@ -96,7 +96,7 @@ const Navbar = () => {
                it opens */
             aria-label="Apple"
           >
-            <img src="/images/logo.svg" alt="" className="invert" />
+            <img src="/images/logo.svg" alt="" />
           </button>
 
           {menuOpen && (
@@ -160,7 +160,7 @@ const Navbar = () => {
                     aria-haspopup="dialog"
                     aria-expanded={spotlightOpen}
                   >
-                    <img src={img} className="icon-hover invert" alt="" />
+                    <img src={img} className="icon-hover" alt="" />
                   </button>
                 </li>
               );
@@ -170,7 +170,7 @@ const Navbar = () => {
                what keeps an image with nothing to say out of the way. */
             return (
               <li key={id} aria-hidden="true">
-                <img src={img} className="icon-hover invert" alt="" />
+                <img src={img} className="icon-hover" alt="" />
               </li>
             );
           })}
