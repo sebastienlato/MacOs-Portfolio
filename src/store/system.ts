@@ -52,12 +52,19 @@ interface SystemStore {
   theme: Theme;
   /** The colour every selection, highlight and focus ring is drawn from. */
   accent: Accent;
-  /** How app icons are recoloured — macOS 26's Default/Dark/Clear/Tinted. */
+  /** How app icons are recoloured — Default, Dark, Clear or Tinted. */
   iconStyle: IconStyle;
   /** What the visitor chose about transparency. */
   transparency: Transparency;
   /** What that currently resolves to, the system having a say as well. */
   reducedTransparency: boolean;
+  /**
+   * macOS 27's Liquid Glass slider, 0 (Ultraclear) to 100 (Fully Tinted), with
+   * 27's own default in the middle. Separate from Reduce Transparency and
+   * subordinate to it: this is a taste, that is an accessibility need, and
+   * when it is on the glass is opaque at any setting.
+   */
+  glassTint: number;
   spotlightOpen: boolean;
   controlCenterOpen: boolean;
   notificationCenterOpen: boolean;
@@ -77,6 +84,7 @@ interface SystemStore {
   setAccent: (accent: Accent) => void;
   setIconStyle: (iconStyle: IconStyle) => void;
   setTransparency: (transparency: Transparency) => void;
+  setGlassTint: (value: number) => void;
   /** Re-resolves against the system setting, as syncSystemTheme does. */
   syncSystemTransparency: () => void;
   toggleTheme: () => void;
@@ -108,6 +116,7 @@ type PersistedSystem = Pick<
   | "iconStyle"
   | "transparency"
   | "reducedTransparency"
+  | "glassTint"
   | "wifiEnabled"
   | "bluetoothEnabled"
   | "airdrop"
@@ -127,6 +136,7 @@ const useSystemStore = create<SystemStore>()(
       iconStyle: "default",
       transparency: "auto",
       reducedTransparency: false,
+      glassTint: 50,
       spotlightOpen: false,
       controlCenterOpen: false,
       notificationCenterOpen: false,
@@ -161,6 +171,9 @@ const useSystemStore = create<SystemStore>()(
 
       setTransparency: (transparency) =>
         set({ transparency, reducedTransparency: resolveTransparency(transparency) }),
+
+      setGlassTint: (value) =>
+        set({ glassTint: Math.min(100, Math.max(0, Math.round(value))) }),
 
       syncSystemTransparency: () =>
         set((state) => ({
@@ -233,6 +246,7 @@ const useSystemStore = create<SystemStore>()(
         iconStyle: state.iconStyle,
         transparency: state.transparency,
         reducedTransparency: state.reducedTransparency,
+        glassTint: state.glassTint,
         wifiEnabled: state.wifiEnabled,
         bluetoothEnabled: state.bluetoothEnabled,
         airdrop: state.airdrop,

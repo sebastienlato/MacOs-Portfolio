@@ -44,10 +44,9 @@ body {
   /* macOS draws its focus ring in the accent colour */
   --color-focus-ring: #0a84ff;
 
-  /* macOS 26 rounds windows far more than the 12px this used to use, and keeps
-     the header's top corners concentric with them. */
-  --radius-window: 16px;
-  --radius-panel: 18px;
+  /* macOS 27 walked back Tahoe's 16px: one radius for every window, and a
+     noticeably squarer one. The header's top corners stay concentric with it. */
+  --radius-window: 12px;
 }
 
 /*
@@ -64,26 +63,38 @@ body {
  */
 @layer base {
   :root {
+    /*
+     * Blur at the Ultraclear end of the slider. Everything past that end is
+     * worked out on <main> — see "The Liquid Glass slider" below — because
+     * macOS 27 frosts mostly with blur: at Default the backdrop is already
+     * reduced to soft colour, and at Tinted to nearly a flat wash of it.
+     */
     --glass-blur: 4px;
-    --glass-backdrop: saturate(1.7);
+    --glass-backdrop: saturate(1.8);
     --glass-tint: 255 255 255;
+    /*
+     * Each surface's white fill at the two ends of the slider, read off
+     * 9to5Mac's Ultraclear / Default / Fully Tinted captures of the shipping
+     * release. Tinted is *not* a white panel: the fully tinted dock is the
+     * wallpaper's own colour, diffused — so the fill rises only a little and
+     * the blur does the rest.
+     */
     /* The dock holds no small text, so it can stay clearer than the popovers */
-    --glass-alpha: 0.18;
-    --glass-alpha-thick: 0.55;
+    --glass-alpha-clear: 0.1;
+    --glass-alpha-tinted: 0.2;
+    --glass-alpha-thick-clear: 0.5;
+    --glass-alpha-thick-tinted: 0.74;
     /*
      * Spotlight is its own case. Every other popover is small, anchored to the
      * thing that opened it, and therefore sits over a known patch of screen;
      * this one is the width of a window, lands in the middle of the desktop,
      * and covers whatever happens to be under it. It also carries the densest
-     * small text in the app — a result list, two columns of it.
-     *
-     * Low blur is what makes the rest of the material read as clear rather
-     * than frosted, and it is kept here, so the tint is the only thing holding
-     * the backdrop down: blur destroys detail, opacity only fades it. At the
-     * shared 0.55 the folder names in a Finder window behind were legible
-     * *through* the result rows.
+     * small text in the app — a result list, two columns of it — so it stays
+     * near-opaque at every slider position: at the shared popover fill the
+     * folder names in a Finder window behind were legible *through* the rows.
      */
-    --glass-alpha-spotlight: 0.9;
+    --glass-alpha-spotlight-clear: 0.86;
+    --glass-alpha-spotlight-tinted: 0.94;
     --glass-shadow: 0 16px 40px -12px rgb(0 0 0 / 0.35);
 
     /* Rim geometry. macOS bends light through a band a few px wide, not a
@@ -92,28 +103,41 @@ body {
     --glass-edge-blur: 8px;
     --glass-edge-filter: brightness(1.12) saturate(1.4);
 
-    /* Specular sweep: hot top-left corner, dead middle, soft bottom-right
-       bounce. The dead middle is what stops it reading as a plain border. */
+    /*
+     * macOS 27's rim: "a darkened edge and brighter specular highlights".
+     *
+     * The dark edge is a half-pixel line just outside the pane, which is what
+     * separates glass from a busy wallpaper without a heavy shadow. The
+     * specular is brighter than Tahoe's and more even — 27 made refraction
+     * "more uniform", and the captures show a lit rim all the way round, hot
+     * at the top-left and bottom-right rather than lit only at one corner.
+     */
+    --glass-dark-edge: rgb(0 0 0 / 0.16);
     --glass-specular: linear-gradient(
       135deg,
-      rgb(255 255 255 / 0.95) 0%,
-      rgb(255 255 255 / 0.35) 18%,
-      rgb(255 255 255 / 0.06) 42%,
-      rgb(255 255 255 / 0.06) 58%,
-      rgb(255 255 255 / 0.4) 84%,
-      rgb(255 255 255 / 0.7) 100%
+      rgb(255 255 255 / 1) 0%,
+      rgb(255 255 255 / 0.6) 18%,
+      rgb(255 255 255 / 0.28) 42%,
+      rgb(255 255 255 / 0.28) 58%,
+      rgb(255 255 255 / 0.6) 84%,
+      rgb(255 255 255 / 0.9) 100%
     );
-    --glass-inner-glow: inset 0 1px 0 0 rgb(255 255 255 / 0.5);
+    --glass-inner-glow: inset 0 1px 0 0 rgb(255 255 255 / 0.6);
 
     /* Space a zoomed window must leave for the dock: the container's own 72px
        plus its bottom-5 offset. Grows at 3xl, where the icons step up to
        size-20, and collapses below sm, where the dock is hidden entirely. */
     --dock-inset: 92px;
 
-    --glass-chrome-alpha: 0.72;
-    /* The one place more blur is right: chrome should wash the colour of what
-       is behind it, not let you read a window through a sidebar. */
-    --glass-chrome-blur: 26px;
+    /*
+     * Window chrome — toolbar and sidebar, one continuous surface in 27. The
+     * captures show it barely moving with the slider: heavily diffused at every
+     * position, the wallpaper's colour and none of its detail, so a Finder
+     * window behind never reads through a sidebar.
+     */
+    --glass-chrome-alpha-clear: 0.4;
+    --glass-chrome-alpha-tinted: 0.56;
+    --glass-chrome-blur: 40px;
     --glass-hairline: rgb(0 0 0 / 0.12);
 
     /* A window's own edge, and the shadow it drops. Separate from the chrome
@@ -121,34 +145,47 @@ body {
        rather than against the window's contents. */
     --window-rim: rgb(0 0 0 / 0.14);
     --window-rim-focused: rgb(0 0 0 / 0.2);
-    --window-shadow-soft: 0 8px 24px -10px rgb(0 0 0 / 0.35),
-      0 1px 4px rgb(0 0 0 / 0.12);
-    --window-shadow-front: 0 24px 64px -16px rgb(0 0 0 / 0.45),
-      0 2px 8px rgb(0 0 0 / 0.16);
+    /* Pulled further apart for macOS 27, which made the front window easier
+       to pick out: the ones behind sit flatter, the front one lifts higher */
+    --window-shadow-soft: 0 6px 18px -10px rgb(0 0 0 / 0.28),
+      0 1px 3px rgb(0 0 0 / 0.1);
+    --window-shadow-front: 0 30px 72px -14px rgb(0 0 0 / 0.5),
+      0 3px 10px rgb(0 0 0 / 0.18);
+
+    /* Toolbar buttons: capsules of brighter glass sitting on the chrome */
+    --glass-control: rgb(255 255 255 / 0.6);
   }
 
   .dark {
-    --glass-backdrop: saturate(1.5) brightness(0.85);
+    --glass-backdrop: saturate(1.6) brightness(0.8);
     --glass-tint: 8 8 12;
-    --glass-alpha: 0.34;
-    --glass-alpha-thick: 0.6;
-    /* Slightly under the light value: the dark tint is near-black, so it
-       swallows what is behind it faster at the same alpha */
-    --glass-alpha-spotlight: 0.8;
+    /* Higher than light: the dark tint is near-black, and at the light values
+       a bright wallpaper lifted it to a muddy grey */
+    --glass-alpha-clear: 0.22;
+    --glass-alpha-tinted: 0.36;
+    --glass-alpha-thick-clear: 0.52;
+    --glass-alpha-thick-tinted: 0.76;
+    /* Slightly under the light value: the dark tint swallows what is behind
+       it faster at the same alpha */
+    --glass-alpha-spotlight-clear: 0.78;
+    --glass-alpha-spotlight-tinted: 0.9;
     --glass-shadow: 0 16px 40px -12px rgb(0 0 0 / 0.6);
     --glass-edge-filter: brightness(1.3) saturate(1.35);
+    /* The dark edge has to be darker to show against dark glass at all */
+    --glass-dark-edge: rgb(0 0 0 / 0.55);
     --glass-specular: linear-gradient(
       135deg,
-      rgb(255 255 255 / 0.5) 0%,
-      rgb(255 255 255 / 0.18) 18%,
-      rgb(255 255 255 / 0.03) 42%,
-      rgb(255 255 255 / 0.03) 58%,
-      rgb(255 255 255 / 0.16) 84%,
-      rgb(255 255 255 / 0.32) 100%
+      rgb(255 255 255 / 0.6) 0%,
+      rgb(255 255 255 / 0.28) 18%,
+      rgb(255 255 255 / 0.1) 42%,
+      rgb(255 255 255 / 0.1) 58%,
+      rgb(255 255 255 / 0.26) 84%,
+      rgb(255 255 255 / 0.45) 100%
     );
-    --glass-inner-glow: inset 0 1px 0 0 rgb(255 255 255 / 0.16);
+    --glass-inner-glow: inset 0 1px 0 0 rgb(255 255 255 / 0.2);
 
-    --glass-chrome-alpha: 0.62;
+    --glass-chrome-alpha-clear: 0.44;
+    --glass-chrome-alpha-tinted: 0.6;
     --glass-hairline: rgb(255 255 255 / 0.12);
 
     /*
@@ -159,10 +196,61 @@ body {
      */
     --window-rim: rgb(255 255 255 / 0.14);
     --window-rim-focused: rgb(255 255 255 / 0.26);
-    --window-shadow-soft: 0 8px 28px -10px rgb(0 0 0 / 0.6),
-      0 1px 4px rgb(0 0 0 / 0.35);
-    --window-shadow-front: 0 28px 72px -16px rgb(0 0 0 / 0.8),
-      0 2px 10px rgb(0 0 0 / 0.45);
+    --window-shadow-soft: 0 6px 20px -10px rgb(0 0 0 / 0.5),
+      0 1px 3px rgb(0 0 0 / 0.3);
+    --window-shadow-front: 0 32px 80px -14px rgb(0 0 0 / 0.85),
+      0 3px 12px rgb(0 0 0 / 0.5);
+
+    --glass-control: rgb(255 255 255 / 0.12);
+  }
+
+  /*
+   * The Liquid Glass slider — macOS 27's answer to Tahoe's legibility
+   * complaints, in System Settings → Appearance. Three notches, Ultraclear,
+   * Default and Fully Tinted, at 0, 0.5 and 1; the store defaults to the
+   * middle one, as 27 does.
+   *
+   * Each surface's fill runs straight between its two endpoints above. The
+   * blur scale is what really moves, and on a curve rather than a line: ×0.5
+   * at Ultraclear, where the backdrop stays sharp and the rim carries the
+   * material; ×3.4 at Default, where the dock's 4px becomes ~14 and the
+   * wallpaper survives as soft shapes; ×10 at Tinted, 40px, where it washes
+   * to one colour. Linear put Default at 21px, which the captures do not show.
+   * The chrome has its own, gentler scale — it is diffused at every position.
+   *
+   * Declared on <main>, where `--glass-level` is set, and not on :root: a var()
+   * in a custom property resolves where the property is declared, and :root
+   * cannot see a value set on its child. `.dark` needs no copy of this — it
+   * only moves the endpoints, and these read whichever endpoints are in force.
+   *
+   * `.reduce-transparency` sets the finished values outright, on the same
+   * element with a class selector, so it beats this at any slider position.
+   */
+  main {
+    --glass-level-safe: clamp(0, var(--glass-level, 0.5), 1);
+    --glass-alpha: calc(
+      var(--glass-alpha-clear) +
+        (var(--glass-alpha-tinted) - var(--glass-alpha-clear)) * var(--glass-level-safe)
+    );
+    --glass-alpha-thick: calc(
+      var(--glass-alpha-thick-clear) +
+        (var(--glass-alpha-thick-tinted) - var(--glass-alpha-thick-clear)) *
+        var(--glass-level-safe)
+    );
+    --glass-alpha-spotlight: calc(
+      var(--glass-alpha-spotlight-clear) +
+        (var(--glass-alpha-spotlight-tinted) - var(--glass-alpha-spotlight-clear)) *
+        var(--glass-level-safe)
+    );
+    --glass-chrome-alpha: calc(
+      var(--glass-chrome-alpha-clear) +
+        (var(--glass-chrome-alpha-tinted) - var(--glass-chrome-alpha-clear)) *
+        var(--glass-level-safe)
+    );
+    --glass-blur-scale: calc(
+      0.5 + 2 * var(--glass-level-safe) + 7.5 * var(--glass-level-safe) * var(--glass-level-safe)
+    );
+    --glass-chrome-blur-scale: calc(0.7 + 0.6 * var(--glass-level-safe));
   }
 
   /*
@@ -190,15 +278,17 @@ body {
      * A multiplier rather than zeroing the blur tokens themselves, because
      * `glass-thick` and `glass-tight` re-declare those on the element that uses
      * them — an `@apply` inlines them into that rule, and a declaration on the
-     * element beats one inherited from here. Spotlight and Control Center kept
-     * their 8px blur that way. Nothing re-declares the scale, so this reaches
-     * every one of them.
+     * element beats one inherited from here. Spotlight and Quick Look kept
+     * their blur that way. Nothing below <main> re-declares the scale, so
+     * this reaches every one of them — and <main>'s own, which the Liquid
+     * Glass slider drives, loses to it on specificity.
      *
      * Behind an opaque fill the blur was invisible, but it still cost a
      * compositing layer and a real blur pass per frame — which is most of what
      * someone turning this on is trying to get away from.
      */
     --glass-blur-scale: 0;
+    --glass-chrome-blur-scale: 0;
     --glass-backdrop: saturate(1);
     --glass-edge-filter: saturate(1);
 
@@ -268,7 +358,10 @@ body {
    pseudo-elements to anchor to. */
 @utility glass {
   background-color: rgb(var(--glass-tint) / var(--glass-fill, var(--glass-alpha)));
-  box-shadow: var(--glass-inner-glow), var(--glass-shadow);
+  box-shadow:
+    var(--glass-inner-glow),
+    0 0 0 0.5px var(--glass-dark-edge),
+    var(--glass-shadow);
   backdrop-filter: blur(calc(var(--glass-blur) * var(--glass-blur-scale, 1)))
     var(--glass-backdrop);
 
@@ -310,7 +403,8 @@ body {
  */
 @utility glass-thick {
   --glass-fill: var(--glass-alpha-thick);
-  --glass-blur: 8px;
+  /* ×0.5 → 3px at Ultraclear, ~20px at Default, 60px at Tinted */
+  --glass-blur: 6px;
 }
 
 /* Small controls need a proportionally tighter lens band than a big panel */
@@ -330,8 +424,35 @@ body {
  */
 @utility glass-chrome {
   background-color: rgb(var(--glass-tint) / var(--glass-chrome-alpha));
-  backdrop-filter: blur(calc(var(--glass-chrome-blur) * var(--glass-blur-scale, 1)))
+  backdrop-filter: blur(calc(var(--glass-chrome-blur) * var(--glass-chrome-blur-scale, 1)))
     var(--glass-backdrop);
+}
+
+/*
+ * A sidebar: the same surface as the toolbar above it. macOS 27 re-attached
+ * sidebars to the window's edge and runs the toolbar's material straight down
+ * into them — no seam, no hairline, no shade of difference between the two;
+ * the contrast is against the opaque content beside it, not the bar above.
+ * Kept as its own name so a sidebar says what it is where it is styled.
+ */
+@utility sidebar-chrome {
+  @apply glass-chrome;
+}
+
+/*
+ * A toolbar button: macOS 27 groups toolbar controls into capsules of
+ * brighter glass sitting on the chrome, each with a lit rim and the same dark
+ * half-pixel edge the floating glass has. No backdrop-filter of its own — it
+ * sits on chrome that has already done the blurring, and a second pass over
+ * a region that small would cost a layer for no visible change.
+ */
+@utility glass-control {
+  background-color: var(--glass-control);
+  box-shadow:
+    inset 0 0.5px 0 rgb(255 255 255 / 0.55),
+    0 0 0 0.5px var(--glass-dark-edge),
+    0 1px 3px rgb(0 0 0 / 0.08);
+  border-radius: 9999px;
 }
 
 /*
@@ -353,6 +474,32 @@ body {
 
   &.is-focused {
     box-shadow: 0 0 0 1px var(--window-rim-focused), var(--window-shadow-front);
+  }
+
+  /*
+   * The rest of macOS 27's "which window is active": a window in the
+   * background stops drinking the wallpaper's colour through its chrome. Its
+   * title bar and sidebar go greyer, and the front window is the only one
+   * still tinted by what is behind it.
+   *
+   * Skipped under Reduce Transparency, where the chrome is opaque and there is
+   * no colour coming through to take away.
+   */
+  main:not(.reduce-transparency) &:not(.is-focused) {
+    --glass-backdrop: saturate(0.35);
+  }
+
+  main.dark:not(.reduce-transparency) &:not(.is-focused) {
+    --glass-backdrop: saturate(0.35) brightness(0.85);
+  }
+}
+
+/* A run of toolbar buttons sharing one capsule, as 27 groups them */
+@utility toolbar-group {
+  @apply glass-control flex shrink-0 items-center gap-0.5 p-1 text-gray-600 dark:text-gray-300;
+
+  & .icon {
+    @apply size-7 p-1.5 rounded-full hover:bg-black/[0.06] dark:hover:bg-white/10;
   }
 }
 
@@ -395,11 +542,11 @@ body {
     box-shadow: 0 0 0 4px rgb(0 0 0 / 0.5);
   }
 
-  /* A menu item already fills with the accent colour when focused, so the blue
-     ring would vanish into it — the outline flips to white and drops the halo */
+  /* A menu item already fills with the accent colour when focused, and that
+     fill is the indicator, as it is in macOS — a ring drawn round it as well
+     was a second one no Mac shows */
   [role="menuitem"]:focus-visible {
-    outline-color: #fff;
-    outline-offset: -2px;
+    outline: none;
     box-shadow: none;
   }
 
@@ -530,6 +677,7 @@ body {
     #control-center > button > img {
       filter: invert(1);
     }
+
     /* Direct children only, so popover internals (Control Center) aren't forced into a row */
     > div {
       @apply flex items-center max-sm:w-full max-sm:justify-center gap-5;
@@ -597,6 +745,18 @@ body {
 }
 
 @layer components {
+  /*
+   * A sidebar glyph: flat monochrome art, repainted in the accent by masking
+   * it with itself — the glyph is its own silhouette, so nothing is lost.
+   * macOS 27 put colour back in sidebar icons after Tahoe greyed them, so
+   * every sidebar uses it, not only the Finder's.
+   */
+  .accent-glyph {
+    background: var(--color-accent-label);
+    -webkit-mask: var(--icon) center / contain no-repeat;
+    mask: var(--icon) center / contain no-repeat;
+  }
+
   .icon {
     @apply p-1 hover:bg-gray-200 rounded hover:cursor-default dark:hover:bg-neutral-700;
   }
@@ -1087,6 +1247,13 @@ body {
     @apply fixed inset-0 z-[15900];
   }
 
+  /*
+   * macOS 27's Notification Center: like its Control Center, no panel — a
+   * column of separate glass cards at the screen's right edge, notifications
+   * first and widgets under them on the widget grid (two small side by side,
+   * a medium the width of both). The column itself is transparent and only as
+   * tall as what is in it; it scrolls if that is ever taller than the screen.
+   */
   #notification-center {
     @apply glass glass-thick fixed right-2 top-11 z-[16000] w-[22rem] max-w-[92vw] overflow-y-auto rounded-[22px] p-3 space-y-3 text-gray-900 dark:text-gray-100;
 
@@ -1657,6 +1824,36 @@ body {
         }
       }
 
+      /* A clear swatch and a tinted one either side of the track, as
+         System Settings lays it out */
+      .glass-slider {
+        @apply flex items-center gap-3 mb-7;
+
+        input {
+          @apply flex-1 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40;
+          accent-color: var(--color-accent);
+        }
+
+        .swatch {
+          @apply size-4 shrink-0 rounded-[5px];
+        }
+
+        /* An empty pane: two outlines offset, the way Apple draws "clear" */
+        .clear {
+          border: 1.5px solid rgb(0 0 0 / 0.45);
+          box-shadow: 3px -3px 0 -1.5px rgb(0 0 0 / 0.3);
+        }
+
+        .tinted {
+          @apply bg-gray-500 dark:bg-gray-400;
+        }
+
+        :where(.dark) & .clear {
+          border-color: rgb(255 255 255 / 0.55);
+          box-shadow: 3px -3px 0 -1.5px rgb(255 255 255 / 0.35);
+        }
+      }
+
       /* macOS shows the accents as a row of plain dots, checked when picked */
       .accent-swatches {
         @apply flex flex-wrap gap-2.5 mb-7;
@@ -1759,7 +1956,7 @@ body {
      */
     @apply absolute bottom-5 left-1/2 -translate-x-1/2 z-[9500] select-none max-sm:hidden;
 
-    /* Tahoe's dock is a floating glass slab, rounded far more than before */
+    /* The dock is a floating glass slab, rounded far more than before Tahoe */
     .dock-container {
       @apply glass glass-tight relative justify-between rounded-[26px] p-2 flex items-end gap-1.5;
     }
@@ -1859,10 +2056,47 @@ body {
   #window-controls {
     @apply flex gap-2;
 
+    /*
+     * macOS 27's lights are glass again — Aqua's gel buttons redrawn in Liquid
+     * Glass. The colour stays a flat background-color, so focus and hover can
+     * keep swapping it exactly as before; the glass is layered over it as
+     * images, and reads the same over red, amber, green or the resting grey:
+     *
+     *   - a bright lens across the top half, the light source catching the dome
+     *   - a softer bounce welling up from the bottom edge, light passing through
+     *   - a hairline rim and a faint inner shade to give the dome its depth
+     */
     button {
-      @apply relative size-3.5 rounded-full cursor-pointer transition-colors;
+      @apply relative size-3.5 rounded-full cursor-pointer;
       /* Grey by default; colour arrives from :focused or :hover below */
       @apply bg-black/20 dark:bg-white/25;
+
+      background-image:
+        radial-gradient(
+          ellipse 62% 40% at 50% 20%,
+          rgb(255 255 255 / 0.8),
+          rgb(255 255 255 / 0.12) 65%,
+          rgb(255 255 255 / 0) 100%
+        ),
+        radial-gradient(
+          circle at 50% 115%,
+          rgb(255 255 255 / 0.35),
+          rgb(255 255 255 / 0) 55%
+        );
+      box-shadow:
+        inset 0 0 0 0.5px rgb(0 0 0 / 0.22),
+        inset 0 -1px 2px rgb(0 0 0 / 0.14);
+
+      /* The press springs back past its rest size, the way 27's buttons now
+         animate on iOS and macOS alike. The overshoot is in the curve. */
+      transition:
+        background-color 150ms ease,
+        transform 380ms cubic-bezier(0.34, 1.9, 0.64, 1);
+
+      &:active {
+        transform: scale(0.8);
+        transition-duration: 150ms, 90ms;
+      }
     }
 
     /*
@@ -1960,9 +2194,10 @@ body {
      * stacking context, so without this the tiling popover was painted behind
      * whatever the window renders below the title bar.
      */
-    @apply glass-chrome relative z-20 flex items-center justify-between px-4 py-3 rounded-t-[var(--radius-window)] select-none text-sm text-gray-500 dark:text-gray-400;
+    @apply glass-chrome relative z-20 flex items-center justify-between gap-3 px-4 py-2.5 rounded-t-[var(--radius-window)] select-none text-sm text-gray-500 dark:text-gray-400;
 
-    border-bottom: 1px solid var(--glass-hairline);
+    /* No hairline under it any more: in 27 the toolbar runs straight into the
+       sidebar as one surface, and the opaque content is the only edge */
 
     /* An unfocused title dims rather than disappears, as macOS does */
     h2 {
@@ -1986,11 +2221,11 @@ body {
     container: window / inline-size;
 
     .toolbar-nav {
-      @apply ml-6 flex shrink-0 items-center gap-3;
+      @apply toolbar-group ml-3;
     }
 
     .toolbar-actions {
-      @apply flex shrink-0 items-center gap-5;
+      @apply toolbar-group;
     }
 
     /*
@@ -2005,7 +2240,7 @@ body {
     }
 
     .search {
-      @apply flex min-w-0 w-full max-w-md items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-gray-100;
+      @apply glass-control flex min-w-0 w-full max-w-md items-center gap-2 px-3.5 py-1.5 dark:text-gray-100;
 
       input {
         @apply min-w-0 flex-1 truncate bg-transparent outline-none placeholder:text-gray-400;
@@ -2173,7 +2408,7 @@ body {
     @apply max-w-3xl absolute top-28 left-1/4 window-shadow rounded-[var(--radius-window)] overflow-hidden;
 
     .sidebar {
-      @apply glass-chrome w-3/12 flex-none flex flex-col p-5 dark:text-gray-200;
+      @apply sidebar-chrome w-3/12 flex-none flex flex-col p-5 dark:text-gray-200;
       border-right: 1px solid var(--glass-hairline);
 
       h2 {
@@ -2185,7 +2420,11 @@ body {
           @apply flex space-y-1 items-center gap-2 px-3 py-2 rounded-md cursor-pointer transition-colors;
 
           &:first-child {
-            @apply bg-accent-soft text-accent-label;
+            @apply bg-black/[0.07] dark:bg-white/10;
+
+            p {
+              @apply font-semibold;
+            }
           }
 
           img {
@@ -2256,7 +2495,7 @@ body {
     @apply absolute w-3xl left-40 top-20 window-shadow overflow-hidden rounded-[var(--radius-window)];
 
     .sidebar {
-      @apply glass-chrome w-48 flex flex-col p-5 space-y-3;
+      @apply sidebar-chrome w-48 flex flex-col p-5 space-y-3;
       border-right: 1px solid var(--glass-hairline);
 
       h3 {
@@ -2266,16 +2505,10 @@ body {
       ul {
         @apply space-y-1;
 
-        /* Flat monochrome art, repainted in the accent by masking it with
-           itself — the glyph is its own silhouette, so nothing is lost */
-        .accent-glyph {
-          background: var(--color-accent-label);
-          -webkit-mask: var(--icon) center / contain no-repeat;
-          mask: var(--icon) center / contain no-repeat;
-        }
-
+        /* 27's sidebar selection: a neutral pill and a heavier label. The
+           glyph keeps the accent — that is where the colour lives now */
         .active {
-          @apply bg-accent-soft text-accent-label;
+          @apply bg-black/[0.07] font-semibold text-gray-900 dark:bg-white/10 dark:text-white;
         }
 
         .not-active {
@@ -2297,14 +2530,16 @@ body {
       }
     }
 
+    /* A segmented control in a toolbar capsule; the picked segment is a
+       neutral pill inside it, as 27 draws them, not a raised white chip */
     .view-switcher {
-      @apply flex items-center gap-0.5 rounded-lg p-0.5 bg-black/[0.06] dark:bg-white/10;
+      @apply toolbar-group;
 
       button {
-        @apply flex-center rounded-md px-2 py-1 text-gray-500 cursor-pointer transition-colors hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100;
+        @apply flex-center rounded-full px-2.5 py-1 text-gray-500 cursor-pointer transition-colors hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100;
 
         &.selected {
-          @apply bg-white text-gray-900 shadow-sm dark:bg-white/20 dark:text-white;
+          @apply bg-black/[0.08] text-gray-900 dark:bg-white/15 dark:text-white;
         }
       }
     }

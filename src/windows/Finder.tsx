@@ -298,7 +298,9 @@ const Finder = () => {
           ))}
         </div>
 
-        <Search className="icon" />
+        <div className="toolbar-group">
+          <Search className="icon" />
+        </div>
       </div>
 
       <div className="flex h-full min-h-0">
