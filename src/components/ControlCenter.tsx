@@ -187,7 +187,7 @@ const ControlCenter = () => {
         aria-expanded={controlCenterOpen}
         aria-label="Control Center"
       >
-        <img src="/icons/mode.svg" alt="" className="w-4 invert" />
+        <img src="/icons/mode.svg" alt="" className="w-4" />
       </button>
 
       {controlCenterOpen && (
