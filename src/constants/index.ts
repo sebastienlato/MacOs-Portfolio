@@ -78,10 +78,11 @@ const navIcons: NavIcon[] = [
 
 const wallpapers: Wallpaper[] = [
   /*
-   * macOS 27's own set, from Apple's release images. The default is the
+   * macOS 27's own set, from Apple's release images. Apple's default is the
    * abstract one — the same artwork iOS 27 ships — and it is dynamic: a
    * light picture and a dark one, following the appearance. The two bridge
-   * photographs are the optional pair Apple added in beta 3.
+   * photographs are the optional pair Apple added in beta 3; Sunset is the
+   * one this desktop opens on (see DEFAULT_WALLPAPER).
    *
    * Desktop copies are 2880 wide. The phone copies are sized by *height*
    * (1100px), not width like Sequoia's: these are wider than 16:10, and a

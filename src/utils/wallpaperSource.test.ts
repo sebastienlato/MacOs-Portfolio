@@ -51,7 +51,7 @@ describe("wallpaperSource", () => {
     expect(wallpaperBackground(gradient)).toBe(gradient.value);
   });
 
-  it("ships macOS 27's default as a light/dark pair", () => {
+  it("ships Golden Gate's abstract as a light/dark pair", () => {
     const goldenGate = wallpapers.find((wp) => wp.id === "golden-gate");
     expect(goldenGate?.dark?.value).toBeTruthy();
     expect(goldenGate?.dark?.value).not.toBe(goldenGate?.value);

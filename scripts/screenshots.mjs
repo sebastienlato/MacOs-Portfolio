@@ -217,7 +217,7 @@ const renderOgCard = async (browser) => {
     `data:${mime};base64,${(await readFile(resolve(root, path))).toString("base64")}`;
 
   const [wallpaper, desktop, phone] = await Promise.all([
-    uri("public/images/golden-gate-light.webp", "image/webp"),
+    uri("public/images/golden-gate-sunset.webp", "image/webp"),
     uri("docs/screenshot.webp", "image/webp"),
     uri("docs/screenshot-mobile.webp", "image/webp"),
   ]);
