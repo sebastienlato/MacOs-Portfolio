@@ -19,6 +19,14 @@ On a phone it becomes an iOS-style Home Screen instead: same content, same prefe
   />
 </p>
 
+<p align="center">
+  <img
+    src="docs/screenshot-safari.webp"
+    alt="Safari on the desktop, open on its Start Page: an address field in a glass toolbar, a grid of favorite sites, and the developer blog below them."
+    width="67%"
+  />
+</p>
+
 ## Features
 
 ### The desktop
@@ -144,13 +152,13 @@ Shared types (window keys, Finder items, wallpapers, …) are in `src/types.ts`.
 
 Update the image files under `public/images` and `public/files` (or add new assets) to match your own projects.
 
-The two screenshots at the top live in `docs/` (kept out of `public/` so they are not deployed) and are generated rather than taken by hand:
+The screenshots at the top live in `docs/` (kept out of `public/` so they are not deployed) and are generated rather than taken by hand:
 
 ```bash
 npm run screenshots
 ```
 
-That boots the app on its own port, waits for the boot screen and the fonts, opens a Finder window for the desktop shot, and writes both `docs/screenshot.webp` and `docs/screenshot-mobile.webp` from the same run — so the pair can never show two different versions of the app. It then composes those two into `public/og.jpg`, the 1200×630 card that link previews use, which keeps the shared image in step with the site.
+That boots the app on its own port, waits for the boot screen and the fonts, opens a Finder window for the desktop shot and Safari on its Start Page for the second, and writes `docs/screenshot.webp`, `docs/screenshot-safari.webp` and `docs/screenshot-mobile.webp` from the same run — so they can never show two different versions of the app. The Safari shot is the Start Page on purpose: a live site would change under it and rewrite the file every run. It then composes the desktop and phone shots into `public/og.jpg`, the 1200×630 card that link previews use, which keeps the shared image in step with the site.
 
 Each file is only rewritten when something visibly moved. The clock is pinned to 9:41 before the shutter, and Chromium's rasteriser drifts by a pixel value or two between runs, so without that check every regeneration would dirty the working tree. Viewports, output sizes and the threshold are at the top of `scripts/screenshots.mjs`.
 
@@ -172,13 +180,13 @@ src/
   mobile.css      # Phone styles (imported by index.css)
   types.ts        # Shared TypeScript types
 scripts/
-  screenshots.mjs # Regenerates the two README screenshots and og.jpg
+  screenshots.mjs # Regenerates the README screenshots and og.jpg
   seo-plugin.ts   # Build-time structured data, <noscript> page and sitemap
   strip-ds-store.ts # Keeps Finder's .DS_Store files out of the build
 public/
   files, fonts, icons, images, macbook.png, og.jpg, robots.txt
 docs/
-  screenshot.webp, screenshot-mobile.webp
+  screenshot.webp, screenshot-safari.webp, screenshot-mobile.webp
 ```
 
 Feel free to fork, remix, and deploy – just update the constants, assets, and copy to make it your own.
