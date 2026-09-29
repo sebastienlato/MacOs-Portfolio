@@ -5,7 +5,7 @@ import { blogPosts } from "#constants/index";
 
 /** The desktop's Safari window, as a reading list. Each post leaves for dev.to. */
 const ArticlesApp = () => (
-  <AppFrame title="Articles">
+  <AppFrame title="Safari">
     <ul className="article-list">
       {blogPosts.map(({ id, image, title, date, link }) => (
         <li key={id}>

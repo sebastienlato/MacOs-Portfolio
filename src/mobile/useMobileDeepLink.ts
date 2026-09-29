@@ -11,7 +11,7 @@ import type { FinderItem } from "#types";
  * matters because a link shared from a desktop is usually opened on a phone.
  *
  *   #/work/securevault  →  Files, already inside SecureVault
- *   #/articles          →  the Articles app
+ *   #/articles          →  the Safari app
  *
  * Writing back is app-level only: Files reports its own depth as you drill in,
  * through `writeFilesHash`.
