@@ -24,6 +24,12 @@ interface AppFrameProps {
    * over a photograph is a caption nobody asked for.
    */
   largeTitle?: boolean;
+  /**
+   * No navigation bar and no title at all, for an app whose content is its own
+   * chrome — Safari, where the page runs to the status bar and the controls
+   * sit in a toolbar along the bottom. The title still names the region.
+   */
+  bare?: boolean;
   children: ReactNode;
 }
 
@@ -38,6 +44,7 @@ const AppFrame = ({
   backLabel = "Back",
   action,
   largeTitle = true,
+  bare = false,
   children,
 }: AppFrameProps) => {
   const origin = useMobileStore((state) => state.origin);
@@ -138,39 +145,41 @@ const AppFrame = ({
   };
 
   return (
-    <section ref={ref} className="mobile-app">
-      <header
-        ref={barRef}
-        className={clsx("app-bar", largeTitle && "large", collapsed && "scrolled")}
-      >
-        {onBack ? (
-          <button type="button" className="back" onClick={onBack}>
-            <ChevronLeft size={22} />
-            <span>{backLabel}</span>
-          </button>
-        ) : (
-          <span className="back-spacer" />
-        )}
+    <section ref={ref} className="mobile-app" aria-label={bare ? title : undefined}>
+      {!bare && (
+        <header
+          ref={barRef}
+          className={clsx("app-bar", largeTitle && "large", collapsed && "scrolled")}
+        >
+          {onBack ? (
+            <button type="button" className="back" onClick={onBack}>
+              <ChevronLeft size={22} />
+              <span>{backLabel}</span>
+            </button>
+          ) : (
+            <span className="back-spacer" />
+          )}
 
-        {/*
-          Two titles, one heading. When the large title is on it is the real
-          <h1> and this is its echo — hiding it from the accessibility tree
-          keeps a screen reader from announcing the screen's name twice, once
-          for a heading and once for the thing that fades in when you scroll.
-        */}
-        {largeTitle ? (
-          <p className="bar-title" aria-hidden="true">
-            {title}
-          </p>
-        ) : (
-          <h1>{title}</h1>
-        )}
+          {/*
+            Two titles, one heading. When the large title is on it is the real
+            <h1> and this is its echo — hiding it from the accessibility tree
+            keeps a screen reader from announcing the screen's name twice, once
+            for a heading and once for the thing that fades in when you scroll.
+          */}
+          {largeTitle ? (
+            <p className="bar-title" aria-hidden="true">
+              {title}
+            </p>
+          ) : (
+            <h1>{title}</h1>
+          )}
 
-        <span className="app-bar-action">{action}</span>
-      </header>
+          <span className="app-bar-action">{action}</span>
+        </header>
+      )}
 
-      <div ref={bodyRef} className="app-body">
-        {largeTitle && (
+      <div ref={bodyRef} className={clsx("app-body", bare && "bare")}>
+        {largeTitle && !bare && (
           <h1 ref={titleRef} className="large-title">
             {title}
           </h1>

@@ -553,7 +553,135 @@
     color: var(--ios-tint);
   }
 
-  /* ---------------------------------------------------------------- articles */
+  /* ------------------------------------------------------------------ safari */
+
+  /*
+   * The page to the status bar and the toolbar along the bottom. The bar is in
+   * the flow rather than floating over the page: a framed site cannot be told
+   * to pad its own last line clear of glass it does not know is there, so
+   * floating it would cover the bottom of every page for good.
+   */
+  .app-body.bare {
+    @apply flex flex-col overflow-hidden p-0;
+
+    padding-top: var(--status-h);
+  }
+
+  .ios-browser {
+    @apply flex min-h-0 flex-1 flex-col;
+
+    .page {
+      @apply relative min-h-0 flex-1;
+
+      iframe {
+        @apply absolute inset-0 size-full border-0 bg-white;
+      }
+    }
+
+    .progress {
+      @apply absolute inset-x-0 top-0 z-10 h-0.5 origin-left;
+
+      background: var(--ios-tint);
+      animation: ios-page-load 8s cubic-bezier(0.1, 0.7, 0.2, 1) forwards;
+    }
+
+    .start-page {
+      @apply absolute inset-0 overflow-y-auto px-4 pb-6 pt-4;
+
+      overscroll-behavior: contain;
+    }
+
+    .section-heading {
+      @apply mb-3 mt-2 text-[22px] font-bold tracking-[-0.01em];
+    }
+
+    .favorites + .section-heading {
+      @apply mt-8;
+    }
+
+    /* Four across, which is what an iPhone's Start Page fits */
+    .favorites {
+      @apply grid grid-cols-4 gap-x-2 gap-y-4;
+
+      button {
+        @apply flex w-full cursor-default flex-col items-center gap-1.5;
+      }
+
+      .tile {
+        @apply flex-center size-[3.75rem] rounded-[22%] text-[26px] font-semibold text-white transition-opacity active:opacity-60;
+      }
+
+      .label {
+        @apply w-full truncate text-center text-[11px];
+
+        color: var(--ios-label);
+      }
+    }
+
+    .refused {
+      @apply absolute inset-0 flex flex-col items-center justify-center gap-3 px-8 text-center;
+
+      h2 {
+        @apply text-[20px] font-semibold;
+      }
+
+      p {
+        @apply text-[15px];
+
+        color: var(--ios-secondary);
+      }
+
+      button {
+        @apply mt-2 cursor-default rounded-full px-5 py-2.5 text-[16px] font-medium text-white;
+
+        background: var(--ios-tint);
+      }
+    }
+  }
+
+  .browser-bar {
+    @apply glass-chrome flex shrink-0 items-center gap-1 px-2 py-1.5;
+
+    border-top: 1px solid var(--ios-separator);
+
+    > button {
+      @apply flex-center size-11 shrink-0 cursor-default rounded-full disabled:opacity-30;
+
+      color: var(--ios-tint);
+    }
+
+    .address {
+      @apply flex h-11 min-w-0 flex-1 items-center gap-1 rounded-full px-4;
+
+      background: var(--ios-fill);
+
+      /* 16px exactly: anything smaller and iOS zooms the page to it on focus */
+      input {
+        @apply min-w-0 flex-1 truncate bg-transparent text-center text-[16px] outline-none focus:text-left;
+
+        color: var(--ios-label);
+
+        &::placeholder {
+          color: var(--ios-secondary);
+        }
+      }
+
+      .reload {
+        @apply flex-center -mr-2 size-8 shrink-0 cursor-default;
+
+        color: var(--ios-label);
+      }
+    }
+  }
+
+  @keyframes ios-page-load {
+    from {
+      transform: scaleX(0.05);
+    }
+    to {
+      transform: scaleX(0.9);
+    }
+  }
 
   .article-list {
     @apply space-y-3;
@@ -582,7 +710,7 @@
       color: var(--ios-secondary);
     }
 
-    h2 {
+    h3 {
       @apply mt-0.5 text-[15px] font-semibold leading-snug;
     }
 

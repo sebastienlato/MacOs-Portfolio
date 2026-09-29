@@ -12,14 +12,20 @@ import {
   Share,
   ShieldHalf,
 } from "lucide-react";
-import { useEffect, useRef, useState, type FormEvent, type RefObject } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { blogPosts, browserFavorites } from "#constants/index";
 import useBrowserStore, { currentUrl } from "#store/browser";
 import useWindowStore from "#store/window";
-import { displayUrl, embeddable, refusesFraming, resolveInput } from "#utils/browser";
-
-const openOutside = (url: string) =>
-  window.open(url, "_blank", "noopener,noreferrer");
+import {
+  displayUrl,
+  embeddable,
+  openInNewTab,
+  refusesFraming,
+  resolveInput,
+} from "#utils/browser";
+// By file, not from the barrel: the phone's Safari uses it too, and the barrel
+// would carry the whole desktop into the phone's chunk
+import BrowserPage from "#components/BrowserPage";
 
 /**
  * The Start Page: Favorites, then the articles this window used to be nothing
@@ -80,45 +86,11 @@ const Refused = ({ url }: { url: string }) => (
       {displayUrl(url)} doesn’t allow itself to be shown inside another page, so
       it has to open in a tab of its own.
     </p>
-    <button type="button" onClick={() => openOutside(url)}>
+    <button type="button" onClick={() => openInNewTab(url)}>
       Open in New Tab
     </button>
   </div>
 );
-
-/**
- * The page, live. Keyed by the parent on every navigation, so each visit is a
- * fresh frame rather than a new `src` on the old one: changing an iframe's
- * `src` pushes an entry onto the *real* tab's history, and the browser's own
- * Back button would start walking this frame instead of the desktop.
- *
- * No `allow-top-navigation` in the sandbox: some sites answer being framed by
- * trying to navigate the top window, which here is the whole desktop.
- */
-const Page = ({
-  url,
-  frameRef,
-}: {
-  url: string;
-  frameRef: RefObject<HTMLIFrameElement | null>;
-}) => {
-  const [loaded, setLoaded] = useState(false);
-
-  return (
-    <>
-      {!loaded && <div className="progress" aria-hidden="true" />}
-      <iframe
-        ref={frameRef}
-        src={url}
-        title={displayUrl(url)}
-        onLoad={() => setLoaded(true)}
-        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation"
-        allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-        referrerPolicy="strict-origin-when-cross-origin"
-      />
-    </>
-  );
-};
 
 const Safari = () => {
   const { history, index, reloadKey, navigate, back, forward, reload } =
@@ -222,7 +194,7 @@ const Safari = () => {
             aria-label="Open in New Tab"
             title="Open in New Tab"
             disabled={!url}
-            onClick={() => url && openOutside(url)}
+            onClick={() => url && openInNewTab(url)}
           >
             <Share className="icon" />
           </button>
@@ -244,7 +216,7 @@ const Safari = () => {
         ) : refusesFraming(url) ? (
           <Refused url={url} />
         ) : (
-          <Page key={`${index}:${reloadKey}:${url}`} url={url} frameRef={frameRef} />
+          <BrowserPage key={`${index}:${reloadKey}:${url}`} url={url} frameRef={frameRef} />
         )}
       </div>
     </>

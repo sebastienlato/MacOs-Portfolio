@@ -9,7 +9,7 @@ import useMobileDeepLink from "#mobile/useMobileDeepLink";
 import type { MobileAppId } from "#mobile/constants";
 
 import AboutApp from "#mobile/apps/AboutApp";
-import ArticlesApp from "#mobile/apps/ArticlesApp";
+import SafariApp from "#mobile/apps/SafariApp";
 import ContactApp from "#mobile/apps/ContactApp";
 import FilesApp from "#mobile/apps/FilesApp";
 import GalleryApp from "#mobile/apps/GalleryApp";
@@ -18,7 +18,7 @@ import SettingsApp from "#mobile/apps/SettingsApp";
 
 const APPS: Record<MobileAppId, ComponentType> = {
   files: FilesApp,
-  articles: ArticlesApp,
+  articles: SafariApp,
   gallery: GalleryApp,
   contact: ContactApp,
   resume: ResumeApp,
