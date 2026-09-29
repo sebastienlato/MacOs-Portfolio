@@ -1,6 +1,7 @@
 import type {
   Accent,
   BlogPost,
+  BrowserFavorite,
   DockApp,
   FinderItem,
   FocusMode,
@@ -307,6 +308,21 @@ const blogPosts: BlogPost[] = [
   },
 ];
 
+/**
+ * Safari's Start Page. Every one of these allows itself to be framed — checked
+ * against the live headers — so none of them lands on a refusal.
+ */
+const browserFavorites: BrowserFavorite[] = [
+  { title: "Sebastien Lato", url: "https://sebastienlato.com/", color: "#1f2937" },
+  { title: "Google", url: "https://www.google.com/webhp?igu=1", color: "#4285f4" },
+  { title: "Wikipedia", url: "https://en.wikipedia.org/wiki/Main_Page", color: "#6b7280" },
+  { title: "React", url: "https://react.dev/", color: "#149eca" },
+  { title: "TypeScript", url: "https://www.typescriptlang.org/", color: "#3178c6" },
+  { title: "Tailwind CSS", url: "https://tailwindcss.com/", color: "#0ea5e9" },
+  { title: "Vite", url: "https://vite.dev/", color: "#9135ff" },
+  { title: "Internet Archive", url: "https://archive.org/", color: "#374151" },
+];
+
 const techStack: TechStackEntry[] = [
   {
     category: "Frontend",
@@ -456,6 +472,7 @@ export {
   iconStyles,
   aboutSpecs,
   blogPosts,
+  browserFavorites,
   techStack,
   socials,
   photosLinks,

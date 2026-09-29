@@ -14,6 +14,10 @@ export type MenuAction =
   | "openContact"
   | "openPhotos"
   | "openSafari"
+  | "browserBack"
+  | "browserForward"
+  | "browserReload"
+  | "browserStartPage"
   | "spotlight"
   | "missionControl"
   | "toggleTheme"
@@ -150,8 +154,21 @@ export const APP_MENUS: Record<WindowKey, AppMenuDef> = {
       {
         title: "View",
         items: [
-          { id: "reload", label: "Reload Page", shortcut: "⌘R", disabled: true },
+          { id: "reload", label: "Reload Page", shortcut: "⌘R", action: "browserReload" },
           { id: "reader", label: "Show Reader", shortcut: "⇧⌘R", disabled: true },
+        ],
+      },
+      /*
+       * Menu-only on purpose. ⌘[, ⌘] and ⌘R are the real browser's back,
+       * forward and reload, and binding them here would fight the tab this
+       * whole desktop is running in.
+       */
+      {
+        title: "History",
+        items: [
+          { id: "back", label: "Back", shortcut: "⌘[", action: "browserBack" },
+          { id: "forward", label: "Forward", shortcut: "⌘]", action: "browserForward" },
+          { id: "start-page", label: "Start Page", shortcut: "⇧⌘H", action: "browserStartPage" },
         ],
       },
       windowMenu(),

@@ -2365,7 +2365,12 @@ body {
   }
 
   #safari {
-    @apply w-4xl absolute top-40 left-2/12 window-shadow rounded-[var(--radius-window)] overflow-hidden;
+    /*
+     * A height of its own, where the other windows take their content's. A
+     * web page has no natural height to offer — an iframe is 150px tall until
+     * told otherwise — so the window sizes the page rather than the reverse.
+     */
+    @apply w-4xl h-[38rem] max-h-[calc(100dvh-8rem)] flex flex-col absolute top-32 left-2/12 window-shadow rounded-[var(--radius-window)] overflow-hidden;
 
     /*
      * A window is resized by hand and has nothing to do with the size of the
@@ -2394,12 +2399,26 @@ body {
       @apply flex min-w-0 flex-1 items-center justify-center gap-3 px-3;
     }
 
+    .toolbar-nav,
+    .toolbar-actions {
+      button {
+        @apply flex-center rounded-full cursor-default disabled:opacity-35 disabled:pointer-events-none;
+      }
+    }
+
     .search {
       @apply glass-control flex min-w-0 w-full max-w-md items-center gap-2 px-3.5 py-1.5 dark:text-gray-100;
 
+      /* Centred at rest, as Safari's field is; editing reads from the left */
       input {
-        @apply min-w-0 flex-1 truncate bg-transparent outline-none placeholder:text-gray-400;
+        @apply min-w-0 flex-1 truncate bg-transparent text-center outline-none placeholder:text-gray-400 focus:text-left;
         box-shadow: none;
+      }
+
+      /* Not an `.icon`: that class pads, and at this size the padding left
+         a glyph six pixels across */
+      .reload {
+        @apply flex-center -mr-1.5 size-5 shrink-0 rounded-full cursor-default text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100;
       }
     }
 
@@ -2427,13 +2446,26 @@ body {
     }
 
     /*
-     * The surface has to span the whole window, not the reading column. This
-     * was max-w-3xl inside a w-4xl window, which was invisible while the window
-     * shell was still opaque and became two see-through strips once it wasn't.
-     * The width limit belongs on the content instead.
+     * The surface has to span the whole window, not the reading column, and
+     * it is the one thing below the toolbar: the child that `.tiled` and
+     * `.user-resized` stretch.
      */
-    .blog {
-      @apply bg-white p-10 dark:bg-neutral-900;
+    .browser-view {
+      @apply relative flex-1 min-h-0 bg-white dark:bg-neutral-900;
+
+      iframe {
+        @apply absolute inset-0 size-full border-0 bg-white;
+      }
+    }
+
+    /* Safari's load progress, as a bar along the foot of the toolbar */
+    .progress {
+      @apply absolute inset-x-0 top-0 z-10 h-0.5 origin-left bg-accent;
+      animation: page-load 8s cubic-bezier(0.1, 0.7, 0.2, 1) forwards;
+    }
+
+    .start-page {
+      @apply absolute inset-0 overflow-auto p-10 space-y-12;
 
       /* 40px a side is a tenth of a narrow window. The reading column matters
          more than the margin once there is little of either. */
@@ -2445,10 +2477,25 @@ body {
         @apply max-w-3xl mx-auto;
       }
 
-      /* Was a hardcoded pink — the one colour in the app that ignored the
-         accent, and the harshest thing on the screen against a dark window */
       h2 {
-        @apply text-xl font-bold text-accent-label mb-10;
+        @apply text-xl font-bold text-gray-800 mb-6 dark:text-gray-100;
+      }
+
+      .favorites {
+        @apply grid gap-x-3 gap-y-5;
+        grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+
+        button {
+          @apply w-full flex flex-col items-center gap-2 p-1.5 rounded-xl cursor-default transition-colors hover:bg-black/5 dark:hover:bg-white/10;
+        }
+
+        .tile {
+          @apply flex-center size-16 rounded-2xl text-3xl font-semibold text-white shadow-sm;
+        }
+
+        .label {
+          @apply w-full truncate text-center text-xs text-gray-700 dark:text-gray-300;
+        }
       }
 
       /* gap, not space-x: the latter puts a margin on every child but the
@@ -2457,8 +2504,7 @@ body {
         @apply grid grid-cols-12 gap-5;
 
         img {
-          /* aspect-square reserves the box before the file loads, so the
-             window is measured at its final height when it opens */
+          /* aspect-square reserves the box before the file loads */
           @apply size-full aspect-square rounded-md object-cover;
         }
 
@@ -2479,6 +2525,38 @@ body {
         }
       }
     }
+
+    .refused {
+      @apply absolute inset-0 flex flex-col items-center justify-center gap-3 p-10 text-center;
+
+      h2 {
+        @apply text-xl font-semibold text-gray-800 dark:text-gray-100;
+      }
+
+      p {
+        @apply max-w-sm text-sm text-gray-500 dark:text-gray-400;
+      }
+
+      button {
+        @apply mt-2 rounded-full bg-accent px-4 py-1.5 text-sm font-medium text-white cursor-default hover:brightness-110;
+      }
+    }
+  }
+
+  /* Races most of the way and then crawls, so a slow page never looks done
+     before its load event says it is */
+  @keyframes page-load {
+    from {
+      transform: scaleX(0.05);
+    }
+    to {
+      transform: scaleX(0.9);
+    }
+  }
+
+  /* See interactionStarted in WindowWrapper */
+  .window-interacting iframe {
+    @apply pointer-events-none;
   }
 
   #terminal {
