@@ -38,7 +38,7 @@ export interface TerminalHandlers {
 /** What `ls` prints. The canonical name for each target lives here. */
 const APPS: { target: TerminalTarget; name: string }[] = [
   { target: "finder", name: "Portfolio" },
-  { target: "safari", name: "Articles" },
+  { target: "safari", name: "Safari" },
   { target: "photos", name: "Gallery" },
   { target: "contact", name: "Contact" },
   { target: "resume", name: "Resume" },

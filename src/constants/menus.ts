@@ -135,7 +135,7 @@ export const APP_MENUS: Record<WindowKey, AppMenuDef> = {
         items: [
           { id: "resume", label: "Resume", shortcut: "⇧⌘R", action: "openResume" },
           { id: "gallery", label: "Gallery", shortcut: "⇧⌘G", action: "openPhotos" },
-          { id: "articles", label: "Articles", shortcut: "⇧⌘A", action: "openSafari" },
+          { id: "articles", label: "Safari", shortcut: "⇧⌘A", action: "openSafari" },
         ],
       },
       windowMenu(),
@@ -144,9 +144,9 @@ export const APP_MENUS: Record<WindowKey, AppMenuDef> = {
   },
 
   safari: {
-    name: "Articles",
+    name: "Safari",
     menus: [
-      appMenu("Articles"),
+      appMenu("Safari"),
       fileMenu([
         { id: "new-tab", label: "New Tab", shortcut: "⌘T", disabled: true },
       ]),
@@ -172,7 +172,7 @@ export const APP_MENUS: Record<WindowKey, AppMenuDef> = {
         ],
       },
       windowMenu(),
-      helpMenu("Articles"),
+      helpMenu("Safari"),
     ],
   },
 
@@ -317,7 +317,7 @@ export const DEFAULT_APP_MENU: AppMenuDef = {
       items: [
         { id: "resume", label: "Resume", shortcut: "⇧⌘R", action: "openResume" },
         { id: "gallery", label: "Gallery", shortcut: "⇧⌘G", action: "openPhotos" },
-        { id: "articles", label: "Articles", shortcut: "⇧⌘A", action: "openSafari" },
+        { id: "articles", label: "Safari", shortcut: "⇧⌘A", action: "openSafari" },
       ],
     },
     helpMenu("Finder"),

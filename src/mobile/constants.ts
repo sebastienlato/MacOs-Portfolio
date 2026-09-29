@@ -64,8 +64,8 @@ export const MOBILE_APPS: MobileApp[] = [
   },
   {
     id: "articles",
-    name: "Articles",
-    title: "Articles",
+    name: "Safari",
+    title: "Safari",
     icon: "/images/safari.webp",
     inDock: true,
   },

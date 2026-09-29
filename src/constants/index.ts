@@ -252,7 +252,7 @@ const dockApps: DockApp[] = [
   },
   {
     id: "safari",
-    name: "Articles",
+    name: "Safari",
     icon: "safari.webp",
     canOpen: true,
   },

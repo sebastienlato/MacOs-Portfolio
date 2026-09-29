@@ -104,7 +104,7 @@ interface SpotlightItem {
 const APPS: { title: string; key: WindowKey; icon: string; extra?: string }[] =
   [
     { title: "Portfolio", key: "finder", icon: "/images/finder.webp", extra: "finder projects work" },
-    { title: "Articles", key: "safari", icon: "/images/safari.webp", extra: "safari blog browser" },
+    { title: "Safari", key: "safari", icon: "/images/safari.webp", extra: "articles blog browser" },
     { title: "Gallery", key: "photos", icon: "/images/photos.webp", extra: "photos pictures" },
     { title: "Contact", key: "contact", icon: "/images/contact.webp", extra: "email socials" },
     { title: "Terminal", key: "terminal", icon: "/images/terminal.webp", extra: "shell zsh commands" },

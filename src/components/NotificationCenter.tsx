@@ -21,7 +21,7 @@ const useNotifications = () => {
   return [
     {
       id: "post",
-      app: "Articles",
+      app: "Safari",
       icon: "/images/safari.webp",
       title: latest.title,
       body: "New post on the blog",
