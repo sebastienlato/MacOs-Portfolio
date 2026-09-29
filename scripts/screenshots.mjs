@@ -10,7 +10,7 @@ import { createServer } from "vite";
 /**
  * Regenerates the README's screenshots.
  *
- * Both shells are captured from the same dev server in one run, so the pair in
+ * Everything is captured from the same dev server in one run, so the shots in
  * the README can never end up showing two different versions of the app.
  *
  *   npm run screenshots
@@ -110,9 +110,29 @@ const openFinder = async (page) => {
   const drop = Math.round(hero.y + hero.height + 20 - finder.y);
   const shift = Math.round((viewport.width - finder.width) / 2 - finder.x);
 
+  /*
+   * By an empty stretch of the title bar, not its centre. The centre is the
+   * view switcher, and a window is not dragged by its buttons — the press goes
+   * to the button — so grabbing there left the window where it opened, over
+   * the hero. Walked outward from the centre until the point is bare bar.
+   */
   const header = await page.locator("#finder #window-header").boundingBox();
-  const x = header.x + header.width / 2;
   const y = header.y + header.height / 2;
+  const x = await page.evaluate(
+    ({ left, width, y }) => {
+      const centre = left + width / 2;
+      for (let offset = 0; offset < width / 2; offset += 4) {
+        for (const x of [centre - offset, centre + offset]) {
+          const hit = document.elementFromPoint(x, y);
+          if (hit?.closest("#window-header") && !hit.closest("button, input, a")) {
+            return x;
+          }
+        }
+      }
+      throw new Error("the Finder's title bar has nowhere bare to grab");
+    },
+    { left: header.x, width: header.width, y }
+  );
 
   await page.mouse.move(x, y);
   await page.mouse.down();
@@ -130,6 +150,29 @@ const openFinder = async (page) => {
   await stillness(dockAtRest(page), "the dock");
 };
 
+/**
+ * Opens Safari on its Start Page. Nothing live: the Start Page is the one
+ * screen of a browser that looks the same on every run, where a real site
+ * would change under the shot and rewrite the file each time.
+ */
+const openSafari = async (page) => {
+  await page.click('#dock button[aria-label="Safari"]');
+  await page.waitForSelector("#safari .start-page");
+
+  // The posts' artwork, which a shot taken early catches half-decoded
+  await page.waitForFunction(() =>
+    [...document.querySelectorAll("#safari .start-page img")].every(
+      (img) => img.complete && img.naturalWidth > 0
+    )
+  );
+
+  // Off the dock, whose icon is still magnified from the click
+  await page.mouse.move(40, 760);
+
+  await stillness(boxOf(page, "#safari"), "the Safari window");
+  await stillness(dockAtRest(page), "the dock");
+};
+
 const SHOTS = [
   {
     name: "screenshot",
@@ -139,6 +182,13 @@ const SHOTS = [
     width: 2000,
     hasTouch: false,
     prepare: openFinder,
+  },
+  {
+    name: "screenshot-safari",
+    viewport: { width: 1280, height: 853 },
+    width: 2000,
+    hasTouch: false,
+    prepare: openSafari,
   },
   {
     name: "screenshot-mobile",
