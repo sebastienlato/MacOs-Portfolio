@@ -149,6 +149,18 @@ export interface BlogPost {
   link: string;
 }
 
+/** A tile on Safari's Start Page. */
+export interface BrowserFavorite {
+  title: string;
+  url: string;
+  /**
+   * The tile's colour. Safari draws a site with no touch icon as its initial
+   * on a flat colour, and drawing every tile that way keeps the Start Page
+   * from asking eight other servers for their artwork before it can render.
+   */
+  color: string;
+}
+
 export interface TechStackEntry {
   category: string;
   items: string[];

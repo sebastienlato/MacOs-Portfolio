@@ -1,5 +1,6 @@
 import { locations } from "#constants/index";
 import type { MenuAction } from "#constants/menus";
+import useBrowserStore from "#store/browser";
 import useLocationStore from "#store/location";
 import useSystemStore from "#store/system";
 import useWindowStore from "#store/window";
@@ -46,6 +47,15 @@ export const runMenuAction = (action: MenuAction) => {
       return openWindow("photos");
     case "openSafari":
       return openWindow("safari");
+
+    case "browserBack":
+      return useBrowserStore.getState().back();
+    case "browserForward":
+      return useBrowserStore.getState().forward();
+    case "browserReload":
+      return useBrowserStore.getState().reload();
+    case "browserStartPage":
+      return useBrowserStore.getState().navigate(null);
 
     case "newFinder":
       useLocationStore.getState().setActiveLocation(locations.work);

@@ -43,6 +43,7 @@ On a phone it becomes an iOS-style Home Screen instead: same content, same prefe
 - **Accent colour** – Eight colours, running through selections, menu highlights, sidebar glyphs and the focus ring in both shells. One CSS variable on `<main>`; nothing is hardcoded blue any more.
 - **Icons** – macOS 27's own, rendered from the system rather than collected (each app bundle's icon via `NSWorkspace`, and AppKit's two Trash images, drawn in the Light appearance and saved as 256px WebP), so every app icon sits on the same grid. The Trash is drawn full or empty depending on what is in it.
 - **Icon styles** – Default, Dark, Clear and Tinted, the appearances macOS has offered since 26. Worked out of flat artwork rather than layered icons: Dark and Clear are filters, and Tinted is a masked overlay in `mix-blend-mode: color`, which takes hue from the accent and leaves each icon's own light and shade underneath — so a tinted icon keeps its modelling instead of flattening to a silhouette.
+- **Safari** – A working browser. Type an address or a search into the field and the live site loads in the window: back, forward, reload, a Start Page of favorites and the blog, and a History menu. It is an iframe, so it obeys the rule every iframe does — a site decides whether it may be framed. Google search, Wikipedia, React, TypeScript and most personal and docs sites allow it; GitHub, YouTube, X, LinkedIn and most large sites refuse, and get a page saying so with an Open in New Tab button instead of a blank rectangle. Links followed *inside* a page are the other site's business, so the address field and Back only track what was opened from the toolbar.
 - **Interactive terminal** – A zsh-style terminal with command history. Try `help`, `ls`, `open safari`, `stack`, `neofetch`, or `sudo`.
 
 ### The phone
@@ -132,7 +133,7 @@ Most of the portfolio data lives in `src/constants/index.ts`, and both shells re
 - `locations` – powers the Finder-like explorer, including folders, files, descriptions, and external links. A folder can also carry a `folderColor` and a `folderBadge`, which is the look it ships with before anyone changes it in Get Info.
 - `contactEmail` – the address the Contact window prints and Spotlight's copy actions write to the clipboard. One copy, so the two cannot disagree.
 - `focusModes`, `soundOutputs` – what Control Center's Focus and Sound panes list.
-- `blogPosts`, `techStack`, `socials`, `gallery`, `aboutSpecs` – drive the Safari, Terminal, Contact, Photos, and About This Mac windows.
+- `blogPosts`, `browserFavorites`, `techStack`, `socials`, `gallery`, `aboutSpecs` – drive the Safari, Terminal, Contact, Photos, and About This Mac windows. Every favorite has to be a site that allows framing; `src/utils/browser.ts` keeps the list of those that do not.
 
 Two files configure a shell rather than its content:
 

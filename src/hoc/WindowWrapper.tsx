@@ -102,6 +102,15 @@ const fadeEnded = (el: HTMLElement) => {
   el.style.removeProperty("will-change");
 };
 
+/*
+ * Marks the page while a window is being dragged or resized, so any iframe on
+ * it stops taking the pointer. An iframe is another document: the moment the
+ * pointer crosses one, the moves go to it rather than to the listeners doing
+ * the dragging, and the window stops dead under the cursor.
+ */
+const interactionStarted = () => document.body.classList.add("window-interacting");
+const interactionEnded = () => document.body.classList.remove("window-interacting");
+
 const WindowWrapper = <P extends object>(
   Component: ComponentType<P>,
   windowKey: WindowKey
@@ -373,7 +382,15 @@ const WindowWrapper = <P extends object>(
         // Draggable's default is an open hand, and a closed one mid-drag
         cursor: "default",
         activeCursor: "default",
+        // Buttons and fields in the title bar are controls, not handles.
+        // Draggable's default drags from them too, and cancels the press to
+        // do it — which left a toolbar text field impossible to focus
+        dragClickables: false,
         onPress: () => focusWindow(windowKey),
+        // Not press and release: a press on a button in the title bar is
+        // reported without a release, which left every iframe dead
+        onDragStart: interactionStarted,
+        onDragEnd: interactionEnded,
         // Held against an edge, the window tiles there on release
         onDrag: () =>
           useSnapStore
@@ -403,6 +420,7 @@ const WindowWrapper = <P extends object>(
       return () => {
         // A drag interrupted by an unmount would otherwise strand the ghost
         useSnapStore.getState().setZone(null);
+        interactionEnded();
         instance.kill();
       };
       // hasOpened is a dependency because the element does not exist until the
@@ -445,6 +463,7 @@ const WindowWrapper = <P extends object>(
       e.preventDefault();
       e.stopPropagation();
       focusWindow(windowKey);
+      interactionStarted();
 
       const startX = e.clientX;
       const startY = e.clientY;
@@ -483,6 +502,7 @@ const WindowWrapper = <P extends object>(
       const onUp = () => {
         window.removeEventListener("pointermove", onMove);
         window.removeEventListener("pointerup", onUp);
+        interactionEnded();
         saveLayout({
           w: el.offsetWidth,
           h: el.offsetHeight,
