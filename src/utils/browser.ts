@@ -156,3 +156,7 @@ export const displayUrl = (url: string): string => {
     return url;
   }
 };
+
+/** The way out for a page that will not be framed: a real tab of its own. */
+export const openInNewTab = (url: string) =>
+  window.open(url, "_blank", "noopener,noreferrer");
