@@ -162,6 +162,16 @@ That boots the app on its own port, waits for the boot screen and the fonts, ope
 
 Each file is only rewritten when something visibly moved. The clock is pinned to 9:41 before the shutter, and Chromium's rasteriser drifts by a pixel value or two between runs, so without that check every regeneration would dirty the working tree. Viewports, output sizes and the threshold are at the top of `scripts/screenshots.mjs`.
 
+## Deploying
+
+The site is static: `npm run build` writes everything to `dist/`, and the contents of that folder are what goes on the host. Nothing deploys on its own — a push to GitHub does not change the live site.
+
+- **Build first, every time.** `dist/` is gitignored and only as fresh as the last build, so uploading it without rebuilding publishes whatever was there before.
+- **Upload the hidden file too.** `public/.htaccess` is copied to `dist/.htaccess`, and many upload tools and file managers skip dotfiles unless told to show them. Without it the site still works but loses its caching and security headers.
+- **Hard-refresh to check.** Files under `assets/` are content-hashed and cached for a year; `index.html` and the resume PDF are revalidated on every load, so a normal reload should show a new deploy, but Cmd+Shift+R rules the browser out.
+
+`.htaccess` is written for an Apache-compatible host (it runs on LiteSpeed). It also serves `.mjs` as JavaScript, which matters because a browser will not start a worker from `text/plain`. On a host that does not read `.htaccess`, set the same headers in that host's own configuration.
+
 ## Project Structure
 
 ```
