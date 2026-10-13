@@ -7,7 +7,10 @@ import "react-pdf/dist/Page/TextLayer.css";
 // page, so a blocked or unreachable unpkg used to mean a blank resume. `?url`
 // makes Vite emit it as an asset and hand back its hashed path, which also
 // keeps it locked to the pdfjs-dist version react-pdf was built against.
-import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+// `?worker&url` rather than plain `?url` so the file is emitted as `.js`: some
+// hosts serve `.mjs` as text/plain, and a browser refuses to start a module
+// worker from that, which shows up as "Failed to load PDF file".
+import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?worker&url";
 
 pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
